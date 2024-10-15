@@ -6,14 +6,8 @@ import flameIcon from "../assets/images/Flame icon.svg";
 import securitySafeIcon from "../assets/images/Security Safe Icon.svg";
 import smokeIcon from "../assets/images/Smoke icon.svg";
 
-export default function HomePage() {
+export default function HomePage({ currentUser }) {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
-
-  const toggleSidebar = () => {
-    setIsSidebarCollapsed((prev) => !prev);
-  };
-
-  // Sample data for last triggered times
   const [lastTriggeredTimes, setLastTriggeredTimes] = useState({
     fireSensor: "Never",
     smokeSensor: "Never",
@@ -23,50 +17,42 @@ export default function HomePage() {
     securityAlarm: "Never",
   });
 
-  // State to track if alarms are active
   const [activeAlarms, setActiveAlarms] = useState({
     fireAlarm: false,
     smokeAlarm: false,
     securityAlarm: false,
   });
 
-  // State to track if sensors are activated
   const [activatedSensors, setActivatedSensors] = useState({
     fireSensor: false,
     smokeSensor: false,
     securitySensor: false,
   });
 
-  // Function to trigger alarms randomly
-  const randomTriggerAlarm = (sensor) => {
-    const shouldTrigger = Math.random() < 0.5; // 50% chance to trigger alarm
+  // Toggle sidebar collapse
+  const toggleSidebar = () => setIsSidebarCollapsed(!isSidebarCollapsed);
 
-    if (shouldTrigger) {
+  // Function to randomly trigger an alarm
+  const randomTriggerAlarm = (sensor) => {
+    if (Math.random() < 0.5) {
       const alarmKey = `${sensor.replace("Sensor", "Alarm")}`;
       const currentTime = new Date().toLocaleTimeString();
-      setLastTriggeredTimes((prev) => ({
-        ...prev,
-        [alarmKey]: currentTime,
-      }));
+      setLastTriggeredTimes((prev) => ({ ...prev, [alarmKey]: currentTime }));
       setActiveAlarms((prev) => ({ ...prev, [alarmKey]: true }));
     }
   };
 
-  // Sample function to update last triggered time and check for alarms
-  const triggerAlarm = (sensor) => {
+  // Trigger or deactivate a sensor
+  const toggleSensor = (sensor) => {
     const currentTime = new Date().toLocaleTimeString();
-    setLastTriggeredTimes((prev) => ({
-      ...prev,
-      [sensor]: currentTime,
-    }));
-
-    // Toggle the activation state of the sensor
     setActivatedSensors((prev) => {
-      const newState = { ...prev, [sensor]: !prev[sensor] }; // Toggle activation
-      if (newState[sensor]) {
-        randomTriggerAlarm(sensor); // Trigger alarm if activated
-      } else {
-        // Deactivate the alarm if the sensor is turned off
+      const newState = { ...prev, [sensor]: !prev[sensor] };
+      setLastTriggeredTimes((prev) => ({
+        ...prev,
+        [sensor]: currentTime,
+      }));
+      if (newState[sensor]) randomTriggerAlarm(sensor);
+      else {
         const alarmKey = `${sensor.replace("Sensor", "Alarm")}`;
         setActiveAlarms((prev) => ({ ...prev, [alarmKey]: false }));
       }
@@ -74,10 +60,55 @@ export default function HomePage() {
     });
   };
 
-  // Function to silence the alarm
+  // Silence an alarm if the user is admin
   const silenceAlarm = (alarm) => {
-    setActiveAlarms((prev) => ({ ...prev, [alarm]: false }));
+    if (currentUser && currentUser.toLowerCase() === "admin") {
+      setActiveAlarms((prev) => ({ ...prev, [alarm]: false }));
+      alert(`${alarm} silenced by admin.`);
+    } else {
+      alert(
+        "You do not have permission to silence alarms. Only the admin can perform this action."
+      );
+    }
   };
+
+  // Helper function to render sensor cards
+  const renderSensorCard = (sensor, icon) => (
+    <div className="sensor-card" key={sensor}>
+      <img src={icon} alt={`${sensor} Icon`} className="sensor-icon" />
+      <button
+        className="alarm-button"
+        style={{ backgroundColor: activatedSensors[sensor] ? "green" : "blue" }}
+        onClick={() => toggleSensor(sensor)}
+      >
+        {activatedSensors[sensor] ? "Deactivate" : "Activate"}
+      </button>
+      {!isSidebarCollapsed && (
+        <p className="last-triggered-text">
+          Last Triggered: {lastTriggeredTimes[sensor]}
+        </p>
+      )}
+    </div>
+  );
+
+  // Helper function to render alarm cards
+  const renderAlarmCard = (alarm, icon) => (
+    <div className="alarm-card" key={alarm}>
+      <img src={icon} alt={`${alarm} Icon`} className="alarm-icon" />
+      <button
+        className="alarm-button"
+        style={{ backgroundColor: activeAlarms[alarm] ? "red" : "blue" }}
+        onClick={() => silenceAlarm(alarm)}
+      >
+        Silence Alarm
+      </button>
+      {!isSidebarCollapsed && (
+        <p className="last-triggered-text">
+          Last Triggered: {lastTriggeredTimes[alarm]}
+        </p>
+      )}
+    </div>
+  );
 
   return (
     <div className="home-container">
@@ -92,108 +123,22 @@ export default function HomePage() {
 
       <main className="main-content">
         <h1 className="header-title">Defense Panel</h1>
+
         <section className="sensors-section">
           <h2>Sensors</h2>
           <div className="sensor-cards-container">
-            {["fireSensor", "smokeSensor", "securitySensor"].map((sensor) => {
-              // Select the corresponding icon based on the sensor type
-              const sensorIcon = {
-                fireSensor: (
-                  <img
-                    src={flameIcon}
-                    alt="Fire Sensor"
-                    className="sensor-icon"
-                  />
-                ),
-                smokeSensor: (
-                  <img
-                    src={smokeIcon}
-                    alt="Smoke Sensor"
-                    className="sensor-icon"
-                  />
-                ),
-                securitySensor: (
-                  <img
-                    src={securitySafeIcon}
-                    alt="Security Sensor"
-                    className="sensor-icon"
-                  />
-                ),
-              }[sensor];
-
-              return (
-                <div className="sensor-card" key={sensor}>
-                  {sensorIcon}
-                  <button
-                    className="alarm-button"
-                    style={{
-                      backgroundColor: activatedSensors[sensor]
-                        ? "green"
-                        : "blue", // Green if activated, otherwise blue
-                    }}
-                    onClick={() => triggerAlarm(sensor)}
-                  >
-                    {activatedSensors[sensor] ? "Deactivate" : "Activate"}
-                  </button>
-                  {!isSidebarCollapsed && (
-                    <p className="last-triggered-text">
-                      Last Triggered: {lastTriggeredTimes[sensor]}
-                    </p>
-                  )}
-                </div>
-              );
-            })}
+            {renderSensorCard("fireSensor", flameIcon)}
+            {renderSensorCard("smokeSensor", smokeIcon)}
+            {renderSensorCard("securitySensor", securitySafeIcon)}
           </div>
         </section>
+
         <section className="alarms-section">
           <h2>Alarms</h2>
           <div className="alarm-cards-container">
-            {["fireAlarm", "smokeAlarm", "securityAlarm"].map((alarm) => {
-              // Select the corresponding icon based on the alarm type
-              const alarmIcon = {
-                fireAlarm: (
-                  <img
-                    src={flameIcon}
-                    alt="Fire Alarm"
-                    className="alarm-icon"
-                  />
-                ),
-                smokeAlarm: (
-                  <img
-                    src={smokeIcon}
-                    alt="Smoke Alarm"
-                    className="alarm-icon"
-                  />
-                ),
-                securityAlarm: (
-                  <img
-                    src={securitySafeIcon}
-                    alt="Security Alarm"
-                    className="alarm-icon"
-                  />
-                ),
-              }[alarm];
-
-              return (
-                <div className="alarm-card" key={alarm}>
-                  {alarmIcon}
-                  <button
-                    className="alarm-button"
-                    style={{
-                      backgroundColor: activeAlarms[alarm] ? "red" : "blue", // Red if alarm is active, otherwise blue
-                    }}
-                    onClick={() => silenceAlarm(alarm)} // Call silenceAlarm on click
-                  >
-                    Silence Alarm
-                  </button>
-                  {!isSidebarCollapsed && (
-                    <p className="last-triggered-text">
-                      Last Triggered: {lastTriggeredTimes[alarm]}
-                    </p>
-                  )}
-                </div>
-              );
-            })}
+            {renderAlarmCard("fireAlarm", flameIcon)}
+            {renderAlarmCard("smokeAlarm", smokeIcon)}
+            {renderAlarmCard("securityAlarm", securitySafeIcon)}
           </div>
         </section>
       </main>

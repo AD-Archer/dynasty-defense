@@ -22,7 +22,10 @@ export default function Login({ togglePage, showLogin }) {
     const users = JSON.parse(localStorage.getItem("users")) || {};
     if (users[username] && users[username] === password) {
       alert("Login successful!");
-      // Redirect to the HomePage after successful login
+      // Save the current user to localStorage
+      localStorage.setItem("currentUser", username);
+      console.log("Current User Set:", username); // Debugging log
+      // Redirect to the HomePage
       navigate("/home"); // Adjust the path according to your route configuration
     } else {
       alert("Invalid username or password.");
