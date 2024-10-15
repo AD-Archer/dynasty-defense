@@ -1,0 +1,149 @@
+/* Global css */
+
+/* Import Google Fonts */
+@import url("https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500&display=swap");
+
+/* CSS Variables for Global Use */
+:root {
+    --primary-color: #4a90e2;
+    --bg-gradient-start: #1e1e1e;
+    --bg-gradient-end: #3b3b3b;
+    --card-bg-color: #2b2b2b;
+    --input-bg-color: #383838;
+    --text-color: #f0f0f0;
+    --input-text-color: #e0e0e0;
+    --icon-color: #888;
+    --border-color: #555;
+    --error-color: #e74c3c;
+    --success-color: #27ae60;
+}
+/* Header and container */
+.container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  padding: 1rem;
+  margin-top: 60px; /* Adjust for header height */
+}
+
+
+.header {
+  background-color: var(--header-bg-color);
+  color: var(--header-text-color);
+  text-align: center;
+  padding: 1rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  position: fixed;
+  width: 100%;
+  top: 0;
+  z-index: 1000;
+}
+
+
+/* Global Resets */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html {
+    font-size: 100%;
+    scroll-behavior: smooth;
+}
+
+body {
+    font-family: "Roboto", sans-serif;
+    color: var(--text-color);
+    background: linear-gradient(to right, var(--bg-gradient-start), var(--bg-gradient-end));
+    margin: 0;
+    padding: 0;
+}
+
+/* Utility Classes */
+.flex-center {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.text-center {
+    text-align: center;
+}
+
+.mt-1 { margin-top: 1rem; }
+.mt-2 { margin-top: 2rem; }
+.mb-1 { margin-bottom: 1rem; }
+.mb-2 { margin-bottom: 2rem; }
+.p-1 { padding: 1rem; }
+.p-2 { padding: 2rem; }
+
+/* Global Forms */
+input, textarea {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid var(--border-color);
+    background-color: var(--input-bg-color);
+    color: var(--input-text-color);
+    border-radius: 6px;
+    font-size: 16px;
+    transition: border-color 0.3s;
+}
+
+input:focus, textarea:focus {
+    outline: none;
+    border-color: var(--primary-color);
+}
+
+/* Buttons */
+button {
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    padding: 12px;
+    border-radius: 6px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+button:hover {
+    background-color: #357abd;
+}
+
+/* Form Error and Success States */
+.error {
+    border-color: var(--error-color);
+}
+
+.success {
+    border-color: var(--success-color);
+}
+
+/* Cards */
+.card {
+    background-color: var(--card-bg-color);
+    padding: 2rem;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.card-header {
+    font-weight: 500;
+    margin-bottom: 1rem;
+    color: var(--text-color);
+}
+
+/* Media Queries for Mobile Responsiveness */
+@media (max-width: 600px) {
+    .card {
+        padding: 1.5rem;
+        border-radius: 8px;
+    }
+
+    button {
+        padding: 10px;
+    }
+}
+
