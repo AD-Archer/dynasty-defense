@@ -36,6 +36,13 @@ export default function Login({ togglePage, showLogin }) {
       form.addEventListener("submit", handleLogin);
     }
 
+    // Set up the default admin user if not already present
+    const users = JSON.parse(localStorage.getItem("users")) || {};
+    if (!users.admin) {
+      users.admin = "password"; // Default admin credentials
+      localStorage.setItem("users", JSON.stringify(users));
+    }
+
     // Cleanup the event listener on component unmount
     return () => {
       if (form) {
