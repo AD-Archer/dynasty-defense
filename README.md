@@ -14,7 +14,7 @@ The **Dynasty Defense System** is a real-time alarm monitoring solution for encl
 ## Installation
 1. Clone the repository:
    ```bash
-   git clone https://github.com/ad-archer/defense-system-project.git
+   git clone https://github.com/ad-archer/defense-system.git
    ```
 2. Navigate to the project directory:
    ```bash

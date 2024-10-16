@@ -1,5 +1,5 @@
 import React, { useState } from "react"; // Importing React and useState for state management
-import { BrowserRouter as Router, Route, Routes } from "react-router-dom"; // Importing Router, Route, and Routes for navigation
+import { HashRouter as Router, Route, Routes } from "react-router-dom"; // Importing HashRouter, Route, and Routes for navigation
 import "./App.css"; // Importing the main CSS file for styling
 import Register from "./components/register.js"; // Importing the Register component
 import Login from "./components/login.js"; // Importing the Login component
