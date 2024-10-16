@@ -38,16 +38,40 @@ export default function HomePage({ currentUser }) {
   // This function toggles the sidebar between collapsed and expanded
   const toggleSidebar = () => setIsSidebarCollapsed(!isSidebarCollapsed);
 
+  // State to track if the sensor is active
+  const [activeSensors, setActiveSensors] = useState({});
+
   // Function to randomly trigger an alarm when a sensor is activated
   const randomTriggerAlarm = (sensor) => {
-    // 50% chance to trigger the alarm
-    if (Math.random() < 0.5) {
-      const alarmKey = `${sensor.replace("Sensor", "Alarm")}`; // Mapping sensor name to its corresponding alarm
-      const currentTime = new Date().toLocaleTimeString(); // Getting the current time
-      // Updating the last triggered time and setting the alarm to active
-      setLastTriggeredTimes((prev) => ({ ...prev, [alarmKey]: currentTime }));
-      setActiveAlarms((prev) => ({ ...prev, [alarmKey]: true }));
-    }
+    const alarmKey = `${sensor.replace("Sensor", "Alarm")}`; // Mapping sensor name to its corresponding alarm
+
+    // Start an interval to check the sensor status every 5 seconds (adjust as needed)
+    const intervalId = setInterval(() => {
+      // Check if the sensor is still active
+      if (activeSensors[sensor]) {
+        // 50% chance to trigger the alarm
+        if (Math.random() < 0.5) {
+          const currentTime = new Date().toLocaleTimeString(); // Getting the current time
+          // Updating the last triggered time and setting the alarm to active
+          setLastTriggeredTimes((prev) => ({
+            ...prev,
+            [alarmKey]: currentTime,
+          }));
+          setActiveAlarms((prev) => ({ ...prev, [alarmKey]: true }));
+        }
+      } else {
+        clearInterval(intervalId); // Clear the interval if the sensor is inactive
+      }
+    }, 5000);
+
+    // Set the sensor as active when triggering the alarm
+    setActiveSensors((prev) => ({ ...prev, [sensor]: true }));
+
+    // Return a function to stop the interval if the sensor is deactivated
+    return () => {
+      setActiveSensors((prev) => ({ ...prev, [sensor]: false })); // Mark the sensor as inactive
+      clearInterval(intervalId);
+    };
   };
 
   // Function to toggle a sensor's activation state
@@ -60,14 +84,16 @@ export default function HomePage({ currentUser }) {
         ...prev,
         [sensor]: currentTime,
       }));
-      if (newState[sensor])
-        randomTriggerAlarm(sensor); // Trigger alarm if sensor is activated
-      else {
+
+      if (newState[sensor]) {
+        const stopAlarm = randomTriggerAlarm(sensor); // Trigger alarm if sensor is activated
+        return newState; // Return the new state of sensors
+      } else {
         const alarmKey = `${sensor.replace("Sensor", "Alarm")}`; // Mapping sensor name to its corresponding alarm
         // Deactivating the alarm if the sensor is deactivated
         setActiveAlarms((prev) => ({ ...prev, [alarmKey]: false }));
+        return newState; // Return the new state of sensors
       }
-      return newState;
     });
   };
 
@@ -78,14 +104,12 @@ export default function HomePage({ currentUser }) {
     // Check if currentUser exists and is an admin
     if (currentUser && currentUser.isAdmin) {
       setActiveAlarms((prev) => ({ ...prev, [alarm]: false }));
-      alert(`${alarm} silenced by admin.`);
     } else {
       alert(
         "You do not have permission to silence alarms. Only the admin can perform this action."
       );
     }
   };
-
 
   // Helper function to generate the UI for each sensor card
   const renderSensorCard = (sensor, icon) => (
