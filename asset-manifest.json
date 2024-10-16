@@ -1,0 +1,18 @@
+{
+  "files": {
+    "main.css": "/AD-Archer/dynasty-defense.git/static/css/main.aa5ade3f.css",
+    "main.js": "/AD-Archer/dynasty-defense.git/static/js/main.b88a7ce5.js",
+    "static/js/453.8716ae1b.chunk.js": "/AD-Archer/dynasty-defense.git/static/js/453.8716ae1b.chunk.js",
+    "static/media/Smoke icon.svg": "/AD-Archer/dynasty-defense.git/static/media/Smoke icon.6bc81430dc418bf3a71b2e0fb6e8b673.svg",
+    "static/media/Flame icon.svg": "/AD-Archer/dynasty-defense.git/static/media/Flame icon.53f7892b42012855b9f92c84ad0a17ea.svg",
+    "static/media/Security Safe Icon.svg": "/AD-Archer/dynasty-defense.git/static/media/Security Safe Icon.4cd1c34c56387095123f158fc255bc57.svg",
+    "index.html": "/AD-Archer/dynasty-defense.git/index.html",
+    "main.aa5ade3f.css.map": "/AD-Archer/dynasty-defense.git/static/css/main.aa5ade3f.css.map",
+    "main.b88a7ce5.js.map": "/AD-Archer/dynasty-defense.git/static/js/main.b88a7ce5.js.map",
+    "453.8716ae1b.chunk.js.map": "/AD-Archer/dynasty-defense.git/static/js/453.8716ae1b.chunk.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.aa5ade3f.css",
+    "static/js/main.b88a7ce5.js"
+  ]
+}
