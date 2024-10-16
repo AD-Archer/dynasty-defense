@@ -8,10 +8,7 @@ import smokeIcon from "../assets/images/Smoke icon.svg";
 
 // This is the main component for the homepage of my defense system monitoring panel
 export default function HomePage({ currentUser }) {
-  // State to keep track of whether the sidebar is collapsed
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
-
-  // Keeping track of the last time each sensor or alarm was triggered
   const [lastTriggeredTimes, setLastTriggeredTimes] = useState({
     fireSensor: "Never",
     smokeSensor: "Never",
@@ -21,38 +18,33 @@ export default function HomePage({ currentUser }) {
     securityAlarm: "Never",
   });
 
-  // State to track which alarms are currently active
   const [activeAlarms, setActiveAlarms] = useState({
     fireAlarm: false,
     smokeAlarm: false,
     securityAlarm: false,
   });
 
-  // Keeping track of which sensors are currently activated
   const [activatedSensors, setActivatedSensors] = useState({
     fireSensor: false,
     smokeSensor: false,
     securitySensor: false,
   });
 
-  // This function toggles the sidebar between collapsed and expanded
-  const toggleSidebar = () => setIsSidebarCollapsed(!isSidebarCollapsed);
+  const [sensorIntervals, setSensorIntervals] = useState({}); // Store intervals for sensors
 
-  // State to track if the sensor is active
-  const [activeSensors, setActiveSensors] = useState({});
+  const toggleSidebar = () => setIsSidebarCollapsed((prev) => !prev);
 
   // Function to randomly trigger an alarm when a sensor is activated
   const randomTriggerAlarm = (sensor) => {
-    const alarmKey = `${sensor.replace("Sensor", "Alarm")}`; // Mapping sensor name to its corresponding alarm
+    const alarmKey = `${sensor.replace("Sensor", "Alarm")}`;
 
-    // Start an interval to check the sensor status every 5 seconds (adjust as needed)
     const intervalId = setInterval(() => {
-      // Check if the sensor is still active
-      if (activeSensors[sensor]) {
-        // 50% chance to trigger the alarm
-        if (Math.random() < 0.5) {
-          const currentTime = new Date().toLocaleTimeString(); // Getting the current time
-          // Updating the last triggered time and setting the alarm to active
+      if (activatedSensors[sensor]) {
+        // Adjust the probability of triggering based on your desired frequency
+        const triggerProbability = 0.05; // Adjust this value as needed
+
+        if (Math.random() < triggerProbability) {
+          const currentTime = new Date().toLocaleTimeString();
           setLastTriggeredTimes((prev) => ({
             ...prev,
             [alarmKey]: currentTime,
@@ -60,50 +52,58 @@ export default function HomePage({ currentUser }) {
           setActiveAlarms((prev) => ({ ...prev, [alarmKey]: true }));
         }
       } else {
-        clearInterval(intervalId); // Clear the interval if the sensor is inactive
+        clearInterval(intervalId);
       }
-    }, 5000);
+    }, 5000); // Adjust the interval as needed
 
-    // Set the sensor as active when triggering the alarm
-    setActiveSensors((prev) => ({ ...prev, [sensor]: true }));
-
-    // Return a function to stop the interval if the sensor is deactivated
-    return () => {
-      setActiveSensors((prev) => ({ ...prev, [sensor]: false })); // Mark the sensor as inactive
-      clearInterval(intervalId);
-    };
+    // Store the interval ID
+    setSensorIntervals((prev) => ({ ...prev, [sensor]: intervalId }));
   };
 
   // Function to toggle a sensor's activation state
   const toggleSensor = (sensor) => {
-    const currentTime = new Date().toLocaleTimeString(); // Getting the current time
+    const currentTime = new Date().toLocaleTimeString();
+
     setActivatedSensors((prev) => {
-      const newState = { ...prev, [sensor]: !prev[sensor] }; // Toggling the sensor's state
-      // Updating the last triggered time for the sensor
+      const newState = { ...prev, [sensor]: !prev[sensor] };
       setLastTriggeredTimes((prev) => ({
         ...prev,
         [sensor]: currentTime,
       }));
 
+      // Start or stop triggering alarms based on sensor activation
       if (newState[sensor]) {
-        const stopAlarm = randomTriggerAlarm(sensor); // Trigger alarm if sensor is activated
-        return newState; // Return the new state of sensors
+        randomTriggerAlarm(sensor);
       } else {
-        const alarmKey = `${sensor.replace("Sensor", "Alarm")}`; // Mapping sensor name to its corresponding alarm
-        // Deactivating the alarm if the sensor is deactivated
-        setActiveAlarms((prev) => ({ ...prev, [alarmKey]: false }));
-        return newState; // Return the new state of sensors
+        silenceAlarmForSensor(sensor);
       }
+      return newState;
     });
   };
 
-  // Function to silence an alarm, only if the current user is an admin
-  const silenceAlarm = (alarm) => {
-    const currentUser = JSON.parse(localStorage.getItem("currentUser"));
+  const silenceAlarmForSensor = (sensor) => {
+    const alarmKey = `${sensor.replace("Sensor", "Alarm")}`;
+    setActiveAlarms((prev) => ({ ...prev, [alarmKey]: false }));
 
-    // Check if currentUser exists and is an admin
-    if (currentUser && currentUser.isAdmin) {
+    // Clear the interval when the sensor is deactivated
+    const intervalId = sensorIntervals[sensor];
+    if (intervalId) {
+      clearInterval(intervalId);
+      setSensorIntervals((prev) => {
+        const newIntervals = { ...prev };
+        delete newIntervals[sensor]; // Remove the interval for the deactivated sensor
+        return newIntervals;
+      });
+    }
+  };
+
+  const silenceAlarm = (alarm) => {
+    console.log("currentUser:", currentUser);
+    console.log("isAdmin:", currentUser?.isAdmin); // Ensure this outputs correctly
+
+    if (currentUser?.isAdmin) {
       setActiveAlarms((prev) => ({ ...prev, [alarm]: false }));
+      console.log(`Silenced ${alarm} alarm.`);
     } else {
       alert(
         "You do not have permission to silence alarms. Only the admin can perform this action."
@@ -111,61 +111,54 @@ export default function HomePage({ currentUser }) {
     }
   };
 
-  // Helper function to generate the UI for each sensor card
   const renderSensorCard = (sensor, icon) => (
     <div className="sensor-card" key={sensor}>
       <img src={icon} alt={`${sensor} Icon`} className="sensor-icon" />
       <button
         className="alarm-button"
-        style={{ backgroundColor: activatedSensors[sensor] ? "green" : "blue" }} // Button color indicates if the sensor is active
+        style={{ backgroundColor: activatedSensors[sensor] ? "green" : "blue" }}
         onClick={() => toggleSensor(sensor)}
       >
         {activatedSensors[sensor] ? "Deactivate" : "Activate"}
       </button>
       {!isSidebarCollapsed && (
         <p className="last-triggered-text">
-          Last Triggered: {lastTriggeredTimes[sensor]}{" "}
-          {/* Displaying the last time the sensor was triggered */}
+          Last Triggered: {lastTriggeredTimes[sensor]}
         </p>
       )}
     </div>
   );
 
-  // Helper function to generate the UI for each alarm card
   const renderAlarmCard = (alarm, icon) => (
     <div className="alarm-card" key={alarm}>
       <img src={icon} alt={`${alarm} Icon`} className="alarm-icon" />
       <button
         className="alarm-button"
-        style={{ backgroundColor: activeAlarms[alarm] ? "red" : "blue" }} // Button color indicates if the alarm is active
+        style={{ backgroundColor: activeAlarms[alarm] ? "red" : "blue" }}
         onClick={() => silenceAlarm(alarm)}
       >
         Silence Alarm
       </button>
       {!isSidebarCollapsed && (
         <p className="last-triggered-text">
-          Last Triggered: {lastTriggeredTimes[alarm]}{" "}
-          {/* Displaying the last time the alarm was triggered */}
+          Last Triggered: {lastTriggeredTimes[alarm]}
         </p>
       )}
     </div>
   );
 
-  // Function to load user data
-  const loadUserData = () => {
-    // Simulating an API call to fetch user data
-    const userData = {
-      username: "JohnDoe",
-    };
-    return userData.username;
-  };
-
   useEffect(() => {
+    // Assuming loadUserData is called to log the username; this could be improved based on actual use
     const username = loadUserData();
     console.log("Loaded username:", username);
   }, []);
 
-  // Main render function for the component
+  const loadUserData = () => {
+    // Simulating user data load; adjust as needed for actual implementation
+    const userData = { username: "JohnDoe" };
+    return userData.username;
+  };
+
   return (
     <div className="home-container">
       <aside className={`sidebar ${isSidebarCollapsed ? "collapsed" : ""}`}>
@@ -183,24 +176,18 @@ export default function HomePage({ currentUser }) {
         <section className="sensors-section">
           <h2>Sensors</h2>
           <div className="sensor-cards-container">
-            {renderSensorCard("fireSensor", flameIcon)}{" "}
-            {/* Rendering the fire sensor card */}
-            {renderSensorCard("smokeSensor", smokeIcon)}{" "}
-            {/* Rendering the smoke sensor card */}
-            {renderSensorCard("securitySensor", securitySafeIcon)}{" "}
-            {/* Rendering the security sensor card */}
+            {renderSensorCard("fireSensor", flameIcon)}
+            {renderSensorCard("smokeSensor", smokeIcon)}
+            {renderSensorCard("securitySensor", securitySafeIcon)}
           </div>
         </section>
 
         <section className="alarms-section">
           <h2>Alarms</h2>
           <div className="alarm-cards-container">
-            {renderAlarmCard("fireAlarm", flameIcon)}{" "}
-            {/* Rendering the fire alarm card */}
-            {renderAlarmCard("smokeAlarm", smokeIcon)}{" "}
-            {/* Rendering the smoke alarm card */}
-            {renderAlarmCard("securityAlarm", securitySafeIcon)}{" "}
-            {/* Rendering the security alarm card */}
+            {renderAlarmCard("fireAlarm", flameIcon)}
+            {renderAlarmCard("smokeAlarm", smokeIcon)}
+            {renderAlarmCard("securityAlarm", securitySafeIcon)}
           </div>
         </section>
       </main>

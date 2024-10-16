@@ -1,99 +1,82 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-// Defining the User class with properties for username, password, and admin status
 class User {
-  constructor(username, password, isAdmin = false) {
+  constructor(username, password, isAdmin) {
     this.username = username;
     this.password = password;
     this.isAdmin = isAdmin;
   }
 }
 
-// Login component
 export default function Login({ togglePage, showLogin }) {
   const navigate = useNavigate();
-  const [currentUser, setCurrentUser] = useState(null); // State to hold current user
+  const [currentUser, setCurrentUser] = useState(null);
 
-  // Function to handle the login process
   const handleLogin = (event) => {
     event.preventDefault();
 
-    // Getting input values
+    // Retrieve values from input fields
     const username = document.getElementById("username").value.trim();
-    const password = document.getElementById("password").value;
+    const password = document.getElementById("password").value.trim();
 
-    console.log("Input Username:", username);
-    console.log("Input Password:", password);
-
+    // Check if fields are filled
     if (!username || !password) {
       alert("Please fill in both fields.");
       return;
     }
 
-    // Retrieve stored users from localStorage
+    // Retrieve stored users
     const storedUsers = JSON.parse(localStorage.getItem("users")) || {};
-    console.log("Stored Users:", storedUsers);
+    console.log("Stored Users:", storedUsers); // Debugging line
 
-    // Check if the user exists and the password matches
+    // Attempt to retrieve the user based on the provided username
     const user = storedUsers[username];
-    console.log("Retrieved User:", user);
+    console.log("Attempting login for:", username); // Debugging line
 
-    if (user && user.password === password) {
-      alert("Login successful!");
-
-      // Set the current user in localStorage
-      localStorage.setItem("currentUser", JSON.stringify(user));
-      console.log("Current User Set:", user);
-
-      // Update currentUser state
-      setCurrentUser(user);
-
-      // Navigate to the home page
-      navigate("/home");
+    // Validate user existence and password
+    if (user) {
+      console.log("Found user:", user); // Debugging line
+      if (user.password.toLowerCase() === password.toLowerCase()) {
+        alert("Login successful!");
+        setCurrentUser(user);
+        localStorage.setItem("currentUser", JSON.stringify(user));
+        navigate("/home");
+      } else {
+        alert("Invalid username or password.");
+      }
     } else {
-      alert("Invalid username or password.");
-      console.log("Login Failed: Username or password is incorrect.");
+      alert("Invalid username or password."); // Inform user the username doesn't exist
     }
   };
 
+  // Set up the login form and create an admin user if none exists
   useEffect(() => {
     const form = document.getElementById("login-form");
     if (form) {
       form.addEventListener("submit", handleLogin);
     }
 
-    // Initialize a default admin user if not present
+    // Ensure admin user is created if none exist
     const storedUsers = JSON.parse(localStorage.getItem("users")) || {};
     if (!storedUsers.admin) {
-      const adminUser = new User("admin", "password", true); // Default admin user
+      const adminUser = new User("admin", "password", true);
       storedUsers.admin = {
         username: adminUser.username,
         password: adminUser.password,
         isAdmin: adminUser.isAdmin,
       };
       localStorage.setItem("users", JSON.stringify(storedUsers));
-      console.log("Admin User Added:", storedUsers.admin);
-    } else {
-      console.log("Admin User Already Exists:", storedUsers.admin);
+      console.log("Admin user created:", adminUser); // Debugging line
     }
 
+    // Cleanup event listener on component unmount
     return () => {
       if (form) {
         form.removeEventListener("submit", handleLogin);
       }
     };
   }, []);
-
-  // Pass current user to the homepage after login
-  useEffect(() => {
-    if (currentUser) {
-      // Store the current user in localStorage
-      localStorage.setItem("currentUser", JSON.stringify(currentUser));
-      // This effect can trigger a redirect to the homepage if necessary
-      navigate("/home", { state: { currentUser } }); // Pass user state to home
-    }
-  }, [currentUser, navigate]);
 
   return (
     <div className="container">

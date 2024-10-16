@@ -1,5 +1,14 @@
 import React, { useState } from "react"; // Importing React and useState for managing state
 
+// User class definition for creating new users
+class User {
+  constructor(username, password, isAdmin) {
+    this.username = username;
+    this.password = password;
+    this.isAdmin = isAdmin; // Set to false for regular users
+  }
+}
+
 // The Register component definition
 export default function Register({ togglePage, showLogin }) {
   // State variables for form inputs and error messages
@@ -68,7 +77,12 @@ export default function Register({ togglePage, showLogin }) {
     }
 
     // If all validations pass, proceed to register the new user
-    users[username] = password; // Adding the new user to the stored users
+    const newUser = new User(username, password, false); // Creating a new user instance with isAdmin set to false
+    users[username] = {
+      username: newUser.username,
+      password: newUser.password,
+      isAdmin: newUser.isAdmin,
+    }; // Adding the new user to the stored users
     localStorage.setItem("users", JSON.stringify(users)); // Saving the updated users to localStorage
 
     // Clearing error messages after a successful registration
