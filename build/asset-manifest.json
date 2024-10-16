@@ -11,5 +11,8 @@
     "main.5d793e62.js.map": "/dynasty-defense/static/js/main.5d793e62.js.map",
     "453.8716ae1b.chunk.js.map": "/dynasty-defense/static/js/453.8716ae1b.chunk.js.map"
   },
-  "entrypoints": ["static/css/main.aa5ade3f.css", "static/js/main.5d793e62.js"]
+  "entrypoints": [
+    "static/css/main.aa5ade3f.css",
+    "static/js/main.5d793e62.js"
+  ]
 }
