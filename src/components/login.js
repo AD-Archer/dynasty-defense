@@ -1,52 +1,83 @@
-import React, { useEffect } from "react";
-import { useNavigate } from "react-router-dom"; // Import useNavigate
+import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
+// Defining the User class with properties for username, password, and admin status
+class User {
+  constructor(username, password, isAdmin = false) {
+    this.username = username;
+    this.password = password;
+    this.isAdmin = isAdmin;
+  }
+}
+
+// Login component
 export default function Login({ togglePage, showLogin }) {
-  const navigate = useNavigate(); // Create a navigate function
+  const navigate = useNavigate();
+  const [currentUser, setCurrentUser] = useState(null); // State to hold current user
 
-  // Function to handle login
+  // Function to handle the login process
   const handleLogin = (event) => {
-    event.preventDefault(); // Prevent form submission
+    event.preventDefault();
 
-    // Get the values from the input fields
+    // Getting input values
     const username = document.getElementById("username").value.trim();
     const password = document.getElementById("password").value;
 
-    // Validate input
+    console.log("Input Username:", username);
+    console.log("Input Password:", password);
+
     if (!username || !password) {
       alert("Please fill in both fields.");
       return;
     }
 
-    // Check stored users
-    const users = JSON.parse(localStorage.getItem("users")) || {};
-    if (users[username] && users[username] === password) {
+    // Retrieve stored users from localStorage
+    const storedUsers = JSON.parse(localStorage.getItem("users")) || {};
+    console.log("Stored Users:", storedUsers);
+
+    // Check if the user exists and the password matches
+    const user = storedUsers[username];
+    console.log("Retrieved User:", user);
+
+    if (user && user.password === password) {
       alert("Login successful!");
-      // Save the current user to localStorage
-      localStorage.setItem("currentUser", username);
-      console.log("Current User Set:", username); // Debugging log
-      // Redirect to the HomePage
-      navigate("/home"); // Adjust the path according to your route configuration
+
+      // Set the current user in localStorage
+      localStorage.setItem("currentUser", JSON.stringify(user));
+      console.log("Current User Set:", user);
+
+      // Update currentUser state
+      setCurrentUser(user);
+
+      // Navigate to the home page
+      navigate("/home");
     } else {
       alert("Invalid username or password.");
+      console.log("Login Failed: Username or password is incorrect.");
     }
   };
 
-  // Add event listener to the form when the component mounts
   useEffect(() => {
     const form = document.getElementById("login-form");
     if (form) {
       form.addEventListener("submit", handleLogin);
     }
 
-    // Set up the default admin user if not already present
-    const users = JSON.parse(localStorage.getItem("users")) || {};
-    if (!users.admin) {
-      users.admin = "password"; // Default admin credentials
-      localStorage.setItem("users", JSON.stringify(users));
+    // Initialize a default admin user if not present
+    const storedUsers = JSON.parse(localStorage.getItem("users")) || {};
+    if (!storedUsers.admin) {
+      const adminUser = new User("admin", "password", true); // Default admin user
+      storedUsers.admin = {
+        username: adminUser.username,
+        password: adminUser.password,
+        isAdmin: adminUser.isAdmin,
+      };
+      localStorage.setItem("users", JSON.stringify(storedUsers));
+      console.log("Admin User Added:", storedUsers.admin);
+    } else {
+      console.log("Admin User Already Exists:", storedUsers.admin);
     }
 
-    // Cleanup the event listener on component unmount
     return () => {
       if (form) {
         form.removeEventListener("submit", handleLogin);
@@ -54,12 +85,21 @@ export default function Login({ togglePage, showLogin }) {
     };
   }, []);
 
+  // Pass current user to the homepage after login
+  useEffect(() => {
+    if (currentUser) {
+      // Store the current user in localStorage
+      localStorage.setItem("currentUser", JSON.stringify(currentUser));
+      // This effect can trigger a redirect to the homepage if necessary
+      navigate("/home", { state: { currentUser } }); // Pass user state to home
+    }
+  }, [currentUser, navigate]);
+
   return (
     <div className="container">
       <section className="header">
         <h1>Dynasty Defense Security</h1>
       </section>
-
       <div className="login-card">
         <h2>Login</h2>
         <form id="login-form" className="sign-in-form">
@@ -76,8 +116,6 @@ export default function Login({ togglePage, showLogin }) {
           </div>
           <button type="submit">Login</button>
         </form>
-
-        {/* Button to switch between Login and Register */}
         <button className="toggle-button" onClick={togglePage}>
           {showLogin ? "Go to Register" : "Register?"}
         </button>
