@@ -31,6 +31,7 @@ export default function HomePage({ currentUser }) {
   });
 
   const [sensorIntervals, setSensorIntervals] = useState({}); // Store intervals for sensors
+  const [user, setUser] = useState(null); // State to store the current user data
 
   const toggleSidebar = () => setIsSidebarCollapsed((prev) => !prev);
 
@@ -98,10 +99,10 @@ export default function HomePage({ currentUser }) {
   };
 
   const silenceAlarm = (alarm) => {
-    console.log("currentUser:", currentUser);
-    console.log("isAdmin:", currentUser?.isAdmin); // Ensure this outputs correctly
+    console.log("currentUser:", user);
+    console.log("isAdmin:", user?.isAdmin); // Ensure this outputs correctly
 
-    if (currentUser?.isAdmin) {
+    if (user?.isAdmin) {
       setActiveAlarms((prev) => ({ ...prev, [alarm]: false }));
       console.log(`Silenced ${alarm} alarm.`);
     } else {
@@ -148,15 +149,22 @@ export default function HomePage({ currentUser }) {
   );
 
   useEffect(() => {
-    // Assuming loadUserData is called to log the username; this could be improved based on actual use
-    const username = loadUserData();
-    console.log("Loaded username:", username);
-  }, []);
+    // Load the user data when the component mounts
+    const userData = loadUserData();
+    console.log("Loaded user data:", userData);
+    setUser(userData); // Update the state with the loaded user data
+  }, []); // Empty dependency array means this runs once when the component mounts
 
   const loadUserData = () => {
     // Simulating user data load; adjust as needed for actual implementation
-    const userData = { username: "JohnDoe" };
-    return userData.username;
+    // Include all relevant user information
+    const userData = {
+      username: "JohnDoe",
+      isAdmin: true, // Example property to indicate admin privileges
+      email: "johndoe@example.com", // Additional user data
+      lastLogin: "2024-10-16T12:34:56Z", // Example timestamp
+    };
+    return userData;
   };
 
   return (
