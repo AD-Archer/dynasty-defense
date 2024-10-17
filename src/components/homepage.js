@@ -35,30 +35,49 @@ export default function HomePage({ currentUser }) {
   const [sensorIntervals, setSensorIntervals] = useState({});
   const [user, setUser] = useState(null);
 
+  // Load user data from local storage
+  const loadUserData = () => {
+    const storedUserData = localStorage.getItem("currentUser");
+    return storedUserData ? JSON.parse(storedUserData) : null; // Return null if no user data found
+  };
+
+  useEffect(() => {
+    const userData = loadUserData();
+    console.log("Loaded user data:", userData);
+    setUser(userData);
+  }, []);
+
   const toggleSidebar = () => setIsSidebarCollapsed((prev) => !prev);
 
-  // Function to randomly trigger an alarm when a sensor is activated
   const randomTriggerAlarm = (sensor) => {
-    const alarmKey = `${sensor.replace("Sensor", "Alarm")}`;
+    const shouldTrigger = Math.random() < 0.5; // 50% chance to trigger alarm
+    if (shouldTrigger) {
+      const alarmKey = `${sensor.replace("Sensor", "Alarm")}`;
+      const currentTime = new Date().toLocaleTimeString();
+      setLastTriggeredTimes((prev) => ({
+        ...prev,
+        [alarmKey]: currentTime,
+      }));
+      setActiveAlarms((prev) => ({ ...prev, [alarmKey]: true }));
 
-    const intervalId = setInterval(() => {
-      if (activatedSensors[sensor]) {
-        const triggerProbability = 0.05;
+      // Set an interval to keep checking the sensor (if that is your intention)
+      const intervalId = setInterval(() => {
+        // Your logic to check the sensor
+      }, 1000); // Adjust the interval as needed
 
-        if (Math.random() < triggerProbability) {
-          const currentTime = new Date().toLocaleTimeString();
-          setLastTriggeredTimes((prev) => ({
-            ...prev,
-            [alarmKey]: currentTime,
-          }));
-          setActiveAlarms((prev) => ({ ...prev, [alarmKey]: true }));
-        }
-      } else {
-        clearInterval(intervalId);
-      }
-    }, 5000);
+      setSensorIntervals((prev) => ({
+        ...prev,
+        [sensor]: intervalId,
+      }));
+    }
+  };
 
-    setSensorIntervals((prev) => ({ ...prev, [sensor]: intervalId }));
+  const triggerAlarm = (sensor) => {
+    const currentTime = new Date().toLocaleTimeString();
+    setLastTriggeredTimes((prev) => ({
+      ...prev,
+      [sensor]: currentTime,
+    }));
   };
 
   const toggleSensor = (sensor) => {
@@ -76,6 +95,13 @@ export default function HomePage({ currentUser }) {
       } else {
         silenceAlarmForSensor(sensor);
       }
+
+      // Save last triggered time to local storage
+      localStorage.setItem(
+        "lastTriggeredTimes",
+        JSON.stringify(lastTriggeredTimes)
+      );
+
       return newState;
     });
   };
@@ -143,24 +169,11 @@ export default function HomePage({ currentUser }) {
   );
 
   useEffect(() => {
-    const userData = loadUserData();
-    console.log("Loaded user data:", userData);
-    setUser(userData);
-  }, []);
-
-const loadUserData = () => {
-  const storedUserData = localStorage.getItem("currentUser");
-
-  // Check if there is any stored user data
-  if (storedUserData) {
-    // Parse the stored JSON string into an object
-    return JSON.parse(storedUserData);
-  } else {
-    // Return null or an empty object if no user data is found
-    return null; // or return {};
-  }
-};
-
+    // Cleanup function to clear any active intervals when the component unmounts
+    return () => {
+      Object.values(sensorIntervals).forEach(clearInterval);
+    };
+  }, [sensorIntervals]);
 
   return (
     <div className="home-container">
@@ -193,6 +206,20 @@ const loadUserData = () => {
             {renderAlarmCard("fireAlarm", flameIcon)}
             {renderAlarmCard("smokeAlarm", smokeIcon)}
             {renderAlarmCard("securityAlarm", securitySafeIcon)}
+          </div>
+        </section>
+
+        <section className="custom-sensors">
+          <h2>Custom Sensors</h2>
+          <div className="custom-sensors-container">
+            {/* Custom Cards go here */}
+          </div>
+        </section>
+
+        <section className="custom-alarms">
+          <h2>Custom Alarms</h2>
+          <div className="custom-alarms-container">
+            {/* Custom Cards go here */}
           </div>
         </section>
       </main>

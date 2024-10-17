@@ -1,26 +1,62 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react"; // Importing React and useState for state management
 import { Link } from "react-router-dom"; // Importing Link for navigation
-import "./styles/homepage.css"; // Assuming similar styles for now
+
+import "./styles/homepage.css";
 
 export default function SettingsPage({ currentUser }) {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+  const [sensors, setSensors] = useState([]); // State to store sensors
+  const [newSensor, setNewSensor] = useState(""); // State for new sensor input
+  const [users, setUsers] = useState([]); // State to store users
 
-  // Example state for settings, such as notification preferences
-  const [settings, setSettings] = useState({
-    emailNotifications: true,
-    smsNotifications: false,
-    theme: "light",
-  });
+  // Load user data from local storage
+  const loadUserData = () => {
+    const storedUserData = localStorage.getItem("users");
 
-  // Toggle the sidebar between collapsed and expanded
-  const toggleSidebar = () => setIsSidebarCollapsed(!isSidebarCollapsed);
-
-  // Handle setting changes
-  const handleSettingChange = (setting, value) => {
-    setSettings((prev) => ({ ...prev, [setting]: value }));
+    // Check if there is any stored user data
+    if (storedUserData) {
+      // Parse the stored JSON string into an object
+      return JSON.parse(storedUserData);
+    } else {
+      // Return an empty array if no user data is found
+      return [];
+    }
   };
 
-  // This is the main render function for the settings page
+  useEffect(() => {
+    const fetchUsers = async () => {
+      const response = await fetch("/api/users"); // Change to your API endpoint
+      const data = await response.json();
+      if (Array.isArray(data)) {
+        setUsers(data);
+      } else {
+        console.error("Fetched data is not an array:", data);
+      }
+    };
+    fetchUsers();
+  }, []);
+
+  const toggleSidebar = () => setIsSidebarCollapsed(!isSidebarCollapsed);
+
+  const handleCreateSensor = () => {
+    if (newSensor.trim()) {
+      setSensors([...sensors, newSensor]);
+      setNewSensor(""); // Clear input after creation
+    }
+  };
+
+  const handleMakeAdmin = (userId) => {
+    setUsers((prevUsers) => {
+      const updatedUsers = prevUsers.map((user) =>
+        user.id === userId ? { ...user, isAdmin: true } : user
+      );
+
+      // Update local storage after promoting the user
+      localStorage.setItem("users", JSON.stringify(updatedUsers));
+      return updatedUsers; // Return updated user list
+    });
+  };
+
   return (
     <div className="home-container">
       <aside className={`sidebar ${isSidebarCollapsed ? "collapsed" : ""}`}>
@@ -40,48 +76,35 @@ export default function SettingsPage({ currentUser }) {
       <main className="main-content">
         <h1 className="header-title">Settings</h1>
 
-        <section className="settings-section">
-          <h2>Notification Settings</h2>
-          <div className="setting-item">
-            <label>
-              <input
-                type="checkbox"
-                checked={settings.emailNotifications}
-                onChange={() =>
-                  handleSettingChange(
-                    "emailNotifications",
-                    !settings.emailNotifications
-                  )
-                }
-              />
-              Email Notifications
-            </label>
+        <section className="sensors-section">
+          <h2>Create Custom Sensors</h2>
+          <div className="input-group">
+            <input
+              type="text"
+              placeholder="New Sensor"
+              value={newSensor}
+              onChange={(e) => setNewSensor(e.target.value)}
+            />
+            <button onClick={handleCreateSensor}>Create Sensor</button>
           </div>
-          <div className="setting-item">
-            <label>
-              <input
-                type="checkbox"
-                checked={settings.smsNotifications}
-                onChange={() =>
-                  handleSettingChange(
-                    "smsNotifications",
-                    !settings.smsNotifications
-                  )
-                }
-              />
-              SMS Notifications
-            </label>
-          </div>
-          <div className="setting-item">
-            <label>Theme</label>
-            <select
-              value={settings.theme}
-              onChange={(e) => handleSettingChange("theme", e.target.value)}
-            >
-              <option value="light">Light</option>
-              <option value="dark">Dark</option>
-            </select>
-          </div>
+        </section>
+
+        <section className="user-list-section">
+          <h2>All Users</h2>
+          <ul className="user-list">
+            {users.map((user) => (
+              <li key={user.id} className="user-item">
+                {user.name} {user.isAdmin && "(Admin)"}
+                <button
+                  onClick={() => handleMakeAdmin(user.id)}
+                  disabled={user.isAdmin}
+                  className="make-admin-button"
+                >
+                  {user.isAdmin ? "Already Admin" : "Make Admin"}
+                </button>
+              </li>
+            ))}
+          </ul>
         </section>
       </main>
     </div>

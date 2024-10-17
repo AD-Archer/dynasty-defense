@@ -63,7 +63,9 @@
 }
 
 .sensors-section,
-.alarms-section {
+.alarms-section,
+.custom-sensors,
+.custom-alarms {
   margin: 1rem 0;
   padding: 1rem;
   background-color: var(--card-bg-color);
@@ -71,7 +73,8 @@
 }
 
 .sensor-cards-container,
-.alarm-cards-container {
+.alarm-cards-container, .custom-alarms-container,
+.custom-sensors-container {
   display: flex; /* Enable flex layout */
   justify-content: center; /* Center cards in the section */
   flex-wrap: wrap; /* Allow wrapping to next line if needed */
@@ -130,4 +133,3 @@
   display: block; /* Ensure it behaves like a block element */
   margin: 0 auto; /* Center the icon horizontally */
 }
-
