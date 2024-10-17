@@ -1,4 +1,5 @@
 import React, { useState } from "react"; // Importing React and useState for managing state
+import { Link } from "react-router-dom"; // Importing Link for navigation
 
 // User class definition for creating new users
 class User {
@@ -151,6 +152,8 @@ export default function Register({ togglePage, showLogin }) {
         <button className="toggle-button" onClick={togglePage}>
           {showLogin ? "Go to Register" : "Go to Login"}
         </button>
+
+        
       </div>
     </div>
   );

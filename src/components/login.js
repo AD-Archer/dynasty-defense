@@ -35,20 +35,17 @@ export default function Login({ togglePage, showLogin }) {
     console.log("Attempting login for:", username); // Debugging line
 
     // Validate user existence and password
-    if (user) {
-      console.log("Found user:", user); // Debugging line
-      if (user.password.toLowerCase() === password.toLowerCase()) {
-        alert("Login successful!");
-        setCurrentUser(user);
-        localStorage.setItem("currentUser", JSON.stringify(user));
-        navigate("/home");
-      } else {
-        alert("Invalid username or password.");
-      }
-    } else {
-      alert("Invalid username or password."); // Inform user the username doesn't exist
-    }
-  };
+if (user && user.password) {
+  console.log("Found user:", user); // Debugging line
+  if (user.password.toLowerCase() === password.toLowerCase()) {
+    alert("Login successful!");
+    setCurrentUser(user);
+    localStorage.setItem("currentUser", JSON.stringify(user));
+    navigate("/home");
+  } else {
+    alert("Invalid username or password."); // Password mismatch
+  }
+} }
 
   // Set up the login form and create an admin user if none exists
   useEffect(() => {

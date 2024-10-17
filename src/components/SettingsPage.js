@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { Link } from "react-router-dom"; // Importing Link for navigation
 import "./styles/homepage.css"; // Assuming similar styles for now
 
 export default function SettingsPage({ currentUser }) {
@@ -26,6 +27,9 @@ export default function SettingsPage({ currentUser }) {
         <button className="sidebar-button" onClick={toggleSidebar}>
           {isSidebarCollapsed ? "Expand" : "Collapse"}
         </button>
+        <Link to="/home">
+          <button className="sidebar-button">Home</button>
+        </Link>
         <button className="sidebar-button">Sensors</button>
         <button className="sidebar-button">Alarms</button>
         <button className="sidebar-button settings-button active">

@@ -1,5 +1,7 @@
-import React, { useState, useEffect } from "react";
-import "./styles/homepage.css";
+import React, { useState, useEffect } from "react"; // Importing React and useState for state management
+import { Link } from "react-router-dom"; // Importing Link for navigation
+import "./styles/homepage.css"; // Importing CSS for styling
+import SettingsPage from "./SettingsPage"; // Adjust the import path if needed
 
 // Importing custom SVG icons for different sensors and alarms
 import flameIcon from "../assets/images/Flame icon.svg";
@@ -30,8 +32,8 @@ export default function HomePage({ currentUser }) {
     securitySensor: false,
   });
 
-  const [sensorIntervals, setSensorIntervals] = useState({}); // Store intervals for sensors
-  const [user, setUser] = useState(null); // State to store the current user data
+  const [sensorIntervals, setSensorIntervals] = useState({});
+  const [user, setUser] = useState(null);
 
   const toggleSidebar = () => setIsSidebarCollapsed((prev) => !prev);
 
@@ -41,8 +43,7 @@ export default function HomePage({ currentUser }) {
 
     const intervalId = setInterval(() => {
       if (activatedSensors[sensor]) {
-        // Adjust the probability of triggering based on your desired frequency
-        const triggerProbability = 0.05; // Adjust this value as needed
+        const triggerProbability = 0.05;
 
         if (Math.random() < triggerProbability) {
           const currentTime = new Date().toLocaleTimeString();
@@ -55,13 +56,11 @@ export default function HomePage({ currentUser }) {
       } else {
         clearInterval(intervalId);
       }
-    }, 5000); // Adjust the interval as needed
+    }, 5000);
 
-    // Store the interval ID
     setSensorIntervals((prev) => ({ ...prev, [sensor]: intervalId }));
   };
 
-  // Function to toggle a sensor's activation state
   const toggleSensor = (sensor) => {
     const currentTime = new Date().toLocaleTimeString();
 
@@ -72,7 +71,6 @@ export default function HomePage({ currentUser }) {
         [sensor]: currentTime,
       }));
 
-      // Start or stop triggering alarms based on sensor activation
       if (newState[sensor]) {
         randomTriggerAlarm(sensor);
       } else {
@@ -86,22 +84,18 @@ export default function HomePage({ currentUser }) {
     const alarmKey = `${sensor.replace("Sensor", "Alarm")}`;
     setActiveAlarms((prev) => ({ ...prev, [alarmKey]: false }));
 
-    // Clear the interval when the sensor is deactivated
     const intervalId = sensorIntervals[sensor];
     if (intervalId) {
       clearInterval(intervalId);
       setSensorIntervals((prev) => {
         const newIntervals = { ...prev };
-        delete newIntervals[sensor]; // Remove the interval for the deactivated sensor
+        delete newIntervals[sensor];
         return newIntervals;
       });
     }
   };
 
   const silenceAlarm = (alarm) => {
-    console.log("currentUser:", user);
-    console.log("isAdmin:", user?.isAdmin); // Ensure this outputs correctly
-
     if (user?.isAdmin) {
       setActiveAlarms((prev) => ({ ...prev, [alarm]: false }));
       console.log(`Silenced ${alarm} alarm.`);
@@ -149,23 +143,24 @@ export default function HomePage({ currentUser }) {
   );
 
   useEffect(() => {
-    // Load the user data when the component mounts
     const userData = loadUserData();
     console.log("Loaded user data:", userData);
-    setUser(userData); // Update the state with the loaded user data
-  }, []); // Empty dependency array means this runs once when the component mounts
+    setUser(userData);
+  }, []);
 
-  const loadUserData = () => {
-    // Simulating user data load; adjust as needed for actual implementation
-    // Include all relevant user information
-    const userData = {
-      username: "JohnDoe",
-      isAdmin: true, // Example property to indicate admin privileges
-      email: "johndoe@example.com", // Additional user data
-      lastLogin: "2024-10-16T12:34:56Z", // Example timestamp
-    };
-    return userData;
-  };
+const loadUserData = () => {
+  const storedUserData = localStorage.getItem("currentUser");
+
+  // Check if there is any stored user data
+  if (storedUserData) {
+    // Parse the stored JSON string into an object
+    return JSON.parse(storedUserData);
+  } else {
+    // Return null or an empty object if no user data is found
+    return null; // or return {};
+  }
+};
+
 
   return (
     <div className="home-container">
@@ -175,14 +170,16 @@ export default function HomePage({ currentUser }) {
         </button>
         <button className="sidebar-button">Sensors</button>
         <button className="sidebar-button">Alarms</button>
-        <button className="sidebar-button settings-button">Settings</button>
+        <Link to="/settings">
+          <button className="sidebar-button settings-button">Settings</button>
+        </Link>
       </aside>
 
       <main className="main-content">
         <h1 className="header-title">Defense Panel</h1>
 
         <section className="sensors-section">
-          <h2>Sensors</h2>
+          <h2>Main Sensors</h2>
           <div className="sensor-cards-container">
             {renderSensorCard("fireSensor", flameIcon)}
             {renderSensorCard("smokeSensor", smokeIcon)}
@@ -191,7 +188,7 @@ export default function HomePage({ currentUser }) {
         </section>
 
         <section className="alarms-section">
-          <h2>Alarms</h2>
+          <h2>Main Alarms</h2>
           <div className="alarm-cards-container">
             {renderAlarmCard("fireAlarm", flameIcon)}
             {renderAlarmCard("smokeAlarm", smokeIcon)}
