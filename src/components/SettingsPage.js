@@ -1,12 +1,10 @@
 import React, { useState, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom"; // 
+import { Link, useNavigate } from "react-router-dom";
 import "./styles/homepage.css";
-import "./styles/settingspage.css";
-import "./register"
-
+import "./register";
 
 export default function SettingsPage({ currentUser }) {
-  const navigate = useNavigate(); // Initialize navigate for navigation
+  const navigate = useNavigate();
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [sensors, setSensors] = useState([]);
   const [newSensor, setNewSensor] = useState("");
@@ -25,24 +23,44 @@ export default function SettingsPage({ currentUser }) {
     return storedSensors ? JSON.parse(storedSensors) : [];
   };
 
+  const loadUsers = () => {
+    const storedUsers = localStorage.getItem("users");
+    return storedUsers ? JSON.parse(storedUsers) : [];
+  };
+
   useEffect(() => {
     const userData = loadUserData();
     setUser(userData);
+
     const loadedSensors = loadSensors();
     setSensors(loadedSensors);
-    checkUserLogin(); // Call checkUserLogin on component mount
+
+    const loadedUsers = loadUsers();
+    setUsers(Array.isArray(loadedUsers) ? loadedUsers : []);
+
+    checkUserLogin();
   }, []);
 
-const checkUserLogin = () => {
-  const storedUserData = localStorage.getItem("currentUser");
-  if (!storedUserData) {
-    navigate("/"); // Redirect to login page if not signed in
-  }
-};
+  const checkUserLogin = () => {
+    const storedUserData = localStorage.getItem("currentUser");
+    if (!storedUserData) {
+      navigate("/");
+    }
+  };
 
   const toggleSidebar = () => setIsSidebarCollapsed(!isSidebarCollapsed);
 
+  const notifyNonAdmin = () => {
+    alert("Only admins can change settings.");
+  };
+
   const handleCreateSensor = () => {
+    console.log("Current User: ", user); // Debug line
+    if (user && !user.isAdmin) {
+      notifyNonAdmin(); // Notify if not an admin
+      return;
+    }
+
     if (newSensor.trim()) {
       if (sensors.length < 3) {
         const updatedSensors = [...sensors, newSensor];
@@ -88,11 +106,10 @@ const checkUserLogin = () => {
     });
   };
 
-  // Function to handle sign-out
-const handleSignOut = () => {
-  localStorage.removeItem("currentUser"); // Clear user data
-  navigate("/"); // Redirect to register page
-};
+  const handleSignOut = () => {
+    localStorage.removeItem("currentUser");
+    navigate("/");
+  };
 
   return (
     <div className="home-container">
@@ -105,13 +122,10 @@ const handleSignOut = () => {
         </Link>
         <button className="sidebar-button">Sensors</button>
         <button className="sidebar-button">Users</button>
-        
       </aside>
 
       <main className="main-content">
         <h1 className="header-title">Settings</h1>
-
-        {/* Sign Out Button */}
 
         <section className="sensors-section">
           <h2>Create Custom Sensors</h2>
