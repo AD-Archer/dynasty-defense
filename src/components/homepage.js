@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom"; // 
 import "./styles/homepage.css";
 import flameIcon from "../assets/images/Flame icon.svg";
 import securitySafeIcon from "../assets/images/Security Safe Icon.svg";
 import smokeIcon from "../assets/images/Smoke icon.svg";
 
 export default function HomePage({ currentUser }) {
+  const navigate = useNavigate(); // Initialize navigate for navigation
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [lastTriggeredTimes, setLastTriggeredTimes] = useState({
     fireSensor: "Never",
@@ -54,8 +55,14 @@ export default function HomePage({ currentUser }) {
     return storedSensors ? JSON.parse(storedSensors) : {};
   }
 
+  const handleSignOut = () => {
+    localStorage.removeItem("currentUser"); // Clear user data
+    navigate("/"); // Redirect to register page
+  };
+
   useEffect(() => {
     // Load last triggered times and activated sensors
+    checkUserLogin(); // Call checkUserLogin on component mount
     const loadedLastTriggeredTimes = loadLastTriggeredTimes();
     const loadedActivatedSensors = loadActivatedSensors();
 
@@ -129,34 +136,43 @@ export default function HomePage({ currentUser }) {
     }
   };
 
- const toggleSensor = (sensor) => {
-   const currentTime = new Date().toLocaleTimeString();
+  const toggleSensor = (sensor) => {
+    const currentTime = new Date().toLocaleTimeString();
 
-   setActivatedSensors((prev) => {
-     const newState = { ...prev, [sensor]: !prev[sensor] };
+    setActivatedSensors((prev) => {
+      const newState = { ...prev, [sensor]: !prev[sensor] };
 
-     // Update the last triggered time
-     setLastTriggeredTimes((prev) => {
-       const updatedTimes = {
-         ...prev,
-         [sensor]: newState[sensor] ? currentTime : "Never",
-       };
-       localStorage.setItem("lastTriggeredTimes", JSON.stringify(updatedTimes));
-       return updatedTimes;
-     });
+      // Update the last triggered time
+      setLastTriggeredTimes((prev) => {
+        const updatedTimes = {
+          ...prev,
+          [sensor]: newState[sensor] ? currentTime : "Never",
+        };
+        localStorage.setItem(
+          "lastTriggeredTimes",
+          JSON.stringify(updatedTimes)
+        );
+        return updatedTimes;
+      });
 
-     localStorage.setItem("activatedSensors", JSON.stringify(newState));
+      localStorage.setItem("activatedSensors", JSON.stringify(newState));
 
-     if (newState[sensor]) {
-       randomTriggerAlarm(sensor);
-     } else {
-       silenceAlarmForSensor(sensor);
-     }
+      if (newState[sensor]) {
+        randomTriggerAlarm(sensor);
+      } else {
+        silenceAlarmForSensor(sensor);
+      }
 
-     return newState;
-   });
- };
+      return newState;
+    });
+  };
 
+  const checkUserLogin = () => {
+    const storedUserData = localStorage.getItem("currentUser");
+    if (!storedUserData) {
+      navigate("/"); // Redirect to login page if not signed in
+    }
+  };
 
   const silenceAlarmForSensor = (sensor) => {
     const alarmKey = `${sensor.replace("Sensor", "Alarm")}`;
@@ -241,11 +257,15 @@ export default function HomePage({ currentUser }) {
   return (
     <div className="home-container">
       <aside className={`sidebar ${isSidebarCollapsed ? "collapsed" : ""}`}>
-        <button className="sidebar-button" onClick={toggleSidebar}>
-          {isSidebarCollapsed ? "Expand" : "Collapse"}
-        </button>
-        <button className="sidebar-button">Sensors</button>
+        <button className="sign-out-button" onClick={handleSignOut}>
+          Sign Out
+        </button>{" "}
+        <Link to="/settings">
+          <button className="sidebar-button">Sensors</button>
+        </Link>
+        <Link to="/settings">
         <button className="sidebar-button">Alarms</button>
+        </Link>
         <Link to="/settings">
           <button className="sidebar-button settings-button">Settings</button>
         </Link>

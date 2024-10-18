@@ -1,53 +1,56 @@
-import React, { useState, useEffect } from "react"; // Importing React and useState for state management
-import { Link } from "react-router-dom"; // Importing Link for navigation
+import React, { useState, useEffect } from "react";
+import { Link, useNavigate } from "react-router-dom"; // 
 import "./styles/homepage.css";
 import "./styles/settingspage.css";
+import "./register"
+
 
 export default function SettingsPage({ currentUser }) {
+  const navigate = useNavigate(); // Initialize navigate for navigation
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
-  const [sensors, setSensors] = useState([]); // State to store sensors
-  const [newSensor, setNewSensor] = useState(""); // State for new sensor input
-  const [users, setUsers] = useState([]); // State to store users
+  const [sensors, setSensors] = useState([]);
+  const [newSensor, setNewSensor] = useState("");
+  const [users, setUsers] = useState([]);
   const [user, setUser] = useState(null);
-  const [editingIndex, setEditingIndex] = useState(null); // State to track which sensor is being edited
-  const [editedName, setEditedName] = useState(""); // State for the edited sensor name
+  const [editingIndex, setEditingIndex] = useState(null);
+  const [editedName, setEditedName] = useState("");
 
-  // Load user data from local storage
   const loadUserData = () => {
     const storedUserData = localStorage.getItem("currentUser");
-    return storedUserData ? JSON.parse(storedUserData) : null; // Return null if no user data found
+    return storedUserData ? JSON.parse(storedUserData) : null;
   };
 
-  // Load sensors from local storage
   const loadSensors = () => {
     const storedSensors = localStorage.getItem("sensors");
-    return storedSensors ? JSON.parse(storedSensors) : []; // Return empty array if no sensors found
+    return storedSensors ? JSON.parse(storedSensors) : [];
   };
 
   useEffect(() => {
     const userData = loadUserData();
-    console.log("Loaded user data:", userData);
     setUser(userData);
-
-    // Load sensors and set them in state
     const loadedSensors = loadSensors();
     setSensors(loadedSensors);
+    checkUserLogin(); // Call checkUserLogin on component mount
   }, []);
+
+const checkUserLogin = () => {
+  const storedUserData = localStorage.getItem("currentUser");
+  if (!storedUserData) {
+    navigate("/"); // Redirect to login page if not signed in
+  }
+};
 
   const toggleSidebar = () => setIsSidebarCollapsed(!isSidebarCollapsed);
 
   const handleCreateSensor = () => {
     if (newSensor.trim()) {
       if (sensors.length < 3) {
-        // Check if user already has 3 sensors
-        const updatedSensors = [...sensors, newSensor]; // Create a new sensors array with the new sensor
-        setSensors(updatedSensors); // Update state with new sensors array
-        setNewSensor(""); // Clear input after creation
-
-        // Save updated sensors to local storage
+        const updatedSensors = [...sensors, newSensor];
+        setSensors(updatedSensors);
+        setNewSensor("");
         localStorage.setItem("sensors", JSON.stringify(updatedSensors));
       } else {
-        alert("You can only create up to 3 sensors."); // Alert user if limit is reached
+        alert("You can only create up to 3 sensors.");
       }
     }
   };
@@ -55,59 +58,60 @@ export default function SettingsPage({ currentUser }) {
   const handleDeleteSensor = (sensorToDelete) => {
     const updatedSensors = sensors.filter(
       (sensor) => sensor !== sensorToDelete
-    ); // Remove the sensor from the array
-    setSensors(updatedSensors); // Update state with new sensors array
-
-    // Save updated sensors to local storage
+    );
+    setSensors(updatedSensors);
     localStorage.setItem("sensors", JSON.stringify(updatedSensors));
   };
 
   const handleEditSensor = (index) => {
     setEditingIndex(index);
-    setEditedName(sensors[index]); // Set the current name for editing
+    setEditedName(sensors[index]);
   };
 
   const handleSaveEdit = (index) => {
     const updatedSensors = sensors.map((sensor, i) =>
       i === index ? editedName : sensor
-    ); // Rename the sensor
-    setSensors(updatedSensors); // Update state with new sensors array
-    localStorage.setItem("sensors", JSON.stringify(updatedSensors)); // Save updated sensors to local storage
-    setEditingIndex(null); // Reset editing index
-    setEditedName(""); // Clear edited name
+    );
+    setSensors(updatedSensors);
+    localStorage.setItem("sensors", JSON.stringify(updatedSensors));
+    setEditingIndex(null);
+    setEditedName("");
   };
 
   const handleMakeAdmin = (username) => {
     setUsers((prevUsers) => {
-      const updatedUsers = prevUsers.map(
-        (user) =>
-          user.username === username ? { ...user, isAdmin: true } : user // Ensure to use username for identification
+      const updatedUsers = prevUsers.map((user) =>
+        user.username === username ? { ...user, isAdmin: true } : user
       );
-
-      // Update local storage after promoting the user
       localStorage.setItem("users", JSON.stringify(updatedUsers));
-      return updatedUsers; // Return updated user list
+      return updatedUsers;
     });
   };
+
+  // Function to handle sign-out
+const handleSignOut = () => {
+  localStorage.removeItem("currentUser"); // Clear user data
+  navigate("/"); // Redirect to register page
+};
 
   return (
     <div className="home-container">
       <aside className={`sidebar ${isSidebarCollapsed ? "collapsed" : ""}`}>
-        <button className="sidebar-button" onClick={toggleSidebar}>
-          {isSidebarCollapsed ? "Expand" : "Collapse"}
+        <button className="sign-out-button" onClick={handleSignOut}>
+          Sign Out
         </button>
         <Link to="/home">
           <button className="sidebar-button">Home</button>
         </Link>
         <button className="sidebar-button">Sensors</button>
-        <button className="sidebar-button">Alarms</button>
-        <button className="sidebar-button settings-button active">
-          Settings
-        </button>
+        <button className="sidebar-button">Users</button>
+        
       </aside>
 
       <main className="main-content">
         <h1 className="header-title">Settings</h1>
+
+        {/* Sign Out Button */}
 
         <section className="sensors-section">
           <h2>Create Custom Sensors</h2>
@@ -121,7 +125,6 @@ export default function SettingsPage({ currentUser }) {
             <button onClick={handleCreateSensor}>Create Sensor</button>
           </div>
 
-          {/* Display created sensors */}
           <div className="sensors-section2">
             <h3>Created Sensors:</h3>
             {sensors.length === 0 ? (
@@ -130,12 +133,12 @@ export default function SettingsPage({ currentUser }) {
               <div className="sensor-list">
                 {sensors.map((sensor, index) => (
                   <div key={index} className="sensor-item">
-                    {editingIndex === index ? ( // Check if the sensor is being edited
+                    {editingIndex === index ? (
                       <>
                         <input
                           type="text"
                           value={editedName}
-                          onChange={(e) => setEditedName(e.target.value)} // Update the name being edited
+                          onChange={(e) => setEditedName(e.target.value)}
                         />
                         <button onClick={() => handleSaveEdit(index)}>
                           Save
@@ -144,23 +147,22 @@ export default function SettingsPage({ currentUser }) {
                     ) : (
                       <>
                         {sensor}
-                        {user &&
-                          user.isAdmin && ( // Check if the user is an admin
-                            <>
-                              <button
-                                onClick={() => handleEditSensor(index)}
-                                className="edit-sensor-button"
-                              >
-                                Edit
-                              </button>
-                              <button
-                                onClick={() => handleDeleteSensor(sensor)}
-                                className="delete-sensor-button"
-                              >
-                                Delete
-                              </button>
-                            </>
-                          )}
+                        {user && user.isAdmin && (
+                          <>
+                            <button
+                              onClick={() => handleEditSensor(index)}
+                              className="edit-sensor-button"
+                            >
+                              Edit
+                            </button>
+                            <button
+                              onClick={() => handleDeleteSensor(sensor)}
+                              className="delete-sensor-button"
+                            >
+                              Delete
+                            </button>
+                          </>
+                        )}
                       </>
                     )}
                   </div>
@@ -173,7 +175,7 @@ export default function SettingsPage({ currentUser }) {
         <section className="user-list-section">
           <h2>All Users</h2>
           <ul className="user-list">
-            {users.length === 0 ? ( // Check if users is empty
+            {users.length === 0 ? (
               <li>No users available</li>
             ) : (
               users.map((user) => (
