@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom"; // 
 import "./styles/homepage.css";
-import "./register";
+import "./styles/settingspage.css";
+import "./register"
+
 
 export default function SettingsPage({ currentUser }) {
   const navigate = useNavigate();
@@ -126,6 +128,8 @@ export default function SettingsPage({ currentUser }) {
 
       <main className="main-content">
         <h1 className="header-title">Settings</h1>
+
+        {/* Sign Out Button */}
 
         <section className="sensors-section">
           <h2>Create Custom Sensors</h2>
