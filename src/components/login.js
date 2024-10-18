@@ -18,17 +18,17 @@ export default function Login({ togglePage, showLogin }) {
     return users ? users : {};
   });
 
-  useEffect(() => {
+  useEffect(() => {  //activates when the component mounts
     // Create admin user if it doesn't exist
-    if (!storedUsers.admin) {
-      const adminUser = new User("admin", "password", true);
+    if (!storedUsers.admin) { //checks if there's an admin user in local storage
+      const adminUser = new User("admin", "password", true); // creates a new admin user 
       storedUsers.admin = {
-        username: adminUser.username,
+        username: adminUser.username, 
         password: adminUser.password,
         isAdmin: adminUser.isAdmin,
       };
-      localStorage.setItem("users", JSON.stringify(storedUsers));
-      setStoredUsers(storedUsers); // Update state to trigger re-render
+      localStorage.setItem("users", JSON.stringify(storedUsers)); // saves the updated users object to local storage by turning it into a JSON string
+      setStoredUsers(storedUsers); // Update state to trigger re-render 
     }
   }, [storedUsers]);
 
@@ -42,12 +42,12 @@ export default function Login({ togglePage, showLogin }) {
     }
 
     // Attempt to retrieve the user based on the provided username
-    const user = storedUsers[username];
+    const user = storedUsers[username];  // Retrieves the user object from the storedUsers object by the provided username
 
     // Validate user existence and password
-    if (user && user.password.toLowerCase() === password.toLowerCase()) {
+    if (user && user.password.toLowerCase() === password.toLowerCase()) { 
       alert("Login successful!");
-      localStorage.setItem("currentUser", JSON.stringify(user));
+      localStorage.setItem("currentUser", JSON.stringify(user)); // this sets the current user in local storage
       navigate("/home");
     } else {
       alert("Invalid username or password."); // Password mismatch

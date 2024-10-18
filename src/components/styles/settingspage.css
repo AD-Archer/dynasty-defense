@@ -1,0 +1,50 @@
+/* settings.css - Design 3: Dark Theme with Accent Colors */
+
+.settings-container {
+  display: flex;
+  flex-direction: column;
+  padding: 2rem;
+  background-color: var(--bg-gradient-end);
+}
+
+
+.sensors-section, .sensors-section2 {
+  margin: 1rem 0;
+  padding: 1rem;
+  background-color: var(--card-bg-color);
+  border-radius: 8px; /* Rounded corners */
+  border-left: 5px solid var(--primary-color); /* Left border for emphasis */
+}
+
+.sensor-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px; /* Moderate gap */
+}
+
+.sensor-item {
+  background-color: #1c1c1c; /* Darker item background */
+  padding: 1.5rem;
+  border-radius: 6px;
+  color: var(--text-color);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: calc(30% - 10px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+}
+
+.delete-sensor-button {
+  background-color: var(--error-color);
+  color: white;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.delete-sensor-button:hover {
+  background-color: #c0392b; /* Darker red on hover */
+}
+
