@@ -1,12 +1,9 @@
 import React, { useState, useEffect } from "react"; // Importing React and useState for state management
 import { Link } from "react-router-dom"; // Importing Link for navigation
 import "./styles/homepage.css"; // Importing CSS for styling
-import SettingsPage from "./SettingsPage"; // Adjust the import path if needed
-
-// Importing custom SVG icons for different sensors and alarms
-import flameIcon from "../assets/images/Flame icon.svg";
-import securitySafeIcon from "../assets/images/Security Safe Icon.svg";
-import smokeIcon from "../assets/images/Smoke icon.svg";
+import flameIcon from "../assets/images/Flame icon.svg"; // Importing custom SVG icons
+import securitySafeIcon from "../assets/images/Security Safe Icon.svg"; // Importing custom SVG icons
+import smokeIcon from "../assets/images/Smoke icon.svg"; // Importing custom SVG icons
 
 // This is the main component for the homepage of my defense system monitoring panel
 export default function HomePage({ currentUser }) {
@@ -41,10 +38,36 @@ export default function HomePage({ currentUser }) {
     return storedUserData ? JSON.parse(storedUserData) : null; // Return null if no user data found
   };
 
+  // Load last triggered times from local storage
+  const loadLastTriggeredTimes = () => {
+    const storedTimes = localStorage.getItem("lastTriggeredTimes");
+    return storedTimes ? JSON.parse(storedTimes) : {}; // Return empty object if no times found
+  };
+
+  // Load activated sensors from local storage
+  const loadActivatedSensors = () => {
+    const storedSensors = localStorage.getItem("activatedSensors");
+    return storedSensors ? JSON.parse(storedSensors) : {}; // Return empty object if no sensors found
+  };
+
   useEffect(() => {
     const userData = loadUserData();
     console.log("Loaded user data:", userData);
     setUser(userData);
+
+    // Load last triggered times and activated sensors and set them in state
+    const loadedTimes = loadLastTriggeredTimes();
+    const loadedSensors = loadActivatedSensors();
+
+    setLastTriggeredTimes((prev) => ({
+      ...prev,
+      ...loadedTimes,
+    }));
+
+    setActivatedSensors((prev) => ({
+      ...prev,
+      ...loadedSensors,
+    }));
   }, []);
 
   const toggleSidebar = () => setIsSidebarCollapsed((prev) => !prev);
@@ -54,10 +77,14 @@ export default function HomePage({ currentUser }) {
     if (shouldTrigger) {
       const alarmKey = `${sensor.replace("Sensor", "Alarm")}`;
       const currentTime = new Date().toLocaleTimeString();
-      setLastTriggeredTimes((prev) => ({
-        ...prev,
-        [alarmKey]: currentTime,
-      }));
+      setLastTriggeredTimes((prev) => {
+        const updatedTimes = { ...prev, [alarmKey]: currentTime };
+        localStorage.setItem(
+          "lastTriggeredTimes",
+          JSON.stringify(updatedTimes)
+        ); // Save to local storage
+        return updatedTimes;
+      });
       setActiveAlarms((prev) => ({ ...prev, [alarmKey]: true }));
 
       // Set an interval to keep checking the sensor (if that is your intention)
@@ -74,10 +101,11 @@ export default function HomePage({ currentUser }) {
 
   const triggerAlarm = (sensor) => {
     const currentTime = new Date().toLocaleTimeString();
-    setLastTriggeredTimes((prev) => ({
-      ...prev,
-      [sensor]: currentTime,
-    }));
+    setLastTriggeredTimes((prev) => {
+      const updatedTimes = { ...prev, [sensor]: currentTime };
+      localStorage.setItem("lastTriggeredTimes", JSON.stringify(updatedTimes)); // Save to local storage
+      return updatedTimes;
+    });
   };
 
   const toggleSensor = (sensor) => {
@@ -89,6 +117,9 @@ export default function HomePage({ currentUser }) {
         ...prev,
         [sensor]: currentTime,
       }));
+
+      // Save activated sensors to local storage
+      localStorage.setItem("activatedSensors", JSON.stringify(newState));
 
       if (newState[sensor]) {
         randomTriggerAlarm(sensor);
@@ -144,7 +175,7 @@ export default function HomePage({ currentUser }) {
       </button>
       {!isSidebarCollapsed && (
         <p className="last-triggered-text">
-          Last Triggered: {lastTriggeredTimes[sensor]}
+          Last Activated: {lastTriggeredTimes[sensor]}
         </p>
       )}
     </div>
@@ -219,7 +250,7 @@ export default function HomePage({ currentUser }) {
         <section className="custom-alarms">
           <h2>Custom Alarms</h2>
           <div className="custom-alarms-container">
-            {/* Custom Cards go here */}
+            {/* Custom Alarms go here */}
           </div>
         </section>
       </main>
