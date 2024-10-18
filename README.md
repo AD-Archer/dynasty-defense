@@ -1,4 +1,3 @@
-
 # Dynasty Defense System
 
 ## Description
@@ -10,6 +9,8 @@ The **Dynasty Defense System** is a real-time alarm monitoring solution for encl
 - **Real-Time Monitoring**: Track sensor status and events in real-time.
 - **Alarm Notifications**: Receive instant alerts when a sensor is triggered.
 - **Reset & Deactivation**: Easily reset or deactivate sensors to handle false alarms.
+- **Custom Sensors**: Create and configure additional custom sensors.
+- **Multi-Admin Support**: The default admin can create more admin accounts.
 
 ## Installation
 1. Clone the repository:
@@ -30,18 +31,24 @@ The **Dynasty Defense System** is a real-time alarm monitoring solution for encl
    ```
 
 ## Usage
-- **Admin Dashboard**: Configure and monitor sensors, and manage system alarms.
-- **Alerts**: Receive notifications when sensors are triggered, providing quick response options.
+1. **Register and Sign In**:
+   - New users can register an account via the registration form. Once registered, sign in using the created credentials.
+   - An admin account is created by default with the following credentials:
+     - **Username**: `admin`
+     - **Password**: `password` (all lowercase)
+   - For security purposes, it is recommended to change the default admin password after the first login.
 
-## Roadmap
-### Milestone 1: Setup & Authentication
-- Implement secure password-based login.
+2. **Admin Dashboard**:
+   - Upon signing in, the dashboard allows users to configure and monitor sensors, as well as manage system alarms.
+   - Admin users have additional privileges to create new admin accounts, manage user roles, and silence active alarms.
 
-### Milestone 2: Sensor Management & Monitoring
-- Develop the sensor configuration and real-time monitoring UI.
+3. **Sensor Activation**:
+   - Users can activate a sensor to enable real-time monitoring. When a sensor detects an event (fire, smoke, or heat), it triggers an alarm.
+   - Users can also create their own custom sensors to listen for specific alarm conditions.
 
-### Milestone 3: Alarm Notifications & Testing
-- Implement chat-based notifications for alarms.
+4. **Handling Alarms**:
+   - When an alarm is triggered, notifications appear on the dashboard, and appropriate actions can be taken to resolve the situation.
+   - Admins have the capability to silence or reset alarms to manage false positives or handle emergency scenarios.
 
 ## Contributing
 Feel free to submit issues or pull requests to help improve the system. All contributions are welcome!
@@ -51,3 +58,4 @@ This project is licensed under the MIT License. See the [LICENSE](LICENSE) file 
 
 ## Contact
 Created by [@ad-archer](https://github.com/ad-archer). For questions or collaboration, feel free to reach out.
+
