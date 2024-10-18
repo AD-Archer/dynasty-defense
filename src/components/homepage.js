@@ -1,11 +1,10 @@
-import React, { useState, useEffect } from "react"; // Importing React and useState for state management
-import { Link } from "react-router-dom"; // Importing Link for navigation
-import "./styles/homepage.css"; // Importing CSS for styling
-import flameIcon from "../assets/images/Flame icon.svg"; // Importing custom SVG icons
-import securitySafeIcon from "../assets/images/Security Safe Icon.svg"; // Importing custom SVG icons
-import smokeIcon from "../assets/images/Smoke icon.svg"; // Importing custom SVG icons
+import React, { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
+import "./styles/homepage.css";
+import flameIcon from "../assets/images/Flame icon.svg";
+import securitySafeIcon from "../assets/images/Security Safe Icon.svg";
+import smokeIcon from "../assets/images/Smoke icon.svg";
 
-// This is the main component for the homepage of my defense system monitoring panel
 export default function HomePage({ currentUser }) {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [lastTriggeredTimes, setLastTriggeredTimes] = useState({
@@ -17,11 +16,19 @@ export default function HomePage({ currentUser }) {
     securityAlarm: "Never",
   });
 
-  const [activeAlarms, setActiveAlarms] = useState({
-    fireAlarm: false,
-    smokeAlarm: false,
-    securityAlarm: false,
-  });
+  // Load the initial state from local storage
+  const loadActiveAlarms = () => {
+    const storedActiveAlarms = localStorage.getItem("activeAlarms");
+    return storedActiveAlarms
+      ? JSON.parse(storedActiveAlarms)
+      : {
+          fireAlarm: false,
+          smokeAlarm: false,
+          securityAlarm: false,
+        };
+  };
+
+  const [activeAlarms, setActiveAlarms] = useState(loadActiveAlarms());
 
   const [activatedSensors, setActivatedSensors] = useState({
     fireSensor: false,
@@ -30,92 +37,96 @@ export default function HomePage({ currentUser }) {
   });
 
   const [sensorIntervals, setSensorIntervals] = useState({});
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState(loadUserData());
 
-  // Load user data from local storage
-  const loadUserData = () => {
+  function loadUserData() {
     const storedUserData = localStorage.getItem("currentUser");
-    return storedUserData ? JSON.parse(storedUserData) : null; // Return null if no user data found
-  };
+    return storedUserData ? JSON.parse(storedUserData) : null;
+  }
 
-  // Load last triggered times from local storage
-  const loadLastTriggeredTimes = () => {
+  function loadLastTriggeredTimes() {
     const storedTimes = localStorage.getItem("lastTriggeredTimes");
-    return storedTimes ? JSON.parse(storedTimes) : {}; // Return empty object if no times found
-  };
+    return storedTimes ? JSON.parse(storedTimes) : {};
+  }
 
-  // Load activated sensors from local storage
-  const loadActivatedSensors = () => {
+  function loadActivatedSensors() {
     const storedSensors = localStorage.getItem("activatedSensors");
-    return storedSensors ? JSON.parse(storedSensors) : {}; // Return empty object if no sensors found
-  };
+    return storedSensors ? JSON.parse(storedSensors) : {};
+  }
 
   useEffect(() => {
-    const userData = loadUserData();
-    console.log("Loaded user data:", userData);
-    setUser(userData);
-
-    // Load last triggered times and activated sensors and set them in state
-    const loadedTimes = loadLastTriggeredTimes();
-    const loadedSensors = loadActivatedSensors();
+    // Load last triggered times and activated sensors
+    const loadedLastTriggeredTimes = loadLastTriggeredTimes();
+    const loadedActivatedSensors = loadActivatedSensors();
 
     setLastTriggeredTimes((prev) => ({
       ...prev,
-      ...loadedTimes,
+      ...loadedLastTriggeredTimes,
     }));
 
-    setActivatedSensors((prev) => ({
-      ...prev,
-      ...loadedSensors,
-    }));
-  }, []);
+    setActivatedSensors((prev) => {
+      const newState = {
+        ...prev,
+        ...loadedActivatedSensors,
+      };
+
+      // Check sensor states and trigger alarms if activated
+      Object.keys(newState).forEach((sensor) => {
+        if (newState[sensor]) {
+          randomTriggerAlarm(sensor); // Trigger alarm if sensor is activated
+        }
+      });
+
+      return newState;
+    });
+  }, []); // Runs on component mount only
 
   const toggleSidebar = () => setIsSidebarCollapsed((prev) => !prev);
 
-const randomTriggerAlarm = (sensor) => {
-  const alarmKey = `${sensor.replace("Sensor", "Alarm")}`;
+  const randomTriggerAlarm = (sensor) => {
+    const alarmKey = `${sensor.replace("Sensor", "Alarm")}`;
 
-  // Function to trigger the alarm
-  const triggerAlarm = () => {
-    const currentTime = new Date().toLocaleTimeString();
-    setLastTriggeredTimes((prev) => {
-      const updatedTimes = { ...prev, [alarmKey]: currentTime };
-      localStorage.setItem("lastTriggeredTimes", JSON.stringify(updatedTimes)); // Save to local storage
-      return updatedTimes;
-    });
+    // Trigger the alarm once and prevent further triggering
+    const triggerAlarm = () => {
+      const currentTime = new Date().toLocaleTimeString();
 
-    setActiveAlarms((prev) => ({ ...prev, [alarmKey]: true }));
-    console.log(`${alarmKey} triggered at ${currentTime}`);
-  };
+      // Only trigger the alarm if it's not already active
+      if (!activeAlarms[alarmKey]) {
+        setLastTriggeredTimes((prev) => {
+          const updatedTimes = { ...prev, [alarmKey]: currentTime };
+          localStorage.setItem(
+            "lastTriggeredTimes",
+            JSON.stringify(updatedTimes)
+          );
+          return updatedTimes;
+        });
 
-  // Clear any existing interval for this sensor
-  if (sensorIntervals[sensor]) {
-    clearInterval(sensorIntervals[sensor]);
-  }
+        // Update active alarms and local storage
+        setActiveAlarms((prev) => {
+          const newAlarms = { ...prev, [alarmKey]: true };
+          localStorage.setItem("activeAlarms", JSON.stringify(newAlarms));
+          return newAlarms;
+        });
 
-  // Start an interval to randomly trigger the alarm every 3 to 10 seconds
-  const intervalId = setInterval(() => {
-    const shouldTrigger = Math.random() < 0.5; // 50% chance to trigger alarm each interval
-    if (shouldTrigger) {
-      triggerAlarm();
+        console.log(`${alarmKey} triggered at ${currentTime}`);
+      }
+    };
+
+    // Check if the alarm is already active; if not, set up a random triggering interval
+    if (!activeAlarms[alarmKey]) {
+      const intervalId = setInterval(() => {
+        const shouldTrigger = Math.random() < 0.5; // 50% chance to trigger alarm
+        if (shouldTrigger) {
+          triggerAlarm();
+          clearInterval(intervalId); // Stop the interval after triggering once
+        }
+      }, Math.floor(Math.random() * (10000 - 3000 + 1)) + 3000); // Random interval between 3 and 10 seconds
+
+      setSensorIntervals((prev) => ({
+        ...prev,
+        [sensor]: intervalId,
+      }));
     }
-  }, Math.floor(Math.random() * (10000 - 3000 + 1)) + 3000); // Random interval between 3 and 10 seconds
-
-  // Save the interval ID for cleanup later
-  setSensorIntervals((prev) => ({
-    ...prev,
-    [sensor]: intervalId,
-  }));
-};
-
-
-  const triggerAlarm = (sensor) => {
-    const currentTime = new Date().toLocaleTimeString();
-    setLastTriggeredTimes((prev) => {
-      const updatedTimes = { ...prev, [sensor]: currentTime };
-      localStorage.setItem("lastTriggeredTimes", JSON.stringify(updatedTimes)); // Save to local storage
-      return updatedTimes;
-    });
   };
 
   const toggleSensor = (sensor) => {
@@ -128,7 +139,6 @@ const randomTriggerAlarm = (sensor) => {
         [sensor]: currentTime,
       }));
 
-      // Save activated sensors to local storage
       localStorage.setItem("activatedSensors", JSON.stringify(newState));
 
       if (newState[sensor]) {
@@ -137,7 +147,7 @@ const randomTriggerAlarm = (sensor) => {
         silenceAlarmForSensor(sensor);
       }
 
-      // Save last triggered time to local storage
+      // Update last triggered times in local storage
       localStorage.setItem(
         "lastTriggeredTimes",
         JSON.stringify(lastTriggeredTimes)
@@ -149,7 +159,11 @@ const randomTriggerAlarm = (sensor) => {
 
   const silenceAlarmForSensor = (sensor) => {
     const alarmKey = `${sensor.replace("Sensor", "Alarm")}`;
-    setActiveAlarms((prev) => ({ ...prev, [alarmKey]: false }));
+    setActiveAlarms((prev) => {
+      const newAlarms = { ...prev, [alarmKey]: false };
+      localStorage.setItem("activeAlarms", JSON.stringify(newAlarms));
+      return newAlarms;
+    });
 
     const intervalId = sensorIntervals[sensor];
     if (intervalId) {
@@ -164,7 +178,11 @@ const randomTriggerAlarm = (sensor) => {
 
   const silenceAlarm = (alarm) => {
     if (user?.isAdmin) {
-      setActiveAlarms((prev) => ({ ...prev, [alarm]: false }));
+      setActiveAlarms((prev) => {
+        const newAlarms = { ...prev, [alarm]: false };
+        localStorage.setItem("activeAlarms", JSON.stringify(newAlarms));
+        return newAlarms;
+      });
       console.log(`Silenced ${alarm} alarm.`);
     } else {
       alert(
@@ -194,6 +212,10 @@ const randomTriggerAlarm = (sensor) => {
   const renderAlarmCard = (alarm, icon) => (
     <div className="alarm-card" key={alarm}>
       <img src={icon} alt={`${alarm} Icon`} className="alarm-icon" />
+      <p className="last-triggered-text">
+        Active Since:{" "}
+        {activeAlarms[alarm] ? lastTriggeredTimes[alarm] : "Not active"}
+      </p>
       <button
         className="alarm-button"
         style={{ backgroundColor: activeAlarms[alarm] ? "red" : "blue" }}
@@ -202,15 +224,16 @@ const randomTriggerAlarm = (sensor) => {
         Silence Alarm
       </button>
       {!isSidebarCollapsed && (
-        <p className="last-triggered-text">
-          Last Triggered: {lastTriggeredTimes[alarm]}
-        </p>
+        <>
+          <p className="last-triggered-text">
+            Last Triggered: {lastTriggeredTimes[alarm]}
+          </p>
+        </>
       )}
     </div>
   );
 
   useEffect(() => {
-    // Cleanup function to clear any active intervals when the component unmounts
     return () => {
       Object.values(sensorIntervals).forEach(clearInterval);
     };
