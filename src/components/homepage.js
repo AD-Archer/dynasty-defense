@@ -129,33 +129,34 @@ export default function HomePage({ currentUser }) {
     }
   };
 
-  const toggleSensor = (sensor) => {
-    const currentTime = new Date().toLocaleTimeString();
+ const toggleSensor = (sensor) => {
+   const currentTime = new Date().toLocaleTimeString();
 
-    setActivatedSensors((prev) => {
-      const newState = { ...prev, [sensor]: !prev[sensor] };
-      setLastTriggeredTimes((prev) => ({
-        ...prev,
-        [sensor]: currentTime,
-      }));
+   setActivatedSensors((prev) => {
+     const newState = { ...prev, [sensor]: !prev[sensor] };
 
-      localStorage.setItem("activatedSensors", JSON.stringify(newState));
+     // Update the last triggered time
+     setLastTriggeredTimes((prev) => {
+       const updatedTimes = {
+         ...prev,
+         [sensor]: newState[sensor] ? currentTime : "Never",
+       };
+       localStorage.setItem("lastTriggeredTimes", JSON.stringify(updatedTimes));
+       return updatedTimes;
+     });
 
-      if (newState[sensor]) {
-        randomTriggerAlarm(sensor);
-      } else {
-        silenceAlarmForSensor(sensor);
-      }
+     localStorage.setItem("activatedSensors", JSON.stringify(newState));
 
-      // Update last triggered times in local storage
-      localStorage.setItem(
-        "lastTriggeredTimes",
-        JSON.stringify(lastTriggeredTimes)
-      );
+     if (newState[sensor]) {
+       randomTriggerAlarm(sensor);
+     } else {
+       silenceAlarmForSensor(sensor);
+     }
 
-      return newState;
-    });
-  };
+     return newState;
+   });
+ };
+
 
   const silenceAlarmForSensor = (sensor) => {
     const alarmKey = `${sensor.replace("Sensor", "Alarm")}`;
@@ -224,11 +225,9 @@ export default function HomePage({ currentUser }) {
         Silence Alarm
       </button>
       {!isSidebarCollapsed && (
-        <>
-          <p className="last-triggered-text">
-            Last Triggered: {lastTriggeredTimes[alarm]}
-          </p>
-        </>
+        <p className="last-triggered-text">
+          Last Triggered: {lastTriggeredTimes[alarm]}
+        </p>
       )}
     </div>
   );
@@ -270,20 +269,6 @@ export default function HomePage({ currentUser }) {
             {renderAlarmCard("fireAlarm", flameIcon)}
             {renderAlarmCard("smokeAlarm", smokeIcon)}
             {renderAlarmCard("securityAlarm", securitySafeIcon)}
-          </div>
-        </section>
-
-        <section className="custom-sensors">
-          <h2>Custom Sensors</h2>
-          <div className="custom-sensors-container">
-            {/* Custom Cards go here */}
-          </div>
-        </section>
-
-        <section className="custom-alarms">
-          <h2>Custom Alarms</h2>
-          <div className="custom-alarms-container">
-            {/* Custom Alarms go here */}
           </div>
         </section>
       </main>
