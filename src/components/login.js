@@ -15,20 +15,17 @@ export default function Login({ togglePage, showLogin }) {
   const [password, setPassword] = useState("");
   const [storedUsers, setStoredUsers] = useState(() => {
     const users = JSON.parse(localStorage.getItem("users"));
-    return users ? users : {};
+    return users || {}; // Return an empty object if none found
   });
 
-  useEffect(() => {  //activates when the component mounts
-    // Create admin user if it doesn't exist
-    if (!storedUsers.admin) { //checks if there's an admin user in local storage
-      const adminUser = new User("admin", "password", true); // creates a new admin user 
-      storedUsers.admin = {
-        username: adminUser.username, 
-        password: adminUser.password,
-        isAdmin: adminUser.isAdmin,
-      };
-      localStorage.setItem("users", JSON.stringify(storedUsers)); // saves the updated users object to local storage by turning it into a JSON string
-      setStoredUsers(storedUsers); // Update state to trigger re-render 
+  useEffect(() => {
+    // Check if admin user exists in the storedUsers object
+    if (!storedUsers["admin"]) {
+      const adminUser = new User("admin", "password", true);
+      const updatedUsers = { ...storedUsers, [adminUser.username]: adminUser };
+      localStorage.setItem("users", JSON.stringify(updatedUsers)); // Save the updated object
+      setStoredUsers(updatedUsers); // Update state to trigger re-render
+      console.log("Admin user initialized:", updatedUsers);
     }
   }, [storedUsers]);
 
@@ -41,16 +38,31 @@ export default function Login({ togglePage, showLogin }) {
       return;
     }
 
-    // Attempt to retrieve the user based on the provided username
-    const user = storedUsers[username];  // Retrieves the user object from the storedUsers object by the provided username
+    // Log the stored users for debugging
+    console.log("Stored Users Object:", storedUsers);
 
-    // Validate user existence and password
-    if (user && user.password.toLowerCase() === password.toLowerCase()) { 
+    // Find the user in the storedUsers object
+    const user = storedUsers[username.trim().toLowerCase()]; // Adjust for case sensitivity
+
+    // Check if user is found
+    if (!user) {
+      alert("User not found. Please check the username.");
+      console.log("No matching user found for username:", username);
+      return;
+    }
+
+    // Log the found user and password entered for debugging
+    console.log("User Found:", user);
+    console.log("Entered Password:", password);
+
+    // Validate password
+    if (user.password === password.trim()) {
       alert("Login successful!");
-      localStorage.setItem("currentUser", JSON.stringify(user)); // this sets the current user in local storage
+      localStorage.setItem("currentUser", JSON.stringify(user)); // Store the current user
       navigate("/home");
     } else {
       alert("Invalid username or password."); // Password mismatch
+      console.log("Password mismatch for user:", username);
     }
   };
 
