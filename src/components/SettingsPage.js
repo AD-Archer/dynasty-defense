@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react"; // Importing React and useState for state management
 import { Link } from "react-router-dom"; // Importing Link for navigation
 import "./styles/homepage.css";
-import './styles/settingspage.css';
+import "./styles/settingspage.css";
 
 export default function SettingsPage({ currentUser }) {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
@@ -9,6 +9,8 @@ export default function SettingsPage({ currentUser }) {
   const [newSensor, setNewSensor] = useState(""); // State for new sensor input
   const [users, setUsers] = useState([]); // State to store users
   const [user, setUser] = useState(null);
+  const [editingIndex, setEditingIndex] = useState(null); // State to track which sensor is being edited
+  const [editedName, setEditedName] = useState(""); // State for the edited sensor name
 
   // Load user data from local storage
   const loadUserData = () => {
@@ -58,6 +60,21 @@ export default function SettingsPage({ currentUser }) {
 
     // Save updated sensors to local storage
     localStorage.setItem("sensors", JSON.stringify(updatedSensors));
+  };
+
+  const handleEditSensor = (index) => {
+    setEditingIndex(index);
+    setEditedName(sensors[index]); // Set the current name for editing
+  };
+
+  const handleSaveEdit = (index) => {
+    const updatedSensors = sensors.map((sensor, i) =>
+      i === index ? editedName : sensor
+    ); // Rename the sensor
+    setSensors(updatedSensors); // Update state with new sensors array
+    localStorage.setItem("sensors", JSON.stringify(updatedSensors)); // Save updated sensors to local storage
+    setEditingIndex(null); // Reset editing index
+    setEditedName(""); // Clear edited name
   };
 
   const handleMakeAdmin = (username) => {
@@ -113,16 +130,39 @@ export default function SettingsPage({ currentUser }) {
               <div className="sensor-list">
                 {sensors.map((sensor, index) => (
                   <div key={index} className="sensor-item">
-                    {sensor}
-                    {user &&
-                      user.isAdmin && ( // Check if the user is an admin
-                        <button
-                          onClick={() => handleDeleteSensor(sensor)}
-                          className="delete-sensor-button"
-                        >
-                          Delete
+                    {editingIndex === index ? ( // Check if the sensor is being edited
+                      <>
+                        <input
+                          type="text"
+                          value={editedName}
+                          onChange={(e) => setEditedName(e.target.value)} // Update the name being edited
+                        />
+                        <button onClick={() => handleSaveEdit(index)}>
+                          Save
                         </button>
-                      )}
+                      </>
+                    ) : (
+                      <>
+                        {sensor}
+                        {user &&
+                          user.isAdmin && ( // Check if the user is an admin
+                            <>
+                              <button
+                                onClick={() => handleEditSensor(index)}
+                                className="edit-sensor-button"
+                              >
+                                Edit
+                              </button>
+                              <button
+                                onClick={() => handleDeleteSensor(sensor)}
+                                className="delete-sensor-button"
+                              >
+                                Delete
+                              </button>
+                            </>
+                          )}
+                      </>
+                    )}
                   </div>
                 ))}
               </div>
