@@ -72,32 +72,42 @@ export default function HomePage({ currentUser }) {
 
   const toggleSidebar = () => setIsSidebarCollapsed((prev) => !prev);
 
-  const randomTriggerAlarm = (sensor) => {
-    const shouldTrigger = Math.random() < 0.5; // 50% chance to trigger alarm
-    if (shouldTrigger) {
-      const alarmKey = `${sensor.replace("Sensor", "Alarm")}`;
-      const currentTime = new Date().toLocaleTimeString();
-      setLastTriggeredTimes((prev) => {
-        const updatedTimes = { ...prev, [alarmKey]: currentTime };
-        localStorage.setItem(
-          "lastTriggeredTimes",
-          JSON.stringify(updatedTimes)
-        ); // Save to local storage
-        return updatedTimes;
-      });
-      setActiveAlarms((prev) => ({ ...prev, [alarmKey]: true }));
+const randomTriggerAlarm = (sensor) => {
+  const alarmKey = `${sensor.replace("Sensor", "Alarm")}`;
 
-      // Set an interval to keep checking the sensor (if that is your intention)
-      const intervalId = setInterval(() => {
-        // Your logic to check the sensor
-      }, 1000); // Adjust the interval as needed
+  // Function to trigger the alarm
+  const triggerAlarm = () => {
+    const currentTime = new Date().toLocaleTimeString();
+    setLastTriggeredTimes((prev) => {
+      const updatedTimes = { ...prev, [alarmKey]: currentTime };
+      localStorage.setItem("lastTriggeredTimes", JSON.stringify(updatedTimes)); // Save to local storage
+      return updatedTimes;
+    });
 
-      setSensorIntervals((prev) => ({
-        ...prev,
-        [sensor]: intervalId,
-      }));
-    }
+    setActiveAlarms((prev) => ({ ...prev, [alarmKey]: true }));
+    console.log(`${alarmKey} triggered at ${currentTime}`);
   };
+
+  // Clear any existing interval for this sensor
+  if (sensorIntervals[sensor]) {
+    clearInterval(sensorIntervals[sensor]);
+  }
+
+  // Start an interval to randomly trigger the alarm every 3 to 10 seconds
+  const intervalId = setInterval(() => {
+    const shouldTrigger = Math.random() < 0.5; // 50% chance to trigger alarm each interval
+    if (shouldTrigger) {
+      triggerAlarm();
+    }
+  }, Math.floor(Math.random() * (10000 - 3000 + 1)) + 3000); // Random interval between 3 and 10 seconds
+
+  // Save the interval ID for cleanup later
+  setSensorIntervals((prev) => ({
+    ...prev,
+    [sensor]: intervalId,
+  }));
+};
+
 
   const triggerAlarm = (sensor) => {
     const currentTime = new Date().toLocaleTimeString();
