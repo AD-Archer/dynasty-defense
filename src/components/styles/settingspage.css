@@ -1,72 +1,105 @@
-/* settings.css - Design 3: Dark Theme with Accent Colors */
+/* settings.css - Users Section Styling */
 
-.settings-container {
-  display: flex;
-  flex-direction: column;
-  padding: 2rem;
-  background-color: var(--bg-gradient-end);
-}
-
-
-.sensors-section, .sensors-section2 {
+.users-section {
   margin: 1rem 0;
   padding: 1rem;
-  background-color: var(--card-bg-color);
+  background-color: var(--card-bg-color); /* Match card background color */
   border-radius: 8px; /* Rounded corners */
   border-left: 5px solid var(--primary-color); /* Left border for emphasis */
 }
 
-.sensor-list {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 15px; /* Moderate gap */
+.users-section h2 {
+  color: var(--text-color); /* Match text color */
+  margin-bottom: 1rem; /* Space below heading */
+  font-size: 1.5rem; /* Heading size */
+  text-align: left; /* Left-aligned heading */
 }
 
-.sensor-item {
-  background-color: #1c1c1c; /* Darker item background */
-  padding: 1.5rem;
-  border-radius: 6px;
-  color: var(--text-color);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  width: calc(30% - 10px);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+.user-list {
+  list-style-type: none; /* Remove default list styling */
+  padding: 0; /* Remove default padding */
 }
 
-.delete-sensor-button {
-  background-color: var(--error-color);
-  color: white;
-  border: none;
-  padding: 8px 12px;
-  border-radius: 5px;
-  cursor: pointer;
-  transition: background-color 0.3s;
+.user-item {
+  background-color: #1c1c1c; /* Dark item background */
+  padding: 1rem; /* Padding for each user item */
+  border-radius: 6px; /* Rounded corners */
+  color: var(--text-color); /* Text color */
+  display: flex; /* Flexbox for layout */
+  align-items: center; /* Center vertically */
+  justify-content: space-between; /* Space out items */
+  margin-bottom: 10px; /* Space between items */
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5); /* Shadow for depth */
 }
 
-.delete-sensor-button:hover {
+.user-item:last-child {
+  margin-bottom: 0; /* No margin for the last item */
+}
+
+.toggle-admin-button,
+.edit-user-button,
+.delete-user-button {
+  background-color: #007bff; /* Default button background color */
+  color: white; /* White text */
+  border: none; /* Remove border */
+  padding: 8px 12px; /* Padding for buttons */
+  border-radius: 5px; /* Rounded corners */
+  cursor: pointer; /* Pointer cursor on hover */
+  transition: background-color 0.3s; /* Smooth transition */
+}
+
+.toggle-admin-button {
+  background-color: #ffc107; /* Yellow for toggle admin */
+}
+
+.toggle-admin-button:hover {
+  background-color: #e0a800; /* Darker yellow on hover */
+}
+
+.edit-user-button {
+  background-color: #28a745; /* Green for edit */
+}
+
+.edit-user-button:hover {
+  background-color: #218838; /* Darker green on hover */
+}
+
+.delete-user-button {
+  background-color: var(--error-color); /* Error color for delete */
+}
+
+.delete-user-button:hover {
   background-color: #c0392b; /* Darker red on hover */
 }
 
-.sidebar {
-  display: flex;
-  flex-direction: column; /* Stack buttons vertically */
-  padding: 20px; /* Add padding for overall spacing */
+.edit-user-form {
+  margin-top: 20px; /* Space above the edit form */
+  padding: 15px;
+  border: 1px solid #ccc; /* Light gray border */
+  border-radius: 8px; /* Rounded corners */
+  background-color: var(--card-bg-color); /* Match card background */
 }
 
-.sidebar-button,
-.sign-out-button {
-  margin: 10px 0; /* Space between buttons */
-  padding: 10px 15px; /* Add some padding for button size */
-  background-color: #007bff; /* Example background color */
-  color: white; /* Text color */
-  border: none; /* No border */
+.edit-user-form input {
+  width: calc(100% - 20px); /* Full width minus padding */
+  padding: 10px; /* Padding for inputs */
+  margin-bottom: 10px; /* Space below each input */
+  border: 1px solid #ccc; /* Light gray border */
+  border-radius: 5px; /* Rounded corners */
+  background-color: #1c1c1c; /* Dark background for input */
+  color: var(--text-color); /* Match text color */
+}
+
+.edit-user-form button {
+  margin-top: 10px; /* Space above the button */
+  padding: 10px 15px; /* Padding for button */
+  border: none; /* Remove default border */
   border-radius: 5px; /* Rounded corners */
   cursor: pointer; /* Pointer cursor on hover */
-  transition: background-color 0.3s; /* Smooth transition for hover effect */
+  transition: background-color 0.3s; /* Smooth transition */
 }
 
-.sidebar-button:hover,
-.sign-out-button:hover {
-  background-color: #0056b3; /* Darker shade on hover */
+.edit-user-form button:hover {
+  background-color: #007bff; /* Blue background on hover */
+  color: white; /* White text */
 }

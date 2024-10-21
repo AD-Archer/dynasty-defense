@@ -1,9 +1,7 @@
 import React, { useState, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom"; // 
+import { Link, useNavigate } from "react-router-dom";
 import "./styles/homepage.css";
 import "./styles/settingspage.css";
-import "./register"
-
 
 export default function SettingsPage({ currentUser }) {
   const navigate = useNavigate();
@@ -14,22 +12,33 @@ export default function SettingsPage({ currentUser }) {
   const [user, setUser] = useState(null);
   const [editingIndex, setEditingIndex] = useState(null);
   const [editedName, setEditedName] = useState("");
+  const [editingUser, setEditingUser] = useState(null);
+  const [newUserName, setNewUserName] = useState("");
+  const [newPassword, setNewPassword] = useState("");
 
+  // Function to load user data from localStorage
   const loadUserData = () => {
     const storedUserData = localStorage.getItem("currentUser");
     return storedUserData ? JSON.parse(storedUserData) : null;
   };
 
+  // Function to load sensors from localStorage
   const loadSensors = () => {
     const storedSensors = localStorage.getItem("sensors");
     return storedSensors ? JSON.parse(storedSensors) : [];
   };
 
+  // Function to load users from localStorage
   const loadUsers = () => {
     const storedUsers = localStorage.getItem("users");
-    return storedUsers ? JSON.parse(storedUsers) : [];
+    if (storedUsers) {
+      const usersObj = JSON.parse(storedUsers);
+      return Object.values(usersObj); // Convert object to an array of users
+    }
+    return [];
   };
 
+  // useEffect to load initial data on component mount
   useEffect(() => {
     const userData = loadUserData();
     setUser(userData);
@@ -38,11 +47,12 @@ export default function SettingsPage({ currentUser }) {
     setSensors(loadedSensors);
 
     const loadedUsers = loadUsers();
-    setUsers(Array.isArray(loadedUsers) ? loadedUsers : []);
+    setUsers(loadedUsers);
 
-    checkUserLogin();
+    checkUserLogin(); // Ensure the user is logged in
   }, []);
 
+  // Function to check if user is logged in; if not, redirect to homepage
   const checkUserLogin = () => {
     const storedUserData = localStorage.getItem("currentUser");
     if (!storedUserData) {
@@ -50,31 +60,37 @@ export default function SettingsPage({ currentUser }) {
     }
   };
 
+  // Toggle sidebar collapse/expand
   const toggleSidebar = () => setIsSidebarCollapsed(!isSidebarCollapsed);
 
+  // Function to notify non-admin users attempting restricted actions
   const notifyNonAdmin = () => {
     alert("Only admins can change settings.");
   };
 
+  // Function to handle creating a new sensor
   const handleCreateSensor = () => {
-    console.log("Current User: ", user); // Debug line
     if (user && !user.isAdmin) {
       notifyNonAdmin(); // Notify if not an admin
       return;
     }
 
-    if (newSensor.trim()) {
-      if (sensors.length < 3) {
-        const updatedSensors = [...sensors, newSensor];
-        setSensors(updatedSensors);
-        setNewSensor("");
-        localStorage.setItem("sensors", JSON.stringify(updatedSensors));
-      } else {
-        alert("You can only create up to 3 sensors.");
-      }
+    if (!newSensor.trim()) {
+      alert("Please enter a sensor name."); // Display alert if sensor name is empty
+      return;
+    }
+
+    if (sensors.length < 3) {
+      const updatedSensors = [...sensors, newSensor];
+      setSensors(updatedSensors);
+      setNewSensor("");
+      localStorage.setItem("sensors", JSON.stringify(updatedSensors));
+    } else {
+      alert("You can only create up to 3 sensors."); // Alert if trying to add more than 3 sensors
     }
   };
 
+  // Function to delete a sensor
   const handleDeleteSensor = (sensorToDelete) => {
     const updatedSensors = sensors.filter(
       (sensor) => sensor !== sensorToDelete
@@ -83,11 +99,13 @@ export default function SettingsPage({ currentUser }) {
     localStorage.setItem("sensors", JSON.stringify(updatedSensors));
   };
 
+  // Function to start editing a sensor
   const handleEditSensor = (index) => {
     setEditingIndex(index);
     setEditedName(sensors[index]);
   };
 
+  // Function to save changes to a sensor name
   const handleSaveEdit = (index) => {
     const updatedSensors = sensors.map((sensor, i) =>
       i === index ? editedName : sensor
@@ -98,16 +116,53 @@ export default function SettingsPage({ currentUser }) {
     setEditedName("");
   };
 
-  const handleMakeAdmin = (username) => {
+  // Toggle admin status for a user
+  const handleToggleAdmin = (username) => {
     setUsers((prevUsers) => {
       const updatedUsers = prevUsers.map((user) =>
-        user.username === username ? { ...user, isAdmin: true } : user
+        user.username === username ? { ...user, isAdmin: !user.isAdmin } : user
       );
       localStorage.setItem("users", JSON.stringify(updatedUsers));
       return updatedUsers;
     });
   };
 
+  // Function to edit a user's details
+  const handleEditUser = (username) => {
+    const userToEdit = users.find((user) => user.username === username);
+    setEditingUser(userToEdit);
+    setNewUserName(userToEdit.username);
+    setNewPassword(userToEdit.password);
+  };
+
+  // Save changes to a user's name and password
+  const handleSaveUserEdit = () => {
+    setUsers((prevUsers) => {
+      const updatedUsers = prevUsers.map((user) =>
+        user.username === editingUser.username
+          ? { ...user, username: newUserName, password: newPassword }
+          : user
+      );
+      localStorage.setItem("users", JSON.stringify(updatedUsers));
+      return updatedUsers;
+    });
+    setEditingUser(null);
+    setNewUserName("");
+    setNewPassword("");
+  };
+
+  // Function to delete a user
+  const handleDeleteUser = (username) => {
+    setUsers((prevUsers) => {
+      const updatedUsers = prevUsers.filter(
+        (user) => user.username !== username
+      );
+      localStorage.setItem("users", JSON.stringify(updatedUsers));
+      return updatedUsers;
+    });
+  };
+
+  // Function to handle user sign out
   const handleSignOut = () => {
     localStorage.removeItem("currentUser");
     navigate("/");
@@ -116,6 +171,9 @@ export default function SettingsPage({ currentUser }) {
   return (
     <div className="home-container">
       <aside className={`sidebar ${isSidebarCollapsed ? "collapsed" : ""}`}>
+        <div className="active-user">
+          {user ? <p>Welcome, {user.username}</p> : <p>Loading user...</p>}
+        </div>
         <button className="sign-out-button" onClick={handleSignOut}>
           Sign Out
         </button>
@@ -128,8 +186,6 @@ export default function SettingsPage({ currentUser }) {
 
       <main className="main-content">
         <h1 className="header-title">Settings</h1>
-
-        {/* Sign Out Button */}
 
         <section className="sensors-section">
           <h2>Create Custom Sensors</h2>
@@ -200,16 +256,47 @@ export default function SettingsPage({ currentUser }) {
                 <li key={user.username} className="user-item">
                   {user.username} {user.isAdmin && "(Admin)"}
                   <button
-                    onClick={() => handleMakeAdmin(user.username)}
-                    disabled={user.isAdmin}
-                    className="make-admin-button"
+                    onClick={() => handleToggleAdmin(user.username)}
+                    className="toggle-admin-button"
                   >
-                    {user.isAdmin ? "Already Admin" : "Make Admin"}
+                    {user.isAdmin ? "Revoke Admin" : "Make Admin"}
+                  </button>
+                  <button
+                    onClick={() => handleEditUser(user.username)}
+                    className="edit-user-button"
+                  >
+                    Edit
+                  </button>
+                  <button
+                    onClick={() => handleDeleteUser(user.username)}
+                    className="delete-user-button"
+                  >
+                    Delete
                   </button>
                 </li>
               ))
             )}
           </ul>
+
+          {editingUser && (
+            <div className="edit-user-form">
+              <h3>Edit User</h3>
+              <input
+                type="text"
+                value={newUserName}
+                onChange={(e) => setNewUserName(e.target.value)}
+                placeholder="New Username"
+              />
+              <input
+                type="password"
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
+                placeholder="New Password"
+              />
+              <button onClick={handleSaveUserEdit}>Save Changes</button>
+              <button onClick={() => setEditingUser(null)}>Cancel</button>
+            </div>
+          )}
         </section>
       </main>
     </div>

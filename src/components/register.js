@@ -1,5 +1,7 @@
 import React, { useState } from "react"; // Importing React and useState for managing state
-import { Link } from "react-router-dom"; // Importing Link for navigation
+import { useNavigate } from "react-router-dom"; // Importing useNavigate for programmatic navigation
+import "./styles/register.css";
+import HomePage from "./homepage.js"; // Importing the HomePage component with a relative path
 
 // User class definition for creating new users
 class User {
@@ -17,6 +19,7 @@ export default function Register({ togglePage, showLogin }) {
   const [password, setPassword] = useState(""); // State to hold the input for the password
   const [confirmPassword, setConfirmPassword] = useState(""); // State to hold the input for password confirmation
   const [errorMessages, setErrorMessages] = useState([]); // State to hold error messages for form validation
+  const navigate = useNavigate(); // Hook for navigating to different routes
 
   // Function to handle form submission
   const handleSubmit = (event) => {
@@ -86,9 +89,16 @@ export default function Register({ togglePage, showLogin }) {
     }; // Adding the new user to the stored users
     localStorage.setItem("users", JSON.stringify(users)); // Saving the updated users to localStorage
 
+    // Automatically log in the user by saving the username to localStorage
+    localStorage.setItem("currentUser", JSON.stringify(newUser));
+
     // Clearing error messages after a successful registration
     setErrorMessages([]);
     alert("Registration successful!"); // Displaying a success message
+
+    // Navigate to the homepage
+
+    navigate("/home");
   };
 
   return (
@@ -152,8 +162,6 @@ export default function Register({ togglePage, showLogin }) {
         <button className="toggle-button" onClick={togglePage}>
           {showLogin ? "Go to Register" : "Go to Login"}
         </button>
-
-        
       </div>
     </div>
   );

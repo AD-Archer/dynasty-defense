@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom"; // 
+import { Link, useNavigate } from "react-router-dom";
 import "./styles/homepage.css";
 import flameIcon from "../assets/images/Flame icon.svg";
 import securitySafeIcon from "../assets/images/Security Safe Icon.svg";
@@ -8,6 +8,8 @@ import smokeIcon from "../assets/images/Smoke icon.svg";
 export default function HomePage({ currentUser }) {
   const navigate = useNavigate(); // Initialize navigate for navigation
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+
+  // Use descriptive states for clarity
   const [lastTriggeredTimes, setLastTriggeredTimes] = useState({
     fireSensor: "Never",
     smokeSensor: "Never",
@@ -17,87 +19,76 @@ export default function HomePage({ currentUser }) {
     securityAlarm: "Never",
   });
 
-  // Load the initial state from local storage
-  const loadActiveAlarms = () => {
-    const storedActiveAlarms = localStorage.getItem("activeAlarms");
-    return storedActiveAlarms
-      ? JSON.parse(storedActiveAlarms)
-      : {
-          fireAlarm: false,
-          smokeAlarm: false,
-          securityAlarm: false,
-        };
+  // Load initial state from local storage with fallback defaults
+  const loadInitialState = (key, defaultValue) => {
+    const storedValue = localStorage.getItem(key);
+    return storedValue ? JSON.parse(storedValue) : defaultValue;
   };
 
-  const [activeAlarms, setActiveAlarms] = useState(loadActiveAlarms());
+  const [activeAlarms, setActiveAlarms] = useState(
+    loadInitialState("activeAlarms", {
+      fireAlarm: false,
+      smokeAlarm: false,
+      securityAlarm: false,
+    })
+  );
 
-  const [activatedSensors, setActivatedSensors] = useState({
-    fireSensor: false,
-    smokeSensor: false,
-    securitySensor: false,
-  });
+  const [activatedSensors, setActivatedSensors] = useState(
+    loadInitialState("activatedSensors", {
+      fireSensor: false,
+      smokeSensor: false,
+      securitySensor: false,
+    })
+  );
 
   const [sensorIntervals, setSensorIntervals] = useState({});
-  const [user, setUser] = useState(loadUserData());
+  const [user, setUser] = useState(loadInitialState("currentUser", null));
 
-  function loadUserData() {
-    const storedUserData = localStorage.getItem("currentUser");
-    return storedUserData ? JSON.parse(storedUserData) : null;
-  }
+  // Unified function for loading various stored states
+  const loadStoredState = (key, defaultValue) => {
+    const storedData = localStorage.getItem(key);
+    return storedData ? JSON.parse(storedData) : defaultValue;
+  };
 
-  function loadLastTriggeredTimes() {
-    const storedTimes = localStorage.getItem("lastTriggeredTimes");
-    return storedTimes ? JSON.parse(storedTimes) : {};
-  }
-
-  function loadActivatedSensors() {
-    const storedSensors = localStorage.getItem("activatedSensors");
-    return storedSensors ? JSON.parse(storedSensors) : {};
-  }
-
+  // Function to sign out user and redirect to login
   const handleSignOut = () => {
     localStorage.removeItem("currentUser"); // Clear user data
     navigate("/"); // Redirect to register page
   };
 
   useEffect(() => {
-    // Load last triggered times and activated sensors
-    checkUserLogin(); // Call checkUserLogin on component mount
-    const loadedLastTriggeredTimes = loadLastTriggeredTimes();
-    const loadedActivatedSensors = loadActivatedSensors();
+    // Load user, last triggered times, and activated sensors on mount
+    checkUserLogin(); // Validate user login status on mount
 
-    setLastTriggeredTimes((prev) => ({
-      ...prev,
-      ...loadedLastTriggeredTimes,
-    }));
-
+    // Update states with stored values
+    setLastTriggeredTimes(
+      loadStoredState("lastTriggeredTimes", lastTriggeredTimes)
+    );
     setActivatedSensors((prev) => {
-      const newState = {
-        ...prev,
-        ...loadedActivatedSensors,
-      };
+      const storedSensors = loadStoredState("activatedSensors", prev);
 
-      // Check sensor states and trigger alarms if activated
-      Object.keys(newState).forEach((sensor) => {
-        if (newState[sensor]) {
-          randomTriggerAlarm(sensor); // Trigger alarm if sensor is activated
+      // Trigger alarms for already activated sensors
+      Object.keys(storedSensors).forEach((sensor) => {
+        if (storedSensors[sensor]) {
+          randomTriggerAlarm(sensor);
         }
       });
 
-      return newState;
+      return storedSensors;
     });
-  }, []); // Runs on component mount only
+  }, []);
 
   const toggleSidebar = () => setIsSidebarCollapsed((prev) => !prev);
 
+  // Function to handle random alarm triggering
   const randomTriggerAlarm = (sensor) => {
     const alarmKey = `${sensor.replace("Sensor", "Alarm")}`;
 
-    // Trigger the alarm once and prevent further triggering
+    // Triggering the alarm with interval handling
     const triggerAlarm = () => {
       const currentTime = new Date().toLocaleTimeString();
 
-      // Only trigger the alarm if it's not already active
+      // Update only if the alarm is inactive
       if (!activeAlarms[alarmKey]) {
         setLastTriggeredTimes((prev) => {
           const updatedTimes = { ...prev, [alarmKey]: currentTime };
@@ -108,7 +99,6 @@ export default function HomePage({ currentUser }) {
           return updatedTimes;
         });
 
-        // Update active alarms and local storage
         setActiveAlarms((prev) => {
           const newAlarms = { ...prev, [alarmKey]: true };
           localStorage.setItem("activeAlarms", JSON.stringify(newAlarms));
@@ -119,20 +109,15 @@ export default function HomePage({ currentUser }) {
       }
     };
 
-    // Check if the alarm is already active; if not, set up a random triggering interval
     if (!activeAlarms[alarmKey]) {
       const intervalId = setInterval(() => {
-        const shouldTrigger = Math.random() < 0.5; // 50% chance to trigger alarm
-        if (shouldTrigger) {
+        if (Math.random() < 0.5) {
           triggerAlarm();
-          clearInterval(intervalId); // Stop the interval after triggering once
+          clearInterval(intervalId);
         }
-      }, Math.floor(Math.random() * (10000 - 3000 + 1)) + 3000); // Random interval between 3 and 10 seconds
+      }, Math.floor(Math.random() * (10000 - 3000 + 1)) + 3000);
 
-      setSensorIntervals((prev) => ({
-        ...prev,
-        [sensor]: intervalId,
-      }));
+      setSensorIntervals((prev) => ({ ...prev, [sensor]: intervalId }));
     }
   };
 
@@ -142,12 +127,11 @@ export default function HomePage({ currentUser }) {
     setActivatedSensors((prev) => {
       const newState = { ...prev, [sensor]: !prev[sensor] };
 
-      // Update the last triggered time
       setLastTriggeredTimes((prev) => {
         const updatedTimes = {
           ...prev,
           [sensor]: newState[sensor] ? currentTime : "Never",
-        };
+        }; 
         localStorage.setItem(
           "lastTriggeredTimes",
           JSON.stringify(updatedTimes)
@@ -168,12 +152,12 @@ export default function HomePage({ currentUser }) {
   };
 
   const checkUserLogin = () => {
-    const storedUserData = localStorage.getItem("currentUser");
-    if (!storedUserData) {
+    if (!loadStoredState("currentUser", null)) {
       navigate("/"); // Redirect to login page if not signed in
     }
   };
 
+  // Silence alarm for a specific sensor
   const silenceAlarmForSensor = (sensor) => {
     const alarmKey = `${sensor.replace("Sensor", "Alarm")}`;
     setActiveAlarms((prev) => {
@@ -193,6 +177,7 @@ export default function HomePage({ currentUser }) {
     }
   };
 
+  // Silence an alarm if user is admin
   const silenceAlarm = (alarm) => {
     if (user?.isAdmin) {
       setActiveAlarms((prev) => {
@@ -202,12 +187,11 @@ export default function HomePage({ currentUser }) {
       });
       console.log(`Silenced ${alarm} alarm.`);
     } else {
-      alert(
-        "You do not have permission to silence alarms. Only the admin can perform this action."
-      );
+      alert("Only the admin can perform this action.");
     }
   };
 
+  // Render functions for sensor and alarm cards
   const renderSensorCard = (sensor, icon) => (
     <div className="sensor-card" key={sensor}>
       <img src={icon} alt={`${sensor} Icon`} className="sensor-icon" />
@@ -248,6 +232,7 @@ export default function HomePage({ currentUser }) {
     </div>
   );
 
+  // Cleanup intervals on unmount
   useEffect(() => {
     return () => {
       Object.values(sensorIntervals).forEach(clearInterval);
@@ -257,14 +242,17 @@ export default function HomePage({ currentUser }) {
   return (
     <div className="home-container">
       <aside className={`sidebar ${isSidebarCollapsed ? "collapsed" : ""}`}>
+        <div className="active-user">
+          {user ? <p>Welcome, {user.username}</p> : <p>Loading user...</p>}
+        </div>
         <button className="sign-out-button" onClick={handleSignOut}>
           Sign Out
-        </button>{" "}
+        </button>
         <Link to="/settings">
           <button className="sidebar-button">Sensors</button>
         </Link>
         <Link to="/settings">
-        <button className="sidebar-button">Alarms</button>
+          <button className="sidebar-button">Alarms</button>
         </Link>
         <Link to="/settings">
           <button className="sidebar-button settings-button">Settings</button>
@@ -273,7 +261,6 @@ export default function HomePage({ currentUser }) {
 
       <main className="main-content">
         <h1 className="header-title">Defense Panel</h1>
-
         <section className="sensors-section">
           <h2>Main Sensors</h2>
           <div className="sensor-cards-container">
@@ -282,7 +269,6 @@ export default function HomePage({ currentUser }) {
             {renderSensorCard("securitySensor", securitySafeIcon)}
           </div>
         </section>
-
         <section className="alarms-section">
           <h2>Main Alarms</h2>
           <div className="alarm-cards-container">
@@ -292,6 +278,9 @@ export default function HomePage({ currentUser }) {
           </div>
         </section>
       </main>
+      <button className="collapse-button" onClick={toggleSidebar}>
+        {isSidebarCollapsed ? "Expand Sidebar" : "Collapse Sidebar"}
+      </button>
     </div>
   );
 }

@@ -1,0 +1,14 @@
+/* styles/register.css */
+.error-messages {
+  background-color: #ffe6e6; /* Light red background for better visibility */
+  border: 1px solid #ff0000; /* Red border */
+  padding: 10px;
+  margin-top: 15px;
+  border-radius: 5px;
+}
+
+.error {
+  color: #ff0000; /* Red text for errors */
+  margin-bottom: 5px; /* Space between error messages */
+  font-weight: bold;
+}
