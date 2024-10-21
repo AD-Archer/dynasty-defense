@@ -1,55 +1,100 @@
-/* settings.css - Users Section Styling */
+/* General Styles */
+:root {
+  --card-bg-color: #1c1c1c; /* Background color for cards */
+  --text-color: #ffffff; /* Default text color */
+  --primary-color: #007bff; /* Primary action color */
+  --error-color: #c0392b; /* Color used for errors */
+}
 
+/* Sensor List Styles */
+.sensor-list {
+  list-style: none; /* Remove default list styling */
+  padding: 0; /* Reset padding */
+}
+
+.sensor-item {
+  background-color: var(--card-bg-color); /* Background for sensor items */
+  padding: 1rem; /* Padding for sensor items */
+  border-radius: 6px; /* Rounded corners */
+  color: var(--text-color); /* Text color */
+  display: flex; /* Flexbox for layout */
+  align-items: center; /* Center items vertically */
+  justify-content: space-between; /* Space items evenly */
+  margin-bottom: 1rem; /* Margin between sensor items */
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5); /* Shadow effect */
+}
+
+.sensor-item:last-child {
+  margin-bottom: 0; /* Remove margin for the last item */
+}
+
+/* Button Styles */
+.edit-sensor-button,
+.delete-sensor-button {
+  background-color: var(--primary-color); /* Button background */
+  color: white; /* Button text color */
+  border: none; /* Remove default border */
+  padding: 8px 12px; /* Button padding */
+  border-radius: 5px; /* Rounded corners */
+  cursor: pointer; /* Pointer cursor on hover */
+  transition: background-color 0.3s ease; /* Smooth color transition */
+  margin-right: 10px; /* Space between buttons */
+}
+
+.edit-sensor-button:hover {
+  background-color: #0056b3; /* Darker blue on hover */
+}
+
+.delete-sensor-button:hover {
+  background-color: var(--error-color); /* Darker red on hover */
+}
+
+.button-container {
+  display: flex; /* Flex container for buttons */
+  gap: 15px; /* Space between buttons */
+  margin-top: 1rem; /* Space above the button container */
+}
+
+/* Users Section Styling */
 .users-section {
-  margin: 1rem 0;
-  padding: 1rem;
-  background-color: var(--card-bg-color); /* Match card background color */
+  margin: 1rem 0; /* Vertical margin */
+  padding: 1rem; /* Inner padding */
+  background-color: var(--card-bg-color); /* Section background */
   border-radius: 8px; /* Rounded corners */
   border-left: 5px solid var(--primary-color); /* Left border for emphasis */
 }
 
 .users-section h2 {
-  color: var(--text-color); /* Match text color */
+  color: var(--text-color); /* Heading color */
   margin-bottom: 1rem; /* Space below heading */
-  font-size: 1.5rem; /* Heading size */
-  text-align: left; /* Left-aligned heading */
+  font-size: 1.5rem; /* Font size for heading */
+  text-align: left; /* Align heading to the left */
 }
 
 .user-list {
-  list-style-type: none; /* Remove default list styling */
-  padding: 0; /* Remove default padding */
+  list-style: none; /* Remove default list styling */
+  padding: 0; /* Reset padding */
 }
 
 .user-item {
-  background-color: #1c1c1c; /* Dark item background */
-  padding: 1rem; /* Padding for each user item */
+  background-color: var(--card-bg-color); /* Background for user items */
+  padding: 1rem; /* Padding for user items */
   border-radius: 6px; /* Rounded corners */
   color: var(--text-color); /* Text color */
   display: flex; /* Flexbox for layout */
-  align-items: center; /* Center vertically */
-  justify-content: space-between; /* Space out items */
-  margin-bottom: 10px; /* Space between items */
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5); /* Shadow for depth */
+  align-items: center; /* Center items vertically */
+  justify-content: space-between; /* Space items evenly */
+  margin-bottom: 1rem; /* Margin between user items */
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5); /* Shadow effect */
 }
 
 .user-item:last-child {
-  margin-bottom: 0; /* No margin for the last item */
+  margin-bottom: 0; /* Remove margin for the last item */
 }
 
-.toggle-admin-button,
-.edit-user-button,
-.delete-user-button {
-  background-color: #007bff; /* Default button background color */
-  color: white; /* White text */
-  border: none; /* Remove border */
-  padding: 8px 12px; /* Padding for buttons */
-  border-radius: 5px; /* Rounded corners */
-  cursor: pointer; /* Pointer cursor on hover */
-  transition: background-color 0.3s; /* Smooth transition */
-}
-
+/* User Button Styles */
 .toggle-admin-button {
-  background-color: #ffc107; /* Yellow for toggle admin */
+  background-color: #ffc107; /* Yellow for admin toggle */
 }
 
 .toggle-admin-button:hover {
@@ -65,29 +110,30 @@
 }
 
 .delete-user-button {
-  background-color: var(--error-color); /* Error color for delete */
+  background-color: var(--error-color); /* Red for delete */
 }
 
 .delete-user-button:hover {
   background-color: #c0392b; /* Darker red on hover */
 }
 
+/* Edit User Form Styles */
 .edit-user-form {
   margin-top: 20px; /* Space above the edit form */
-  padding: 15px;
+  padding: 15px; /* Inner padding */
   border: 1px solid #ccc; /* Light gray border */
   border-radius: 8px; /* Rounded corners */
-  background-color: var(--card-bg-color); /* Match card background */
+  background-color: var(--card-bg-color); /* Background matching card */
 }
 
 .edit-user-form input {
   width: calc(100% - 20px); /* Full width minus padding */
-  padding: 10px; /* Padding for inputs */
-  margin-bottom: 10px; /* Space below each input */
+  padding: 10px; /* Padding for input */
+  margin-bottom: 10px; /* Space below input */
   border: 1px solid #ccc; /* Light gray border */
   border-radius: 5px; /* Rounded corners */
   background-color: #1c1c1c; /* Dark background for input */
-  color: var(--text-color); /* Match text color */
+  color: var(--text-color); /* Text color */
 }
 
 .edit-user-form button {
@@ -96,10 +142,10 @@
   border: none; /* Remove default border */
   border-radius: 5px; /* Rounded corners */
   cursor: pointer; /* Pointer cursor on hover */
-  transition: background-color 0.3s; /* Smooth transition */
+  transition: background-color 0.3s ease; /* Smooth transition */
 }
 
 .edit-user-form button:hover {
-  background-color: #007bff; /* Blue background on hover */
+  background-color: var(--primary-color); /* Blue background on hover */
   color: white; /* White text */
 }

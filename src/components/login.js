@@ -29,41 +29,78 @@ export default function Login({ togglePage, showLogin }) {
     }
   }, [storedUsers]);
 
-  const handleLogin = (event) => {
-    event.preventDefault();
+const handleLogin = (event) => {
+  event.preventDefault();
 
-    // Check if fields are filled
-    if (!username || !password) {
-      alert("Please fill in both fields.");
-      return;
-    }
+  // Check if fields are filled
+  if (!username || !password) {
+    alert("Please fill in both fields.");
+    return;
+  }
 
-    // Log the stored users for debugging
-    console.log("Stored Users Object:", storedUsers);
+  // Normalize username for consistent matching
+  const normalizedUsername = username.trim().toLowerCase();
 
-    // Find the user in the storedUsers object
-    const user = storedUsers[username.trim().toLowerCase()]; // Adjust for case sensitivity
+  // Log the stored users for debugging
+  console.log("Stored Users Object:", storedUsers);
 
-    // Check if user is found
+  // Find the user in the storedUsers object
+  const user = storedUsers[normalizedUsername]; // Adjust for case sensitivity
+
+  // Check if user is found
+  if (!user) {
+    alert("User not found. Please check the username.");
+    console.log("No matching user found for username:", username);
+    return;
+  }
+
+  // Validate password
+  if (user.password === password.trim()) {
+    alert("Login successful!");
+    localStorage.setItem("currentUser", JSON.stringify(user)); // Store the current user
+    navigate("/home");
+  } else {
+    alert("Invalid username or password."); // Password mismatch
+    console.log("Password mismatch for user:", username);
+  }
+};
+
+// Function to create a new user
+const handleCreateUser = (newUser) => {
+  // Normalize the username for comparison
+  const normalizedUsername = newUser.username.trim().toLowerCase();
+
+  // Check if the user already exists before adding
+  if (storedUsers[normalizedUsername]) {
+    alert("User already exists. Please choose a different username.");
+    return;
+  }
+
+  const updatedUsers = { ...storedUsers, [normalizedUsername]: newUser }; // Use normalized username
+  localStorage.setItem("users", JSON.stringify(updatedUsers));
+  setStoredUsers(updatedUsers); // Update state to trigger re-render
+};
+
+
+  const handleToggleAdmin = (username) => {
+    // Check if the user is already an admin
+    const user = storedUsers[username];
     if (!user) {
-      alert("User not found. Please check the username.");
-      console.log("No matching user found for username:", username);
+      alert("User not found.");
       return;
     }
 
-    // Log the found user and password entered for debugging
-    console.log("User Found:", user);
-    console.log("Entered Password:", password);
-
-    // Validate password
-    if (user.password === password.trim()) {
-      alert("Login successful!");
-      localStorage.setItem("currentUser", JSON.stringify(user)); // Store the current user
-      navigate("/home");
-    } else {
-      alert("Invalid username or password."); // Password mismatch
-      console.log("Password mismatch for user:", username);
+    if (user.isAdmin) {
+      alert("This user is already an admin.");
+      return;
     }
+
+    // Toggle admin status
+    const updatedUser = { ...user, isAdmin: true };
+    const updatedUsers = { ...storedUsers, [username]: updatedUser };
+    localStorage.setItem("users", JSON.stringify(updatedUsers));
+    setStoredUsers(updatedUsers);
+    alert(`User ${username} is now an admin!`);
   };
 
   return (

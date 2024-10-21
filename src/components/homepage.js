@@ -278,9 +278,7 @@ export default function HomePage({ currentUser }) {
           </div>
         </section>
       </main>
-      <button className="collapse-button" onClick={toggleSidebar}>
-        {isSidebarCollapsed ? "Expand Sidebar" : "Collapse Sidebar"}
-      </button>
+     
     </div>
   );
 }
