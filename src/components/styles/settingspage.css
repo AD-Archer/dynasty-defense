@@ -1,10 +1,4 @@
 /* General Styles */
-:root {
-  --card-bg-color: #1c1c1c; /* Background color for cards */
-  --text-color: #ffffff; /* Default text color */
-  --primary-color: #007bff; /* Primary action color */
-  --error-color: #c0392b; /* Color used for errors */
-}
 
 /* Sensor List Styles */
 .sensor-list {

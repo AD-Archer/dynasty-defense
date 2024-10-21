@@ -121,36 +121,38 @@ export default function HomePage({ currentUser }) {
     }
   };
 
-  const toggleSensor = (sensor) => {
-    const currentTime = new Date().toLocaleTimeString();
+ const toggleSensor = (sensor) => {
+   const currentTime = new Date().toLocaleTimeString();
 
-    setActivatedSensors((prev) => {
-      const newState = { ...prev, [sensor]: !prev[sensor] };
+   setActivatedSensors((prev) => {
+     const newState = { ...prev, [sensor]: !prev[sensor] };
 
-      setLastTriggeredTimes((prev) => {
-        const updatedTimes = {
-          ...prev,
-          [sensor]: newState[sensor] ? currentTime : "Never",
-        }; 
-        localStorage.setItem(
-          "lastTriggeredTimes",
-          JSON.stringify(updatedTimes)
-        );
-        return updatedTimes;
-      });
+     setLastTriggeredTimes((prev) => {
+       const updatedTimes = { ...prev };
 
-      localStorage.setItem("activatedSensors", JSON.stringify(newState));
+       // Update last triggered time only when activating the sensor
+       if (newState[sensor]) {
+         updatedTimes[sensor] = currentTime; // Set the current time if activating
+       }
+       // No need to set it to "Never" when deactivating
+       // updatedTimes[sensor] = newState[sensor] ? currentTime : "Never";
 
-      if (newState[sensor]) {
-        randomTriggerAlarm(sensor);
-      } else {
-        silenceAlarmForSensor(sensor);
-      }
+       localStorage.setItem("lastTriggeredTimes", JSON.stringify(updatedTimes));
+       return updatedTimes;
+     });
 
-      return newState;
-    });
-  };
+     localStorage.setItem("activatedSensors", JSON.stringify(newState));
 
+     if (newState[sensor]) {
+       randomTriggerAlarm(sensor);
+     } else {
+       silenceAlarmForSensor(sensor);
+     }
+
+     return newState;
+   });
+ };
+ 
   const checkUserLogin = () => {
     if (!loadStoredState("currentUser", null)) {
       navigate("/"); // Redirect to login page if not signed in
