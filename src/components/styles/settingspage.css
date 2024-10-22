@@ -4,6 +4,8 @@
 .sensor-list {
   list-style: none; /* Remove default list styling */
   padding: 0; /* Reset padding */
+  overflow-y: auto; /* Allow scrolling */
+
 }
 
 .sensor-item {
@@ -47,6 +49,7 @@
   display: flex; /* Flex container for buttons */
   gap: 15px; /* Space between buttons */
   margin-top: 1rem; /* Space above the button container */
+  justify-content: flex-start; /* Align buttons to the start */
 }
 
 /* Users Section Styling */
@@ -68,6 +71,8 @@
 .user-list {
   list-style: none; /* Remove default list styling */
   padding: 0; /* Reset padding */
+  max-height: 400px; /* Limit height */
+  overflow-y: auto; /* Allow scrolling */
 }
 
 .user-item {
@@ -87,21 +92,7 @@
 }
 
 /* User Button Styles */
-.toggle-admin-button {
-  background-color: #ffc107; /* Yellow for admin toggle */
-}
 
-.toggle-admin-button:hover {
-  background-color: #e0a800; /* Darker yellow on hover */
-}
-
-.edit-user-button {
-  background-color: #28a745; /* Green for edit */
-}
-
-.edit-user-button:hover {
-  background-color: #218838; /* Darker green on hover */
-}
 
 .delete-user-button {
   background-color: var(--error-color); /* Red for delete */
@@ -144,3 +135,10 @@
   color: white; /* White text */
 }
 
+/*   overflow-y: auto; /* Allow scrolling */ 
+.sidebar{
+  overflow-y: auto; /* Allow scrolling */
+}
+.main-content{
+  overflow-y: auto; /* Allow scrolling */
+}

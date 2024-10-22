@@ -22,98 +22,107 @@ export default function Register({ togglePage, showLogin }) {
   const navigate = useNavigate();
 
   // Function to handle form submission
-  const handleSubmit = async (event) => {
-    event.preventDefault();
-    const newErrorMessages = [];
+ const handleSubmit = async (event) => {
+   event.preventDefault();
+   const newErrorMessages = [];
 
-    // Validating the username length
-    if (username.length < 5) {
-      newErrorMessages.push("Username must be at least 5 characters long.");
-    }
+   // Validating the username length
+   if (username.length < 5) {
+     newErrorMessages.push("Username must be at least 5 characters long.");
+   }
 
-    // Retrieve the stored users and ensure it's an array
-    const storedUsersString = localStorage.getItem("users");
-    let storedUsers = [];
+   // Retrieve the stored users and ensure it's an array
+   const storedUsersString = localStorage.getItem("users");
+   let storedUsers = [];
 
-    // Parse stored users and handle errors
-    try {
-      if (storedUsersString) {
-        storedUsers = JSON.parse(storedUsersString);
-        // Ensure storedUsers is an array
-        if (!Array.isArray(storedUsers)) {
-          throw new Error("Stored users is not an array.");
-        }
-      }
-    } catch (error) {
-      console.error("Error retrieving users:", error);
-      storedUsers = []; // Reset to an empty array if there's an error
-    }
+   // Parse stored users and handle errors
+   try {
+     if (storedUsersString) {
+       storedUsers = JSON.parse(storedUsersString);
+       // Ensure storedUsers is an array
+       if (!Array.isArray(storedUsers)) {
+         throw new Error("Stored users is not an array.");
+       }
+     }
+   } catch (error) {
+     console.error("Error retrieving users:", error);
+     storedUsers = []; // Reset to an empty array if there's an error
+   }
 
-    // Checking if the username already exists in the stored users
-    const userExists = storedUsers.find((user) => user.username === username);
-    if (userExists) {
-      newErrorMessages.push("Username already exists. Please choose another.");
-    }
+   // Count regular users (excluding admins)
+   const regularUsersCount = storedUsers.filter((user) => !user.isAdmin).length;
 
-    // Password validation
-    const passwordRequirements = {
-      length: password.length >= 16,
-      uppercase: /[A-Z]/.test(password),
-      lowercase: /[a-z]/.test(password),
-      number: /[0-9]/.test(password),
-      specialChar: /[!@#$%^&*]/.test(password),
-    };
+   // Alert if max number of regular users is reached
+   if (regularUsersCount >= 4) {
+     alert("Maximum number of regular users (4) has been reached.");
+     return; // Prevent further registration
+   }
 
-    // Adding error messages for password requirements that aren't met
-    if (!passwordRequirements.length) {
-      newErrorMessages.push("Password must be at least 16 characters long.");
-    }
-    if (!passwordRequirements.uppercase) {
-      newErrorMessages.push(
-        "Password must contain at least one uppercase letter."
-      );
-    }
-    if (!passwordRequirements.lowercase) {
-      newErrorMessages.push(
-        "Password must contain at least one lowercase letter."
-      );
-    }
-    if (!passwordRequirements.number) {
-      newErrorMessages.push("Password must contain at least one number.");
-    }
-    if (!passwordRequirements.specialChar) {
-      newErrorMessages.push(
-        "Password must contain at least one special character."
-      );
-    }
+   // Checking if the username already exists in the stored users
+   const userExists = storedUsers.find((user) => user.username === username);
+   if (userExists) {
+     newErrorMessages.push("Username already exists. Please choose another.");
+   }
 
-    // Validating that the password and confirm password fields match
-    if (password !== confirmPassword) {
-      newErrorMessages.push("Passwords do not match.");
-    }
+   // Password validation
+   const passwordRequirements = {
+     length: password.length >= 16,
+     uppercase: /[A-Z]/.test(password),
+     lowercase: /[a-z]/.test(password),
+     number: /[0-9]/.test(password),
+     specialChar: /[!@#$%^&*]/.test(password),
+   };
 
-    // Checking if there are any validation errors
-    if (newErrorMessages.length > 0) {
-      setErrorMessages(newErrorMessages);
-      return;
-    }
+   // Adding error messages for password requirements that aren't met
+   if (!passwordRequirements.length) {
+     newErrorMessages.push("Password must be at least 16 characters long.");
+   }
+   if (!passwordRequirements.uppercase) {
+     newErrorMessages.push(
+       "Password must contain at least one uppercase letter."
+     );
+   }
+   if (!passwordRequirements.lowercase) {
+     newErrorMessages.push(
+       "Password must contain at least one lowercase letter."
+     );
+   }
+   if (!passwordRequirements.number) {
+     newErrorMessages.push("Password must contain at least one number.");
+   }
+   if (!passwordRequirements.specialChar) {
+     newErrorMessages.push(
+       "Password must contain at least one special character."
+     );
+   }
 
-    // If all validations pass, proceed to register the new user
-    const hashedPassword = await bcrypt.hash(password, 10); // Hashing the password
-    const newUser = new User(username, hashedPassword, false); // Store the hashed password
-    storedUsers.push(newUser); // Add the new user to the array
-    localStorage.setItem("users", JSON.stringify(storedUsers)); // Save the updated users array to localStorage
+   // Validating that the password and confirm password fields match
+   if (password !== confirmPassword) {
+     newErrorMessages.push("Passwords do not match.");
+   }
 
-    // Automatically log in the user by saving the username to localStorage
-    localStorage.setItem("currentUser", JSON.stringify(newUser));
+   // Checking if there are any validation errors
+   if (newErrorMessages.length > 0) {
+     setErrorMessages(newErrorMessages);
+     return;
+   }
 
-    // Clearing error messages after a successful registration
-    setErrorMessages([]);
-    alert("Registration successful!");
+   // If all validations pass, proceed to register the new user
+   const hashedPassword = await bcrypt.hash(password, 10); // Hashing the password
+   const newUser = new User(username, hashedPassword, false); // Store the hashed password
+   storedUsers.push(newUser); // Add the new user to the array
+   localStorage.setItem("users", JSON.stringify(storedUsers)); // Save the updated users array to localStorage
 
-    // Navigate to the homepage
-    navigate("/home");
-  };
+   // Automatically log in the user by saving the username to localStorage
+   localStorage.setItem("currentUser", JSON.stringify(newUser));
+
+   // Clearing error messages after a successful registration
+   setErrorMessages([]);
+   alert("Registration successful!");
+
+   // Navigate to the homepage
+   navigate("/home");
+ };
 
   return (
     <div className="container">

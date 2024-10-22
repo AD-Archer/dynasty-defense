@@ -17,29 +17,26 @@ export default function SettingsPage() {
   const [newUserName, setNewUserName] = useState("");
   const [newPassword, setNewPassword] = useState("");
 
-  // Load user data from localStorage
-  const loadUserData = () => {
-    const storedUserData = localStorage.getItem("currentUser");
-    return storedUserData ? JSON.parse(storedUserData) : null;
-  };
-
-  // Load sensors from localStorage
-  const loadSensors = () => {
-    const storedSensors = localStorage.getItem("sensors");
-    return storedSensors ? JSON.parse(storedSensors) : [];
-  };
-
-  // Load users from localStorage
-  const loadUsers = () => {
-    const storedUsers = localStorage.getItem("users");
-    if (storedUsers) {
-      const usersObj = JSON.parse(storedUsers);
-      return Object.values(usersObj); // Convert object to an array of users
-    }
-    return [];
-  };
-
   useEffect(() => {
+    const loadUserData = () => {
+      const storedUserData = localStorage.getItem("currentUser");
+      return storedUserData ? JSON.parse(storedUserData) : null;
+    };
+
+    const loadSensors = () => {
+      const storedSensors = localStorage.getItem("sensors");
+      return storedSensors ? JSON.parse(storedSensors) : [];
+    };
+
+    const loadUsers = () => {
+      const storedUsers = localStorage.getItem("users");
+      if (storedUsers) {
+        const usersObj = JSON.parse(storedUsers);
+        return Object.values(usersObj); // Convert object to an array of users
+      }
+      return [];
+    };
+
     const userData = loadUserData();
     if (!userData) {
       navigate("/"); // Redirect if no user data is found
@@ -57,7 +54,6 @@ export default function SettingsPage() {
       (u) => u.username.toLowerCase() === "admin"
     ).length;
     if (adminCount > 1) {
-      // Keep only one "admin" user and remove the rest
       const filteredUsers = loadedUsers.filter(
         (u) => u.username.toLowerCase() !== "admin"
       ); // Keep all non-"admin" users
@@ -79,7 +75,6 @@ export default function SettingsPage() {
     alert("Only admins can change settings.");
   };
 
-  // Function to create a new sensor
   const handleCreateSensor = () => {
     if (!user || !user.isAdmin) {
       notifyNonAdmin();
@@ -101,7 +96,6 @@ export default function SettingsPage() {
     }
   };
 
-  // Function to delete a sensor
   const handleDeleteSensor = (sensorToDelete) => {
     const updatedSensors = sensors.filter(
       (sensor) => sensor !== sensorToDelete
@@ -110,13 +104,11 @@ export default function SettingsPage() {
     localStorage.setItem("sensors", JSON.stringify(updatedSensors));
   };
 
-  // Function to start editing a sensor
   const handleEditSensor = (index) => {
     setEditingIndex(index);
     setEditedName(sensors[index]);
   };
 
-  // Function to save changes to a sensor name
   const handleSaveEdit = (index) => {
     const updatedSensors = sensors.map((sensor, i) =>
       i === index ? editedName : sensor
@@ -127,7 +119,6 @@ export default function SettingsPage() {
     setEditedName("");
   };
 
-  // Function to edit a user's details
   const handleEditUser = (username) => {
     if (!user || !user.isAdmin) {
       notifyNonAdmin();
@@ -145,7 +136,6 @@ export default function SettingsPage() {
     setNewPassword(userToEdit?.password || "");
   };
 
-  // Define password requirements
   const passwordRequirements = {
     length: (password) => password.length >= 16,
     uppercase: (password) => /[A-Z]/.test(password),
@@ -154,7 +144,6 @@ export default function SettingsPage() {
     specialChar: (password) => /[!@#$%^&*]/.test(password),
   };
 
-  // Function to validate password
   const validatePassword = (password) => {
     return (
       passwordRequirements.length(password) &&
@@ -165,21 +154,16 @@ export default function SettingsPage() {
     );
   };
 
-  // Update handleSaveUserEdit function
   const handleSaveUserEdit = async () => {
     if (!editingUser) return;
 
-    // If the current user is an admin and a new password is being set
     if (user.isAdmin && newPassword !== editingUser.password) {
       const isValidPassword = validatePassword(newPassword);
-
       if (!isValidPassword) {
         const confirmChange = window.confirm(
           "The new password does not meet the requirements. Do you want to proceed anyway?"
         );
-        if (!confirmChange) {
-          return; // If admin cancels, do not proceed
-        }
+        if (!confirmChange) return; // If admin cancels, do not proceed
       }
     }
 
@@ -208,7 +192,6 @@ export default function SettingsPage() {
     setNewPassword("");
   };
 
-  // Function to delete a user
   const handleDeleteUser = (username) => {
     if (!user || !user.isAdmin) {
       notifyNonAdmin();
@@ -220,7 +203,6 @@ export default function SettingsPage() {
       return;
     }
 
-    // Prevent deletion of the current user's account
     if (username === user.username) {
       alert("You cannot delete your own account.");
       return;
@@ -235,14 +217,12 @@ export default function SettingsPage() {
     });
   };
 
-  // Function to toggle admin status of a user
   const handleToggleAdmin = (username) => {
     if (!user || !user.isAdmin) {
       notifyNonAdmin();
       return;
     }
 
-    // Prevent toggling admin status for the "admin" user
     if (username.toLowerCase() === "admin") {
       alert(
         "You cannot remove admin privileges from the default admin account."
@@ -250,7 +230,6 @@ export default function SettingsPage() {
       return;
     }
 
-    // Prevent toggling admin status for the current user
     if (username === user.username) {
       alert("You cannot remove your own admin privileges.");
       return;
@@ -267,7 +246,7 @@ export default function SettingsPage() {
       return updatedUsers;
     });
   };
-  // Function to handle user sign out
+
   const handleSignOut = () => {
     localStorage.removeItem("currentUser");
     navigate("/");
@@ -342,49 +321,42 @@ export default function SettingsPage() {
         </section>
 
         <section className="users-section">
-          <h2>Manage Users</h2>
+  <h2>Manage Users</h2>
 
-          <div className="users-list">
-            {users.length === 0 ? (
-              <p>No users available.</p>
-            ) : (
-              users.map((user) => (
-                <div key={user.username} className="user-item">
-                  {editingUser?.username === user.username ? (
-                    <>
-                      <input
-                        type="text"
-                        value={newUserName}
-                        onChange={(e) => setNewUserName(e.target.value)}
-                      />
-                      <input
-                        type="password"
-                        value={newPassword}
-                        onChange={(e) => setNewPassword(e.target.value)}
-                      />
-                      <button onClick={handleSaveUserEdit}>Save</button>
-                    </>
-                  ) : (
-                    <>
-                      <span>
-                        {user.username} {user.isAdmin ? "(Admin)" : ""}
-                      </span>
-                      <button onClick={() => handleEditUser(user.username)}>
-                        Edit
-                      </button>
-                      <button onClick={() => handleDeleteUser(user.username)}>
-                        Delete
-                      </button>
-                      <button onClick={() => handleToggleAdmin(user.username)}>
-                        {user.isAdmin ? "Remove Admin" : "Make Admin"}
-                      </button>
-                    </>
-                  )}
-                </div>
-              ))
-            )}
+  <div className="users-list">
+    {users.length === 0 ? (
+      <p>No users available.</p>
+    ) : (
+      users.map((user) => (
+        <li className="user-item" key={user.username}>
+          <span>{user.username} {user.isAdmin ? "(Admin)" : ""}</span>
+          <div className="button-container">
+            <button className="edit-user-button" onClick={() => handleEditUser(user.username)}>Edit</button>
+            <button className="delete-user-button" onClick={() => handleDeleteUser(user.username)}>Delete</button>
+            <button className="toggle-admin-button" onClick={() => handleToggleAdmin(user.username)}>
+              {user.isAdmin ? "Remove Admin" : "Make Admin"}
+            </button>
           </div>
-        </section>
+          {editingUser?.username === user.username && (
+            <div className="edit-user-inputs">
+              <input
+                type="text"
+                value={newUserName}
+                onChange={(e) => setNewUserName(e.target.value)}
+              />
+              <input
+                type="password"
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
+              />
+              <button onClick={handleSaveUserEdit}>Save</button>
+            </div>
+          )}
+        </li>
+      ))
+    )}
+  </div>
+</section>
       </main>
     </div>
   );
