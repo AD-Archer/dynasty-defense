@@ -250,14 +250,17 @@ export default function HomePage({ currentUser }) {
         <button className="sign-out-button" onClick={handleSignOut}>
           Sign Out
         </button>
+        <Link to="/home">
+          <button className="sidebar-button">Home</button>
+        </Link>
         <Link to="/settings">
           <button className="sidebar-button">Sensors</button>
         </Link>
-        <Link to="/settings">
-          <button className="sidebar-button">Alarms</button>
+        <Link to="/AdminLog">
+          <button className="sidebar-button">Logs</button>
         </Link>
         <Link to="/settings">
-          <button className="sidebar-button settings-button">Settings</button>
+          <button className="sidebar-button">Settings</button>
         </Link>
       </aside>
 
@@ -280,7 +283,6 @@ export default function HomePage({ currentUser }) {
           </div>
         </section>
       </main>
-     
     </div>
   );
 }

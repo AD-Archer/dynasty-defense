@@ -1,0 +1,105 @@
+/* adminLog.css */
+
+/* Main container for the logs page */
+.logs-container {
+  display: flex; /* Ensure the sidebar and main content are side by side */
+  flex-direction: row; /* Align children in a row */
+  height: 100vh; /* Full height to fit the page */
+  background-color: rgba(0, 0, 0, 0.8); /* Background for the page */
+}
+
+/* Sidebar styling */
+.sidebar {
+  width: 250px; /* Set width for sidebar */
+  background-color: #333; /* Sidebar background color */
+  color: white; /* Text color for sidebar */
+  padding: 1rem; /* Add some padding */
+  display: flex; /* Use flexbox for alignment */
+  flex-direction: column; /* Stack items vertically */
+  position: relative; /* Position for toggle functionality */
+}
+
+/* Collapsed sidebar styling */
+.sidebar.collapsed {
+  width: 80px; /* Change width when collapsed */
+}
+
+
+
+/* Title styling */
+.admin-log-title {
+  color: var(--text-color);
+  font-size: 2rem;
+  margin-bottom: 1rem;
+}
+
+/* Content area for logs */
+.admin-log-content {
+  width: 100%;
+  max-height: 60vh; /* Limit height for overflow */
+  overflow-y: auto; /* Enable scrolling */
+  padding: 1rem;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  background-color: var(--card-bg-color);
+  margin-bottom: 1rem;
+}
+
+/* Individual log entry styling */
+.admin-log-entry {
+  color: var(--text-color);
+  padding: 0.5rem 0;
+  border-bottom: 1px solid var(--border-color);
+}
+
+/* Last log entry without border */
+.admin-log-entry:last-child {
+  border-bottom: none;
+}
+
+/* Message when no logs are available */
+.no-logs-message {
+  color: var(--error-color);
+  text-align: center;
+  font-weight: bold;
+}
+
+/* Button styling for clearing logs */
+.admin-log-clear-button {
+  background-color: var(--primary-color);
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+/* Button hover effect */
+.admin-log-clear-button:hover {
+  background-color: #357abd;
+}
+
+/* Media Queries for Responsiveness */
+@media (max-width: 600px) {
+  .sidebar {
+    width: 200px; /* Slightly smaller on mobile */
+  }
+
+  .sidebar.collapsed {
+    width: 60px; /* Further reduced width when collapsed */
+  }
+
+  .main-content {
+    padding: 0.5rem; /* Smaller padding on mobile */
+  }
+
+  .admin-log-title {
+    font-size: 1.5rem; /* Smaller title on mobile */
+  }
+
+  .admin-log-clear-button {
+    padding: 10px 20px; /* Smaller button on mobile */
+  }
+}

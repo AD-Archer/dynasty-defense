@@ -1,48 +1,54 @@
-import React, { useEffect, useState } from "react";
-import "./styles/homepage.css";
-import "./styles/adminLog.css";
+import React, { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import "./styles/adminLog.css"; // Make sure to create this CSS file for styles
 
-export default function AdminLog() {
-  const [logs, setLogs] = useState([]);
+export default function LogsPage({ currentUser }) {
+  const navigate = useNavigate();
 
-  // Function to retrieve logs from local storage
-  const getLogs = () => {
-    const storedLogs = JSON.parse(localStorage.getItem("systemLog")) || [];
-    setLogs(storedLogs);
+  // Move the loadInitialUser function above the useState calls
+  const loadInitialUser = () => {
+    const storedUser = localStorage.getItem("currentUser");
+    return storedUser ? JSON.parse(storedUser) : null;
   };
 
-  // Function to clear the logs
-  const clearLogs = () => {
-    localStorage.removeItem("systemLog");
-    setLogs([]);
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+  const [user, setUser] = useState(currentUser || loadInitialUser());
+
+  // Function to sign out user and redirect to login
+  const handleSignOut = () => {
+    localStorage.removeItem("currentUser");
+    navigate("/");
   };
 
-  // UseEffect to load logs on component mount
-  useEffect(() => {
-    getLogs();
-  }, []);
+  const toggleSidebar = () => setIsSidebarCollapsed((prev) => !prev);
 
   return (
-    <div className="container">
-      <h1>Admin Log</h1>
-      {/* <div id="logContainer" className="log-container">
-        {logs.length > 0 ? (
-          logs.map((log, index) => (
-            <div key={index} className="log-entry">
-              [{new Date(log.timestamp).toLocaleString()}] {log.action}
-            </div>
-          ))
-        ) : (
-          <div>No logs available.</div>
-        )}
-      </div>
-      <button
-        id="clearLogButton"
-        onClick={clearLogs}
-        className="clear-log-button"
-      >
-        Clear Log
-      </button> */}
+    <div className="logs-container">
+      <aside className={`sidebar ${isSidebarCollapsed ? "collapsed" : ""}`}>
+        <div className="active-user">
+          {user ? <p>Welcome, {user.username}</p> : <p>Loading user...</p>}
+        </div>
+        <button className="sign-out-button" onClick={handleSignOut}>
+          Sign Out
+        </button>
+        <Link to="/home">
+          <button className="sidebar-button">Home</button>
+        </Link>
+        <Link to="/settings">
+          <button className="sidebar-button">Sensors</button>
+        </Link>
+        <Link to="/AdminLog">
+          <button className="sidebar-button">Logs</button>
+        </Link>
+        <Link to="/settings">
+          <button className="sidebar-button">Settings</button>
+        </Link>
+      </aside>
+
+      <main className="main-content">
+        <h1 className="header-title">Logs Page</h1>
+        {/* Additional content for the logs page can be added here */}
+      </main>
     </div>
   );
 }

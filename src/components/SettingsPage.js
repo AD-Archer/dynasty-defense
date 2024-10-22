@@ -264,9 +264,14 @@ export default function SettingsPage() {
         <Link to="/home">
           <button className="sidebar-button">Home</button>
         </Link>
-        <button className="sidebar-button">Sensors</button>
-        <Link to="/adminLog" className="sidebar-button">
-          Logs
+        <Link to="/settings">
+          <button className="sidebar-button">Sensors</button>
+        </Link>
+        <Link to="/AdminLog">
+          <button className="sidebar-button">Logs</button>
+        </Link>
+        <Link to="/settings">
+          <button className="sidebar-button">Settings</button>
         </Link>
       </aside>
 
