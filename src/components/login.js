@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 
 class User {
   constructor(username, password, isAdmin) {
-    this.username = username;
+    this.username = username.toLowerCase(); // Ensure usernames are stored in lowercase
     this.password = password; // Ideally, this should be hashed
     this.isAdmin = isAdmin;
   }
@@ -14,94 +14,62 @@ export default function Login({ togglePage, showLogin }) {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [storedUsers, setStoredUsers] = useState(() => {
-    const users = JSON.parse(localStorage.getItem("users"));
-    return users || {}; // Return an empty object if none found
+    const users = JSON.parse(localStorage.getItem("users")) || {};
+    return users;
   });
 
   useEffect(() => {
-    // Check if admin user exists in the storedUsers object
     if (!storedUsers["admin"]) {
       const adminUser = new User("admin", "password", true);
-      const updatedUsers = { ...storedUsers, [adminUser.username]: adminUser };
-      localStorage.setItem("users", JSON.stringify(updatedUsers)); // Save the updated object
-      setStoredUsers(updatedUsers); // Update state to trigger re-render
-      console.log("Admin user initialized:", updatedUsers);
+      const updatedUsers = { ...storedUsers, admin: adminUser };
+      localStorage.setItem("users", JSON.stringify(updatedUsers));
+      setStoredUsers(updatedUsers);
     }
   }, [storedUsers]);
 
-const handleLogin = (event) => {
-  event.preventDefault();
+ const handleLogin = (event) => {
+   event.preventDefault();
 
-  // Check if fields are filled
-  if (!username || !password) {
-    alert("Please fill in both fields.");
-    return;
-  }
+   if (!username || !password) {
+     alert("Please fill in both username and password.");
+     return;
+   }
 
-  // Normalize username for consistent matching
-  const normalizedUsername = username.trim().toLowerCase();
+   const normalizedUsername = username.trim().toLowerCase(); // Normalize for consistency
+   const storedUserList = Object.values(storedUsers); // Get an array of all user objects
 
-  // Log the stored users for debugging
-  console.log("Stored Users Object:", storedUsers);
+   // Find the user by matching the username (case-insensitively) in the stored users
+   const user = storedUserList.find(
+     (u) => u.username.toLowerCase() === normalizedUsername
+   );
 
-  // Find the user in the storedUsers object
-  const user = storedUsers[normalizedUsername]; // Adjust for case sensitivity
+   if (!user) {
+     alert("User not found. Please check your username.");
+     return;
+   }
 
-  // Check if user is found
-  if (!user) {
-    alert("User not found. Please check the username.");
-    console.log("No matching user found for username:", username);
-    return;
-  }
+   if (user.password === password.trim()) {
+     alert("Login successful!");
+     localStorage.setItem("currentUser", JSON.stringify(user));
+     navigate("/home");
+   } else {
+     alert("Invalid username or password.");
+   }
+ };
 
-  // Validate password
-  if (user.password === password.trim()) {
-    alert("Login successful!");
-    localStorage.setItem("currentUser", JSON.stringify(user)); // Store the current user
-    navigate("/home");
-  } else {
-    alert("Invalid username or password."); // Password mismatch
-    console.log("Password mismatch for user:", username);
-  }
-};
+  const handleCreateUser = (newUser) => {
+    const normalizedUsername = newUser.username.trim().toLowerCase();
 
-// Function to create a new user
-const handleCreateUser = (newUser) => {
-  // Normalize the username for comparison
-  const normalizedUsername = newUser.username.trim().toLowerCase();
-
-  // Check if the user already exists before adding
-  if (storedUsers[normalizedUsername]) {
-    alert("User already exists. Please choose a different username.");
-    return;
-  }
-
-  const updatedUsers = { ...storedUsers, [normalizedUsername]: newUser }; // Use normalized username
-  localStorage.setItem("users", JSON.stringify(updatedUsers));
-  setStoredUsers(updatedUsers); // Update state to trigger re-render
-};
-
-
-  const handleToggleAdmin = (username) => {
-    // Check if the user is already an admin
-    const user = storedUsers[username];
-    if (!user) {
-      alert("User not found.");
+    if (storedUsers[normalizedUsername]) {
+      alert("User already exists. Please choose a different username.");
       return;
     }
 
-    if (user.isAdmin) {
-      alert("This user is already an admin.");
-      return;
-    }
-
-    // Toggle admin status
-    const updatedUser = { ...user, isAdmin: true };
-    const updatedUsers = { ...storedUsers, [username]: updatedUser };
+    const updatedUsers = { ...storedUsers, [normalizedUsername]: newUser };
     localStorage.setItem("users", JSON.stringify(updatedUsers));
     setStoredUsers(updatedUsers);
-    alert(`User ${username} is now an admin!`);
   };
+
 
   return (
     <div className="container">

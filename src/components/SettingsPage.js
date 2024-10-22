@@ -38,35 +38,35 @@ export default function SettingsPage() {
     return [];
   };
 
-  useEffect(() => {
-    const userData = loadUserData();
-    if (!userData) {
-      navigate("/"); // Redirect if no user data is found
-    } else {
-      setUser(userData);
-    }
+useEffect(() => {
+  const userData = loadUserData();
+  if (!userData) {
+    navigate("/"); // Redirect if no user data is found
+  } else {
+    setUser(userData);
+  }
 
-    const loadedSensors = loadSensors();
-    setSensors(loadedSensors);
+  const loadedSensors = loadSensors();
+  setSensors(loadedSensors);
 
-    const loadedUsers = loadUsers();
+  const loadedUsers = loadUsers();
 
-    // Check for admin accounts and retain only one
-    const adminCount = loadedUsers.filter((u) => u.isAdmin).length;
-    if (adminCount > 1) {
-      const filteredUsers = loadedUsers.filter((u) => !u.isAdmin); // Keep all non-admin users
-      const adminUser = loadedUsers.find((u) => u.isAdmin); // Keep one admin user
-      const updatedUsers = adminUser
-        ? [...filteredUsers, adminUser]
-        : filteredUsers;
+  // Check for users named "admin" and retain only one
+  const adminCount = loadedUsers.filter((u) => u.username.toLowerCase() === "admin").length;
+  if (adminCount > 1) {
+    // Keep only one "admin" user and remove the rest
+    const filteredUsers = loadedUsers.filter((u) => u.username.toLowerCase() !== "admin"); // Keep all non-"admin" users
+    const adminUser = loadedUsers.find((u) => u.username.toLowerCase() === "admin"); // Keep one "admin" user
+    const updatedUsers = adminUser
+      ? [...filteredUsers, adminUser]
+      : filteredUsers;
 
-      setUsers(updatedUsers);
-      localStorage.setItem("users", JSON.stringify(updatedUsers));
-    } else {
-      setUsers(loadedUsers);
-    }
-  }, [navigate]);
-  const toggleSidebar = () => setIsSidebarCollapsed((prev) => !prev);
+    setUsers(updatedUsers);
+    localStorage.setItem("users", JSON.stringify(updatedUsers));
+  } else {
+    setUsers(loadedUsers);
+  }
+}, [navigate]); // Close the useEffect hook here
 
   const notifyNonAdmin = () => {
     alert("Only admins can change settings.");
@@ -94,37 +94,7 @@ export default function SettingsPage() {
     }
   };
 
-  // Function to create a new user
-  const handleCreateUser = () => {
-    if (!user || !user.isAdmin) {
-      notifyNonAdmin();
-      return;
-    }
-
-    // Check if user limit (4 users excluding admin) is reached
-    if (users.length >= 4) {
-      alert("User limit reached. You can only have up to 4 accounts.");
-      return;
-    }
-
-    if (!newUserName.trim() || !newPassword.trim()) {
-      alert("Please enter both username and password.");
-      return;
-    }
-
-    const newUser = {
-      username: newUserName,
-      password: newPassword,
-      isAdmin: false, // Default to non-admin
-    };
-
-    const updatedUsers = [...users, newUser];
-    setUsers(updatedUsers);
-    localStorage.setItem("users", JSON.stringify(updatedUsers));
-    setNewUserName("");
-    setNewPassword("");
-  };
-
+ 
   // Function to delete a sensor
   const handleDeleteSensor = (sensorToDelete) => {
     const updatedSensors = sensors.filter(
@@ -228,6 +198,9 @@ export default function SettingsPage() {
     if (!user || !user.isAdmin) {
       notifyNonAdmin();
       return;
+    }
+    else{
+      user.isAdmin = !user.isAdmin;
     }
 
     setUsers((prevUsers) => {

@@ -1,7 +1,6 @@
-import React, { useState } from "react"; // Importing React and useState for managing state
-import { useNavigate } from "react-router-dom"; // Importing useNavigate for programmatic navigation
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import "./styles/register.css";
-import HomePage from "./homepage.js"; // Importing the HomePage component with a relative path
 
 // User class definition for creating new users
 class User {
@@ -15,35 +14,36 @@ class User {
 // The Register component definition
 export default function Register({ togglePage, showLogin }) {
   // State variables for form inputs and error messages
-  const [username, setUsername] = useState(""); // State to hold the input for the username
-  const [password, setPassword] = useState(""); // State to hold the input for the password
-  const [confirmPassword, setConfirmPassword] = useState(""); // State to hold the input for password confirmation
-  const [errorMessages, setErrorMessages] = useState([]); // State to hold error messages for form validation
-  const navigate = useNavigate(); // Hook for navigating to different routes
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [errorMessages, setErrorMessages] = useState([]);
+  const navigate = useNavigate();
 
   // Function to handle form submission
   const handleSubmit = (event) => {
-    event.preventDefault(); // Preventing the form from submitting and refreshing the page
-    const newErrorMessages = []; // Initializing an array to collect new error messages
+    event.preventDefault();
+    const newErrorMessages = [];
 
     // Validating the username length
     if (username.length < 5) {
-      newErrorMessages.push("Username must be at least 5 characters long."); // Adding an error message if username is too short
+      newErrorMessages.push("Username must be at least 5 characters long.");
     }
 
     // Checking if the username already exists in the stored users
-    const users = JSON.parse(localStorage.getItem("users")) || {}; // Retrieving stored users or initializing an empty object if none found
-    if (users[username]) {
-      newErrorMessages.push("Username already exists. Please choose another."); // Adding an error message if username is already taken
+    const users = JSON.parse(localStorage.getItem("users")) || []; // Initialize as an array
+    const userExists = users.find((user) => user.username === username);
+    if (userExists) {
+      newErrorMessages.push("Username already exists. Please choose another.");
     }
 
-    // Defining password requirements for validation
+    // Password validation (same as before)
     const passwordRequirements = {
-      length: password.length >= 16, // Checking if the password is at least 16 characters long
-      uppercase: /[A-Z]/.test(password), // Checking if the password contains at least one uppercase letter
-      lowercase: /[a-z]/.test(password), // Checking if the password contains at least one lowercase letter
-      number: /[0-9]/.test(password), // Checking if the password contains at least one number
-      specialChar: /[!@#$%^&*]/.test(password), // Checking if the password contains at least one special character
+      length: password.length >= 16,
+      uppercase: /[A-Z]/.test(password),
+      lowercase: /[a-z]/.test(password),
+      number: /[0-9]/.test(password),
+      specialChar: /[!@#$%^&*]/.test(password),
     };
 
     // Adding error messages for password requirements that aren't met
@@ -71,33 +71,28 @@ export default function Register({ togglePage, showLogin }) {
 
     // Validating that the password and confirm password fields match
     if (password !== confirmPassword) {
-      newErrorMessages.push("Passwords do not match."); // Adding an error message if passwords do not match
+      newErrorMessages.push("Passwords do not match.");
     }
 
     // Checking if there are any validation errors
     if (newErrorMessages.length > 0) {
-      setErrorMessages(newErrorMessages); // If there are errors, update the state with the error messages
-      return; // Stop further execution if there are errors
+      setErrorMessages(newErrorMessages);
+      return;
     }
 
     // If all validations pass, proceed to register the new user
-    const newUser = new User(username, password, false); // Creating a new user instance with isAdmin set to false
-    users[username] = {
-      username: newUser.username,
-      password: newUser.password,
-      isAdmin: newUser.isAdmin,
-    }; // Adding the new user to the stored users
-    localStorage.setItem("users", JSON.stringify(users)); // Saving the updated users to localStorage
+    const newUser = new User(username, password, false);
+    users.push(newUser); // Add the new user to the array
+    localStorage.setItem("users", JSON.stringify(users)); // Save the updated users array to localStorage
 
     // Automatically log in the user by saving the username to localStorage
     localStorage.setItem("currentUser", JSON.stringify(newUser));
 
     // Clearing error messages after a successful registration
     setErrorMessages([]);
-    alert("Registration successful!"); // Displaying a success message
+    alert("Registration successful!");
 
     // Navigate to the homepage
-
     navigate("/home");
   };
 
@@ -108,7 +103,7 @@ export default function Register({ togglePage, showLogin }) {
       </section>
 
       <div className="login-card">
-        <h2>Register</h2>
+        <h2>Register Guest</h2>
         <form
           id="registration-form"
           className="sign-in-form"
