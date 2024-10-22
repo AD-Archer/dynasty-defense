@@ -5,6 +5,7 @@ import Register from "./components/register"; // Importing the Register componen
 import Login from "./components/login"; // Importing the Login component
 import HomePage from "./components/homepage"; // Importing the HomePage component
 import SettingsPage from "./components/SettingsPage"; // Adjust the import path
+import AdminLog from "./components/AdminLog"; // Make sure the casing is correct
 
 // Defining the main App component
 function App() {
@@ -34,6 +35,8 @@ function App() {
           />
           <Route path="/home" element={<HomePage />} />
           <Route path="/settings" element={<SettingsPage />} />
+          <Route path="/admin-log" element={<AdminLog />} />{" "}
+          {/* Added AdminLog route */}
         </Routes>
       </div>
     </Router>

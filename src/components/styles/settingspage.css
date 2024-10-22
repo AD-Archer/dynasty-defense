@@ -7,7 +7,9 @@
   overflow-y: auto; /* Allow scrolling */
 
 }
-
+.header-title{
+  color: white;
+}
 .sensor-item {
   background-color: var(--card-bg-color); /* Background for sensor items */
   padding: 1rem; /* Padding for sensor items */

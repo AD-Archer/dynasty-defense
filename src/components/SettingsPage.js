@@ -265,7 +265,9 @@ export default function SettingsPage() {
           <button className="sidebar-button">Home</button>
         </Link>
         <button className="sidebar-button">Sensors</button>
-        <button className="sidebar-button">Users</button>
+        <Link to="/adminLog" className="sidebar-button">
+          Logs
+        </Link>
       </aside>
 
       <main className="main-content">
@@ -321,42 +323,57 @@ export default function SettingsPage() {
         </section>
 
         <section className="users-section">
-  <h2>Manage Users</h2>
+          <h2>Manage Users</h2>
 
-  <div className="users-list">
-    {users.length === 0 ? (
-      <p>No users available.</p>
-    ) : (
-      users.map((user) => (
-        <li className="user-item" key={user.username}>
-          <span>{user.username} {user.isAdmin ? "(Admin)" : ""}</span>
-          <div className="button-container">
-            <button className="edit-user-button" onClick={() => handleEditUser(user.username)}>Edit</button>
-            <button className="delete-user-button" onClick={() => handleDeleteUser(user.username)}>Delete</button>
-            <button className="toggle-admin-button" onClick={() => handleToggleAdmin(user.username)}>
-              {user.isAdmin ? "Remove Admin" : "Make Admin"}
-            </button>
+          <div className="users-list">
+            {users.length === 0 ? (
+              <p>No users available.</p>
+            ) : (
+              users.map((user) => (
+                <li className="user-item" key={user.username}>
+                  <span>
+                    {user.username} {user.isAdmin ? "(Admin)" : ""}
+                  </span>
+                  <div className="button-container">
+                    <button
+                      className="edit-user-button"
+                      onClick={() => handleEditUser(user.username)}
+                    >
+                      Edit
+                    </button>
+                    <button
+                      className="delete-user-button"
+                      onClick={() => handleDeleteUser(user.username)}
+                    >
+                      Delete
+                    </button>
+                    <button
+                      className="toggle-admin-button"
+                      onClick={() => handleToggleAdmin(user.username)}
+                    >
+                      {user.isAdmin ? "Remove Admin" : "Make Admin"}
+                    </button>
+                  </div>
+                  {editingUser?.username === user.username && (
+                    <div className="edit-user-inputs">
+                      <input
+                        type="text"
+                        value={newUserName}
+                        onChange={(e) => setNewUserName(e.target.value)}
+                      />
+                      <input
+                        type="password"
+                        value={newPassword}
+                        onChange={(e) => setNewPassword(e.target.value)}
+                      />
+                      <button onClick={handleSaveUserEdit}>Save</button>
+                    </div>
+                  )}
+                </li>
+              ))
+            )}
           </div>
-          {editingUser?.username === user.username && (
-            <div className="edit-user-inputs">
-              <input
-                type="text"
-                value={newUserName}
-                onChange={(e) => setNewUserName(e.target.value)}
-              />
-              <input
-                type="password"
-                value={newPassword}
-                onChange={(e) => setNewPassword(e.target.value)}
-              />
-              <button onClick={handleSaveUserEdit}>Save</button>
-            </div>
-          )}
-        </li>
-      ))
-    )}
-  </div>
-</section>
+        </section>
       </main>
     </div>
   );
