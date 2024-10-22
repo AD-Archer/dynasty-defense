@@ -50,8 +50,22 @@ export default function HomePage({ currentUser }) {
     return storedData ? JSON.parse(storedData) : defaultValue;
   };
 
+  // Function to log events
+  const logEvent = (action) => {
+    const logs = loadStoredState("logs", []);
+    const newLog = {
+      date: new Date().toLocaleDateString(),
+      time: new Date().toLocaleTimeString(),
+      user: user?.username || "Unknown User", // Get username or fallback
+      action, // Use the action message directly
+    };
+    logs.push(newLog);
+    localStorage.setItem("logs", JSON.stringify(logs));
+  };
+
   // Function to sign out user and redirect to login
   const handleSignOut = () => {
+    logEvent(`${user.username} signed out.`);
     localStorage.removeItem("currentUser"); // Clear user data
     navigate("/"); // Redirect to register page
   };
@@ -102,10 +116,9 @@ export default function HomePage({ currentUser }) {
         setActiveAlarms((prev) => {
           const newAlarms = { ...prev, [alarmKey]: true };
           localStorage.setItem("activeAlarms", JSON.stringify(newAlarms));
+          logEvent(`${alarmKey} triggered at ${currentTime}`); // Log the alarm triggering
           return newAlarms;
         });
-
-        console.log(`${alarmKey} triggered at ${currentTime}`);
       }
     };
 
@@ -121,38 +134,42 @@ export default function HomePage({ currentUser }) {
     }
   };
 
- const toggleSensor = (sensor) => {
-   const currentTime = new Date().toLocaleTimeString();
+  const toggleSensor = (sensor) => {
+    const currentTime = new Date().toLocaleTimeString();
 
-   setActivatedSensors((prev) => {
-     const newState = { ...prev, [sensor]: !prev[sensor] };
+    setActivatedSensors((prev) => {
+      const newState = { ...prev, [sensor]: !prev[sensor] };
 
-     setLastTriggeredTimes((prev) => {
-       const updatedTimes = { ...prev };
+      setLastTriggeredTimes((prev) => {
+        const updatedTimes = { ...prev };
 
-       // Update last triggered time only when activating the sensor
-       if (newState[sensor]) {
-         updatedTimes[sensor] = currentTime; // Set the current time if activating
-       }
-       // No need to set it to "Never" when deactivating
-       // updatedTimes[sensor] = newState[sensor] ? currentTime : "Never";
+        // Update last triggered time only when activating the sensor
+        if (newState[sensor]) {
+          updatedTimes[sensor] = currentTime; // Set the current time if activating
+          logEvent(`${sensor} activated at ${currentTime}`); // Log the sensor activation
+        }
+        // No need to set it to "Never" when deactivating
+        // updatedTimes[sensor] = newState[sensor] ? currentTime : "Never";
 
-       localStorage.setItem("lastTriggeredTimes", JSON.stringify(updatedTimes));
-       return updatedTimes;
-     });
+        localStorage.setItem(
+          "lastTriggeredTimes",
+          JSON.stringify(updatedTimes)
+        );
+        return updatedTimes;
+      });
 
-     localStorage.setItem("activatedSensors", JSON.stringify(newState));
+      localStorage.setItem("activatedSensors", JSON.stringify(newState));
 
-     if (newState[sensor]) {
-       randomTriggerAlarm(sensor);
-     } else {
-       silenceAlarmForSensor(sensor);
-     }
+      if (newState[sensor]) {
+        randomTriggerAlarm(sensor);
+      } else {
+        silenceAlarmForSensor(sensor);
+      }
 
-     return newState;
-   });
- };
- 
+      return newState;
+    });
+  };
+
   const checkUserLogin = () => {
     if (!loadStoredState("currentUser", null)) {
       navigate("/"); // Redirect to login page if not signed in
@@ -165,6 +182,7 @@ export default function HomePage({ currentUser }) {
     setActiveAlarms((prev) => {
       const newAlarms = { ...prev, [alarmKey]: false };
       localStorage.setItem("activeAlarms", JSON.stringify(newAlarms));
+      logEvent(`Silenced ${alarmKey}.`); // Log the silencing of the alarm
       return newAlarms;
     });
 
@@ -185,6 +203,7 @@ export default function HomePage({ currentUser }) {
       setActiveAlarms((prev) => {
         const newAlarms = { ...prev, [alarm]: false };
         localStorage.setItem("activeAlarms", JSON.stringify(newAlarms));
+        logEvent(`Silenced ${alarm} alarm.`); // Log the silencing of the alarm
         return newAlarms;
       });
       console.log(`Silenced ${alarm} alarm.`);
@@ -193,53 +212,45 @@ export default function HomePage({ currentUser }) {
     }
   };
 
-  // render cards
+  // Render sensor cards
+  const renderSensorCard = (sensor, icon) => (
+    <div className="sensor-card" key={sensor}>
+      <img src={icon} alt={`${sensor} Icon`} className="sensor-icon" />
+      <h3>{sensor.replace("Sensor", "")}</h3> {/* Added title for clarity */}
+      <button
+        className="alarm-button"
+        style={{ backgroundColor: activatedSensors[sensor] ? "green" : "blue" }}
+        onClick={() => toggleSensor(sensor)}
+      >
+        {activatedSensors[sensor] ? "Deactivate" : "Activate"}
+      </button>
+      <p className="last-triggered-text">
+        Last Activated: {lastTriggeredTimes[sensor]}
+      </p>
+    </div>
+  );
 
-  // render sensor cards
- const renderSensorCard = (sensor, icon) => (
-   <div className="sensor-card" key={sensor}>
-     <img src={icon} alt={`${sensor} Icon`} className="sensor-icon" />
-     <h3>{sensor.replace("Sensor", "")}</h3> {/* Added title for clarity */}
-     <button
-       className="alarm-button"
-       style={{ backgroundColor: activatedSensors[sensor] ? "green" : "blue" }}
-       onClick={() => toggleSensor(sensor)}
-     >
-       {activatedSensors[sensor] ? "Deactivate" : "Activate"}
-     </button>
-     <p className="last-triggered-text">
-       Last Activated: {lastTriggeredTimes[sensor]}
-     </p>
-   </div>
- );
-
-//  Render alarm cards
- const renderAlarmCard = (alarm, icon) => (
-   <div className="alarm-card" key={alarm}>
-     <img src={icon} alt={`${alarm} Icon`} className="alarm-icon" />
-     <h3>{alarm.replace("Alarm", "")}</h3> {/* Added title for clarity */}
-     <p className="last-triggered-text">
-       Active Since:{" "}
-       {activeAlarms[alarm] ? lastTriggeredTimes[alarm] : "Not active"}
-     </p>
-     <button
-       className="alarm-button"
-       style={{ backgroundColor: activeAlarms[alarm] ? "red" : "blue" }}
-       onClick={() => silenceAlarm(alarm)}
-     >
-       Silence Alarm
-     </button>
-     <p className="last-triggered-text">
-       Last Triggered: {lastTriggeredTimes[alarm]}
-     </p>
-   </div>
- );
-  // Cleanup intervals on unmount
-  useEffect(() => {
-    return () => {
-      Object.values(sensorIntervals).forEach(clearInterval);
-    };
-  }, [sensorIntervals]);
+  // Render alarm cards
+  const renderAlarmCard = (alarm, icon) => (
+    <div className="alarm-card" key={alarm}>
+      <img src={icon} alt={`${alarm} Icon`} className="alarm-icon" />
+      <h3>{alarm.replace("Alarm", "")}</h3> {/* Added title for clarity */}
+      <p className="last-triggered-text">
+        Active Since:{" "}
+        {activeAlarms[alarm] ? lastTriggeredTimes[alarm] : "Not active"}
+      </p>
+      <button
+        className="alarm-button"
+        style={{ backgroundColor: activeAlarms[alarm] ? "red" : "blue" }}
+        onClick={() => silenceAlarm(alarm)}
+      >
+        Silence Alarm
+      </button>
+      <p className="last-triggered-text">
+        Last Triggered: {lastTriggeredTimes[alarm]}
+      </p>
+    </div>
+  );
 
   return (
     <div className="home-container">

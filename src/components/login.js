@@ -38,6 +38,7 @@ export default function Login({ togglePage, showLogin }) {
 
     if (!username || !password) {
       alert("Please fill in both username and password.");
+      logAttempt(username, "Empty username or password");
       return;
     }
 
@@ -49,8 +50,10 @@ export default function Login({ togglePage, showLogin }) {
       (u) => u.username.toLowerCase() === normalizedUsername
     );
 
+    // Log the username input and the outcome
     if (!user) {
       alert("User not found. Please check your username.");
+      logAttempt(normalizedUsername, "User not found");
       return;
     }
 
@@ -58,11 +61,31 @@ export default function Login({ togglePage, showLogin }) {
     if (bcrypt.compareSync(password.trim(), user.password)) {
       alert("Login successful!");
       localStorage.setItem("currentUser", JSON.stringify(user));
+      logAttempt(normalizedUsername, "Login successful"); // Log successful login
       navigate("/home");
     } else {
       alert("Invalid username or password.");
+      logAttempt(normalizedUsername, "Invalid password"); // Log invalid password attempt
     }
   };
+
+  // Function to log login attempts
+  const logAttempt = (username, action) => {
+    const date = new Date();
+    const logEntry = {
+      date: date.toLocaleDateString(),
+      time: date.toLocaleTimeString(),
+      user: username,
+      action: action,
+    };
+
+    // Get existing logs from local storage
+    const existingLogs = JSON.parse(localStorage.getItem("logs")) || [];
+    existingLogs.push(logEntry); // Add the new log entry
+    localStorage.setItem("logs", JSON.stringify(existingLogs)); // Save back to local storage
+  };
+
+  
 
   const handleCreateUser = (newUser) => {
     const normalizedUsername = newUser.username.trim().toLowerCase();

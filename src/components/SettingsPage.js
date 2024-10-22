@@ -44,9 +44,7 @@ export default function SettingsPage() {
       setUser(userData);
     }
 
-    const loadedSensors = loadSensors();
-    setSensors(loadedSensors);
-
+    setSensors(loadSensors());
     const loadedUsers = loadUsers();
 
     // Check for users named "admin" and retain only one

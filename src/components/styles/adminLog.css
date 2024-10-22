@@ -103,3 +103,79 @@
     padding: 10px 20px; /* Smaller button on mobile */
   }
 }
+
+/* adminLog.css */
+
+/* Main container for the logs page */
+.logs-container {
+  display: flex; /* Ensure the sidebar and main content are side by side */
+  flex-direction: row; /* Align children in a row */
+  height: 100vh; /* Full height to fit the page */
+}
+
+/* Sidebar styling */
+.sidebar {
+  width: 250px; /* Set width for sidebar */
+  color: white; /* Text color for sidebar */
+  padding: 1rem; /* Add some padding */
+  display: flex; /* Use flexbox for alignment */
+  flex-direction: column; /* Stack items vertically */
+  position: relative; /* Position for toggle functionality */
+}
+
+/* Collapsed sidebar styling */
+.sidebar.collapsed {
+  width: 80px; /* Change width when collapsed */
+}
+
+/* Main content area styling */
+.main-content {
+  flex: 1; /* Allow main content to take up remaining space */
+  padding: 1rem; /* Add some padding */
+  overflow-y: auto; /* Enable vertical scrolling */
+}
+
+/* Title styling */
+.header-title {
+  font-size: 2rem; /* Larger title */
+  margin-bottom: 1rem; /* Spacing below the title */
+}
+
+/* Scrollable table for logs */
+.logs-table-container {
+  width: 100%; /* Full width for table */
+  max-height: 60vh; /* Limit height for overflow */
+  overflow-y: auto; /* Enable scrolling */
+  border: 1px solid var(--border-color); /* Border around the table */
+}
+
+/* Table styling */
+.logs-table {
+  width: 100%; /* Full width for table */
+  border-collapse: collapse; /* Remove gaps between table cells */
+}
+
+/* Header styling for table */
+.logs-table th {
+  padding: 0.5rem; /* Add padding */
+  text-align: left; /* Align text to the left */
+  border-bottom: 2px solid var(--border-color); /* Border below header */
+}
+
+/* Cell styling for table */
+.logs-table td {
+  padding: 0.5rem; /* Add padding */
+  border-bottom: 1px solid var(--border-color); /* Border below each cell */
+}
+
+/* Last log entry without border */
+.logs-table tr:last-child td {
+  border-bottom: none; /* No border for last row */
+}
+
+/* Message when no logs are available */
+.no-logs-message {
+  color: var(--error-color);
+  text-align: center;
+  font-weight: bold;
+}
