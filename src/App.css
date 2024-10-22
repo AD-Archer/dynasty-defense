@@ -1,5 +1,5 @@
 /* Import global styles */
-@import url("global.css");
+@import url("./components/styles/global.css");
 
 body {
   margin: 0;

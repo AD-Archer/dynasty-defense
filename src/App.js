@@ -35,7 +35,7 @@ function App() {
           />
           <Route path="/home" element={<HomePage />} />
           <Route path="/settings" element={<SettingsPage />} />
-          <Route path="/admin-log" element={<AdminLog />} />{" "}
+          <Route path="/AdminLog" element={<AdminLog />} />{" "}
           {/* Added AdminLog route */}
         </Routes>
       </div>

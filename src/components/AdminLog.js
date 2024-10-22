@@ -25,7 +25,7 @@ export default function AdminLog() {
   return (
     <div className="container">
       <h1>Admin Log</h1>
-      <div id="logContainer" className="log-container">
+      {/* <div id="logContainer" className="log-container">
         {logs.length > 0 ? (
           logs.map((log, index) => (
             <div key={index} className="log-entry">
@@ -42,7 +42,7 @@ export default function AdminLog() {
         className="clear-log-button"
       >
         Clear Log
-      </button>
+      </button> */}
     </div>
   );
 }

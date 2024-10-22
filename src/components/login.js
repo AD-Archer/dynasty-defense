@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import bcrypt from "bcryptjs"; // Import bcryptjs
+import "./styles/global.css";
 
 class User {
   constructor(username, password, isAdmin) {
