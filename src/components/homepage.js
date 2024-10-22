@@ -193,47 +193,47 @@ export default function HomePage({ currentUser }) {
     }
   };
 
-  // Render functions for sensor and alarm cards
-  const renderSensorCard = (sensor, icon) => (
-    <div className="sensor-card" key={sensor}>
-      <img src={icon} alt={`${sensor} Icon`} className="sensor-icon" />
-      <button
-        className="alarm-button"
-        style={{ backgroundColor: activatedSensors[sensor] ? "green" : "blue" }}
-        onClick={() => toggleSensor(sensor)}
-      >
-        {activatedSensors[sensor] ? "Deactivate" : "Activate"}
-      </button>
-      {!isSidebarCollapsed && (
-        <p className="last-triggered-text">
-          Last Activated: {lastTriggeredTimes[sensor]}
-        </p>
-      )}
-    </div>
-  );
+  // render cards
 
-  const renderAlarmCard = (alarm, icon) => (
-    <div className="alarm-card" key={alarm}>
-      <img src={icon} alt={`${alarm} Icon`} className="alarm-icon" />
-      <p className="last-triggered-text">
-        Active Since:{" "}
-        {activeAlarms[alarm] ? lastTriggeredTimes[alarm] : "Not active"}
-      </p>
-      <button
-        className="alarm-button"
-        style={{ backgroundColor: activeAlarms[alarm] ? "red" : "blue" }}
-        onClick={() => silenceAlarm(alarm)}
-      >
-        Silence Alarm
-      </button>
-      {!isSidebarCollapsed && (
-        <p className="last-triggered-text">
-          Last Triggered: {lastTriggeredTimes[alarm]}
-        </p>
-      )}
-    </div>
-  );
+  // render sensor cards
+ const renderSensorCard = (sensor, icon) => (
+   <div className="sensor-card" key={sensor}>
+     <img src={icon} alt={`${sensor} Icon`} className="sensor-icon" />
+     <h3>{sensor.replace("Sensor", "")}</h3> {/* Added title for clarity */}
+     <button
+       className="alarm-button"
+       style={{ backgroundColor: activatedSensors[sensor] ? "green" : "blue" }}
+       onClick={() => toggleSensor(sensor)}
+     >
+       {activatedSensors[sensor] ? "Deactivate" : "Activate"}
+     </button>
+     <p className="last-triggered-text">
+       Last Activated: {lastTriggeredTimes[sensor]}
+     </p>
+   </div>
+ );
 
+//  Render alarm cards
+ const renderAlarmCard = (alarm, icon) => (
+   <div className="alarm-card" key={alarm}>
+     <img src={icon} alt={`${alarm} Icon`} className="alarm-icon" />
+     <h3>{alarm.replace("Alarm", "")}</h3> {/* Added title for clarity */}
+     <p className="last-triggered-text">
+       Active Since:{" "}
+       {activeAlarms[alarm] ? lastTriggeredTimes[alarm] : "Not active"}
+     </p>
+     <button
+       className="alarm-button"
+       style={{ backgroundColor: activeAlarms[alarm] ? "red" : "blue" }}
+       onClick={() => silenceAlarm(alarm)}
+     >
+       Silence Alarm
+     </button>
+     <p className="last-triggered-text">
+       Last Triggered: {lastTriggeredTimes[alarm]}
+     </p>
+   </div>
+ );
   // Cleanup intervals on unmount
   useEffect(() => {
     return () => {

@@ -1,13 +1,15 @@
 /* homepage.css */
 
+/* Main container for the homepage layout */
 .home-container {
-  display: flex; /* Use flexbox layout */
+  display: flex; /* Flexbox layout for responsiveness */
   height: 100vh; /* Full viewport height */
 }
 
+/* Sidebar styles */
 .sidebar {
   background-color: var(--card-bg-color);
-  width: 1fr; /* Fixed width for the sidebar */
+  flex: 0 0 auto; /* Prevent sidebar from growing */
   padding: 1rem;
   display: flex;
   flex-direction: column; /* Stack buttons vertically */
@@ -18,8 +20,26 @@
 
 .sidebar.collapsed {
   width: 60px; /* Width when collapsed */
-  overflow: auto; /* Allow scrolling when sidebar is collapsed */
-  transition: width 0.3s; /* Smooth width transition */
+  overflow: auto; /* Allow scrolling when collapsed */
+}
+
+/* Button styles */
+.sidebar-button {
+  background-color: var(--primary-color);
+  color: white;
+  border: none;
+  padding: 12px; /* Consistent padding */
+  border-radius: 6px;
+  font-size: 16px;
+  cursor: pointer;
+  margin-bottom: 1.5rem; /* Space between buttons */
+  height: 50px; /* Fixed height for uniformity */
+  width: 100%; /* Full width */
+  display: flex; /* Flexbox for centering content */
+  align-items: center; /* Center items vertically */
+  justify-content: center; /* Center items horizontally */
+  text-align: center; /* Center text */
+  transition: background-color 0.3s, opacity 0.3s; /* Smooth transition */
 }
 
 .sidebar-button.active {
@@ -27,41 +47,28 @@
   opacity: 0.8; /* Increased opacity for active buttons */
 }
 
+.sidebar-button:hover {
+  background-color: #357abd; /* Hover effect */
+}
+
+/* Settings button */
+.settings-button {
+  margin-top: auto; /* Push to the bottom */
+  height: 50px; /* Match height with other buttons */
+  width: 100%; /* Full width */
+  padding: 12px; /* Consistent padding */
+}
+
+/* Main content area */
 .main-content {
   flex-grow: 1; /* Fill the remaining space */
   padding: 1rem;
   background-color: var(--bg-gradient-end);
   display: flex;
-  flex-direction: column; /* Stack main content vertically */
+  flex-direction: column; /* Stack content vertically */
 }
 
-.sidebar-button {
-  background-color: var(--primary-color);
-  color: white;
-  border: none;
-  padding: 12px; /* Adjusted padding for buttons */
-  border-radius: 6px;
-  font-size: 16px;
-  cursor: pointer;
-  margin-bottom: 1.5rem; /* Increased spacing between buttons */
-  transition: background-color 0.3s, opacity 0.3s; /* Transition for background color and opacity */
-}
-
-.sidebar-button:hover {
-  background-color: #357abd;
-}
-
-.settings-button {
-  margin-top: auto; /* Always keep settings button at the bottom */
-  padding: 2px;
-}
-
-.header-title {
-  text-align: center;
-  margin-bottom: 2rem;
-  color: var(--text-color);
-}
-
+/* Section styles */
 .sensors-section,
 .alarms-section,
 .custom-sensors,
@@ -72,64 +79,58 @@
   border-radius: 10px;
 }
 
+/* Card containers */
 .sensor-cards-container,
-.alarm-cards-container, .custom-alarms-container,
+.alarm-cards-container,
+.custom-alarms-container,
 .custom-sensors-container {
   display: flex; /* Enable flex layout */
-  justify-content: center; /* Center cards in the section */
-  flex-wrap: wrap; /* Allow wrapping to next line if needed */
+  justify-content: center; /* Center cards */
+  flex-wrap: wrap; /* Allow wrapping to next line */
 }
+
+/* Card styles */
 .sensor-card,
 .alarm-card {
-  background-color: #383838;
-  padding: 1rem;
-  margin: 0.5rem;
-  border-radius: 8px;
-  display: flex; /* Enable flex layout */
-  flex-direction: column; /* Stack contents vertically */
+  background-color: #383838; /* Dark background */
+  padding: 20px; /* Increased padding */
+  margin: 10px; /* Space between cards */
+  width: 200px; /* Fixed width for uniformity */
+  display: flex; /* Use flexbox for alignment */
+  flex-direction: column; /* Stack items vertically */
   align-items: center; /* Center items horizontally */
-  text-align: center; /* Center text */
-  width: 150px; /* Set a fixed width for the cards */
-  height: 200px; /* Ensure both types have the same height */
+  border-radius: 10px; /* Rounded corners */
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2); /* Subtle shadow */
 }
 
+/* Icon styles */
 .sensor-icon,
 .alarm-icon {
-  width: 60px; /* Set a fixed width for icons */
+  width: 50px; /* Consistent icon size */
   height: auto; /* Maintain aspect ratio */
-  margin-bottom: 10px; /* Space between icon and text */
-  max-width: 100%; /* Ensure it doesn't exceed the parent width */
-  display: block; /* Ensure it behaves like a block element */
-  margin: 0 auto; /* Center the icon horizontally */
+  margin-bottom: 10px; /* Space below icons */
 }
 
+/* Alarm button styles */
 .alarm-button {
   background-color: var(--primary-color);
-  color: white;
+  color: white; /* Button text color */
   border: none;
-  padding: 10px;
-  font-size: 12px; /* Match font size */
-  border-radius: 6px;
-  cursor: pointer;
-  transition: background-color 0.3s;
-  margin: 5px 0; /* Spacing between buttons */
-}
-
-.last-triggered-text {
-  padding-top: 10px;
-  font-size: 12px; /* Make the text smaller */
-  color: #bbb; /* Set a light gray color */
-  margin-top: auto; /* Push the text to the bottom of the card */
+  border-radius: 6px; /* Rounded corners */
+  padding: 10px 15px; /* Button padding */
+  margin-top: 10px; /* Space above the button */
+  cursor: pointer; /* Pointer cursor on hover */
+  transition: background-color 0.3s; /* Transition effect */
 }
 
 .alarm-button:hover {
-  background-color: #357abd;
+  background-color: darkblue; /* Darker on hover */
 }
 
-.alarm-icon {
-  width: 60px; /* Set a fixed width */
-  height: auto; /* Maintain aspect ratio */
-  max-width: 100%; /* Ensure it doesn't exceed the parent width */
-  display: block; /* Ensure it behaves like a block element */
-  margin: 0 auto; /* Center the icon horizontally */
+/* Last triggered text styles */
+.last-triggered-text {
+  margin-top: 10px; /* Space above text */
+  color: #bbb; /* Light gray color */
+  font-size: 12px; /* Smaller font */
+  text-align: center; /* Center align text */
 }
