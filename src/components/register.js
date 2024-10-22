@@ -1,12 +1,13 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import bcrypt from "bcryptjs"; // Import bcrypt for hashing
 import "./styles/register.css";
 
 // User class definition for creating new users
 class User {
   constructor(username, password, isAdmin) {
     this.username = username;
-    this.password = password;
+    this.password = password; // This will now be the hashed password
     this.isAdmin = isAdmin; // Set to false for regular users
   }
 }
@@ -21,7 +22,7 @@ export default function Register({ togglePage, showLogin }) {
   const navigate = useNavigate();
 
   // Function to handle form submission
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
     const newErrorMessages = [];
 
@@ -30,14 +31,31 @@ export default function Register({ togglePage, showLogin }) {
       newErrorMessages.push("Username must be at least 5 characters long.");
     }
 
+    // Retrieve the stored users and ensure it's an array
+    const storedUsersString = localStorage.getItem("users");
+    let storedUsers = [];
+
+    // Parse stored users and handle errors
+    try {
+      if (storedUsersString) {
+        storedUsers = JSON.parse(storedUsersString);
+        // Ensure storedUsers is an array
+        if (!Array.isArray(storedUsers)) {
+          throw new Error("Stored users is not an array.");
+        }
+      }
+    } catch (error) {
+      console.error("Error retrieving users:", error);
+      storedUsers = []; // Reset to an empty array if there's an error
+    }
+
     // Checking if the username already exists in the stored users
-    const users = JSON.parse(localStorage.getItem("users")) || []; // Initialize as an array
-    const userExists = users.find((user) => user.username === username);
+    const userExists = storedUsers.find((user) => user.username === username);
     if (userExists) {
       newErrorMessages.push("Username already exists. Please choose another.");
     }
 
-    // Password validation (same as before)
+    // Password validation
     const passwordRequirements = {
       length: password.length >= 16,
       uppercase: /[A-Z]/.test(password),
@@ -81,9 +99,10 @@ export default function Register({ togglePage, showLogin }) {
     }
 
     // If all validations pass, proceed to register the new user
-    const newUser = new User(username, password, false);
-    users.push(newUser); // Add the new user to the array
-    localStorage.setItem("users", JSON.stringify(users)); // Save the updated users array to localStorage
+    const hashedPassword = await bcrypt.hash(password, 10); // Hashing the password
+    const newUser = new User(username, hashedPassword, false); // Store the hashed password
+    storedUsers.push(newUser); // Add the new user to the array
+    localStorage.setItem("users", JSON.stringify(storedUsers)); // Save the updated users array to localStorage
 
     // Automatically log in the user by saving the username to localStorage
     localStorage.setItem("currentUser", JSON.stringify(newUser));
@@ -142,7 +161,7 @@ export default function Register({ togglePage, showLogin }) {
           <button type="submit">Register</button>
         </form>
 
-        {/* Display error messages */}
+        {/* Display error messages if there are any */}
         {errorMessages.length > 0 && (
           <div className="error-messages">
             {errorMessages.map((message, index) => (

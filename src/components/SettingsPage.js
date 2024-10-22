@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import bcrypt from "bcryptjs"; // Import bcrypt
 import "./styles/homepage.css";
 import "./styles/settingspage.css";
 
@@ -38,35 +39,41 @@ export default function SettingsPage() {
     return [];
   };
 
-useEffect(() => {
-  const userData = loadUserData();
-  if (!userData) {
-    navigate("/"); // Redirect if no user data is found
-  } else {
-    setUser(userData);
-  }
+  useEffect(() => {
+    const userData = loadUserData();
+    if (!userData) {
+      navigate("/"); // Redirect if no user data is found
+    } else {
+      setUser(userData);
+    }
 
-  const loadedSensors = loadSensors();
-  setSensors(loadedSensors);
+    const loadedSensors = loadSensors();
+    setSensors(loadedSensors);
 
-  const loadedUsers = loadUsers();
+    const loadedUsers = loadUsers();
 
-  // Check for users named "admin" and retain only one
-  const adminCount = loadedUsers.filter((u) => u.username.toLowerCase() === "admin").length;
-  if (adminCount > 1) {
-    // Keep only one "admin" user and remove the rest
-    const filteredUsers = loadedUsers.filter((u) => u.username.toLowerCase() !== "admin"); // Keep all non-"admin" users
-    const adminUser = loadedUsers.find((u) => u.username.toLowerCase() === "admin"); // Keep one "admin" user
-    const updatedUsers = adminUser
-      ? [...filteredUsers, adminUser]
-      : filteredUsers;
+    // Check for users named "admin" and retain only one
+    const adminCount = loadedUsers.filter(
+      (u) => u.username.toLowerCase() === "admin"
+    ).length;
+    if (adminCount > 1) {
+      // Keep only one "admin" user and remove the rest
+      const filteredUsers = loadedUsers.filter(
+        (u) => u.username.toLowerCase() !== "admin"
+      ); // Keep all non-"admin" users
+      const adminUser = loadedUsers.find(
+        (u) => u.username.toLowerCase() === "admin"
+      ); // Keep one "admin" user
+      const updatedUsers = adminUser
+        ? [...filteredUsers, adminUser]
+        : filteredUsers;
 
-    setUsers(updatedUsers);
-    localStorage.setItem("users", JSON.stringify(updatedUsers));
-  } else {
-    setUsers(loadedUsers);
-  }
-}, [navigate]); // Close the useEffect hook here
+      setUsers(updatedUsers);
+      localStorage.setItem("users", JSON.stringify(updatedUsers));
+    } else {
+      setUsers(loadedUsers);
+    }
+  }, [navigate]);
 
   const notifyNonAdmin = () => {
     alert("Only admins can change settings.");
@@ -94,7 +101,6 @@ useEffect(() => {
     }
   };
 
- 
   // Function to delete a sensor
   const handleDeleteSensor = (sensorToDelete) => {
     const updatedSensors = sensors.filter(
@@ -139,14 +145,16 @@ useEffect(() => {
     setNewPassword(userToEdit?.password || "");
   };
 
-  // Save changes to a user's name and password
-  const handleSaveUserEdit = () => {
+  // Hash and save changes to a user's name and password
+  const handleSaveUserEdit = async () => {
     if (!editingUser) return;
+
+    const hashedPassword = await bcrypt.hash(newPassword, 10); // Hash the new password
 
     setUsers((prevUsers) => {
       const updatedUsers = prevUsers.map((user) => {
         if (user.username === editingUser.username) {
-          return { ...user, username: newUserName, password: newPassword };
+          return { ...user, username: newUserName, password: hashedPassword }; // Use hashed password
         }
         return user;
       });
@@ -157,7 +165,7 @@ useEffect(() => {
     const updatedCurrentUser = {
       ...editingUser,
       username: newUserName,
-      password: newPassword,
+      password: hashedPassword,
     };
     localStorage.setItem("currentUser", JSON.stringify(updatedCurrentUser));
 
@@ -178,6 +186,12 @@ useEffect(() => {
       return;
     }
 
+    // Prevent deletion of the current user's account
+    if (username === user.username) {
+      alert("You cannot delete your own account.");
+      return;
+    }
+
     setUsers((prevUsers) => {
       const updatedUsers = prevUsers.filter(
         (user) => user.username !== username
@@ -187,20 +201,25 @@ useEffect(() => {
     });
   };
 
-  // Function to handle user sign out
-  const handleSignOut = () => {
-    localStorage.removeItem("currentUser");
-    navigate("/");
-  };
-
   // Function to toggle admin status of a user
   const handleToggleAdmin = (username) => {
     if (!user || !user.isAdmin) {
       notifyNonAdmin();
       return;
     }
-    else{
-      user.isAdmin = !user.isAdmin;
+
+    // Prevent toggling admin status for the "admin" user
+    if (username.toLowerCase() === "admin") {
+      alert(
+        "You cannot remove admin privileges from the default admin account."
+      );
+      return;
+    }
+
+    // Prevent toggling admin status for the current user
+    if (username === user.username) {
+      alert("You cannot remove your own admin privileges.");
+      return;
     }
 
     setUsers((prevUsers) => {
@@ -213,6 +232,11 @@ useEffect(() => {
       localStorage.setItem("users", JSON.stringify(updatedUsers));
       return updatedUsers;
     });
+  };
+  // Function to handle user sign out
+  const handleSignOut = () => {
+    localStorage.removeItem("currentUser");
+    navigate("/");
   };
 
   return (
@@ -284,51 +308,46 @@ useEffect(() => {
         </section>
 
         <section className="users-section">
-         
+          <h2>Manage Users</h2>
 
           <div className="users-list">
-            <h3>User Accounts:</h3>
             {users.length === 0 ? (
-              <p>No users created yet.</p>
+              <p>No users available.</p>
             ) : (
-              <div>
-                {users.map((user, index) => (
-                  <div key={index} className="user-item">
-                    {editingUser && editingUser.username === user.username ? (
-                      <>
-                        <input
-                          type="text"
-                          value={newUserName}
-                          onChange={(e) => setNewUserName(e.target.value)}
-                        />
-                        <input
-                          type="password"
-                          value={newPassword}
-                          onChange={(e) => setNewPassword(e.target.value)}
-                        />
-                        <button onClick={handleSaveUserEdit}>Save</button>
-                      </>
-                    ) : (
-                      <>
-                        <span>
-                          {user.username} (Admin: {user.isAdmin ? "Yes" : "No"})
-                        </span>
-                        <button onClick={() => handleEditUser(user.username)}>
-                          Edit
-                        </button>
-                        <button onClick={() => handleDeleteUser(user.username)}>
-                          Delete
-                        </button>
-                        <button
-                          onClick={() => handleToggleAdmin(user.username)}
-                        >
-                          Toggle Admin
-                        </button>
-                      </>
-                    )}
-                  </div>
-                ))}
-              </div>
+              users.map((user) => (
+                <div key={user.username} className="user-item">
+                  {editingUser?.username === user.username ? (
+                    <>
+                      <input
+                        type="text"
+                        value={newUserName}
+                        onChange={(e) => setNewUserName(e.target.value)}
+                      />
+                      <input
+                        type="password"
+                        value={newPassword}
+                        onChange={(e) => setNewPassword(e.target.value)}
+                      />
+                      <button onClick={handleSaveUserEdit}>Save</button>
+                    </>
+                  ) : (
+                    <>
+                      <span>
+                        {user.username} {user.isAdmin ? "(Admin)" : ""}
+                      </span>
+                      <button onClick={() => handleEditUser(user.username)}>
+                        Edit
+                      </button>
+                      <button onClick={() => handleDeleteUser(user.username)}>
+                        Delete
+                      </button>
+                      <button onClick={() => handleToggleAdmin(user.username)}>
+                        {user.isAdmin ? "Remove Admin" : "Make Admin"}
+                      </button>
+                    </>
+                  )}
+                </div>
+              ))
             )}
           </div>
         </section>

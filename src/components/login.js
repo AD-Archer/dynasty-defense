@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import bcrypt from "bcryptjs"; // Import bcryptjs
 
 class User {
   constructor(username, password, isAdmin) {
@@ -20,42 +21,47 @@ export default function Login({ togglePage, showLogin }) {
 
   useEffect(() => {
     if (!storedUsers["admin"]) {
-      const adminUser = new User("admin", "password", true);
+      const adminUser = new User(
+        "admin",
+        bcrypt.hashSync("password", 10),
+        true
+      ); // Hash the admin password
       const updatedUsers = { ...storedUsers, admin: adminUser };
       localStorage.setItem("users", JSON.stringify(updatedUsers));
       setStoredUsers(updatedUsers);
     }
   }, [storedUsers]);
 
- const handleLogin = (event) => {
-   event.preventDefault();
+  const handleLogin = (event) => {
+    event.preventDefault();
 
-   if (!username || !password) {
-     alert("Please fill in both username and password.");
-     return;
-   }
+    if (!username || !password) {
+      alert("Please fill in both username and password.");
+      return;
+    }
 
-   const normalizedUsername = username.trim().toLowerCase(); // Normalize for consistency
-   const storedUserList = Object.values(storedUsers); // Get an array of all user objects
+    const normalizedUsername = username.trim().toLowerCase(); // Normalize for consistency
+    const storedUserList = Object.values(storedUsers); // Get an array of all user objects
 
-   // Find the user by matching the username (case-insensitively) in the stored users
-   const user = storedUserList.find(
-     (u) => u.username.toLowerCase() === normalizedUsername
-   );
+    // Find the user by matching the username (case-insensitively) in the stored users
+    const user = storedUserList.find(
+      (u) => u.username.toLowerCase() === normalizedUsername
+    );
 
-   if (!user) {
-     alert("User not found. Please check your username.");
-     return;
-   }
+    if (!user) {
+      alert("User not found. Please check your username.");
+      return;
+    }
 
-   if (user.password === password.trim()) {
-     alert("Login successful!");
-     localStorage.setItem("currentUser", JSON.stringify(user));
-     navigate("/home");
-   } else {
-     alert("Invalid username or password.");
-   }
- };
+    // Compare the hashed password with the entered password
+    if (bcrypt.compareSync(password.trim(), user.password)) {
+      alert("Login successful!");
+      localStorage.setItem("currentUser", JSON.stringify(user));
+      navigate("/home");
+    } else {
+      alert("Invalid username or password.");
+    }
+  };
 
   const handleCreateUser = (newUser) => {
     const normalizedUsername = newUser.username.trim().toLowerCase();
@@ -65,11 +71,19 @@ export default function Login({ togglePage, showLogin }) {
       return;
     }
 
-    const updatedUsers = { ...storedUsers, [normalizedUsername]: newUser };
+    // Hash the new user's password before storing
+    const hashedPassword = bcrypt.hashSync(newUser.password, 10);
+    const updatedUsers = {
+      ...storedUsers,
+      [normalizedUsername]: new User(
+        normalizedUsername,
+        hashedPassword,
+        newUser.isAdmin
+      ),
+    };
     localStorage.setItem("users", JSON.stringify(updatedUsers));
     setStoredUsers(updatedUsers);
   };
-
 
   return (
     <div className="container">
