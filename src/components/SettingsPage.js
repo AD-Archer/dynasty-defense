@@ -145,9 +145,43 @@ export default function SettingsPage() {
     setNewPassword(userToEdit?.password || "");
   };
 
-  // Hash and save changes to a user's name and password
+  // Define password requirements
+  const passwordRequirements = {
+    length: (password) => password.length >= 16,
+    uppercase: (password) => /[A-Z]/.test(password),
+    lowercase: (password) => /[a-z]/.test(password),
+    number: (password) => /[0-9]/.test(password),
+    specialChar: (password) => /[!@#$%^&*]/.test(password),
+  };
+
+  // Function to validate password
+  const validatePassword = (password) => {
+    return (
+      passwordRequirements.length(password) &&
+      passwordRequirements.uppercase(password) &&
+      passwordRequirements.lowercase(password) &&
+      passwordRequirements.number(password) &&
+      passwordRequirements.specialChar(password)
+    );
+  };
+
+  // Update handleSaveUserEdit function
   const handleSaveUserEdit = async () => {
     if (!editingUser) return;
+
+    // If the current user is an admin and a new password is being set
+    if (user.isAdmin && newPassword !== editingUser.password) {
+      const isValidPassword = validatePassword(newPassword);
+
+      if (!isValidPassword) {
+        const confirmChange = window.confirm(
+          "The new password does not meet the requirements. Do you want to proceed anyway?"
+        );
+        if (!confirmChange) {
+          return; // If admin cancels, do not proceed
+        }
+      }
+    }
 
     const hashedPassword = await bcrypt.hash(newPassword, 10); // Hash the new password
 
