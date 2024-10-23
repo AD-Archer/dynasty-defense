@@ -1,26 +1,31 @@
+// login.js
+
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import bcrypt from "bcryptjs"; // Import bcryptjs
-import "./styles/global.css";
+import bcrypt from "bcryptjs"; // Import bcryptjs for password hashing
+import "./styles/global.css"; // Import global CSS styles
 
+// User class for creating user objects
 class User {
   constructor(username, password, isAdmin) {
     this.username = username.toLowerCase(); // Ensure usernames are stored in lowercase
-    this.password = password; // Ideally, this should be hashed
-    this.isAdmin = isAdmin;
+    this.password = password; // Store the password (ideally hashed)
+    this.isAdmin = isAdmin; // Boolean indicating if the user has admin privileges
   }
 }
 
 export default function Login({ togglePage, showLogin }) {
-  const navigate = useNavigate();
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
+  const navigate = useNavigate(); // Hook to navigate programmatically
+  const [username, setUsername] = useState(""); // State for storing the entered username
+  const [password, setPassword] = useState(""); // State for storing the entered password
   const [storedUsers, setStoredUsers] = useState(() => {
+    // Retrieve stored users from localStorage, or initialize as an empty object
     const users = JSON.parse(localStorage.getItem("users")) || {};
     return users;
   });
 
   useEffect(() => {
+    // Check if an admin user exists, and create one if not
     if (!storedUsers["admin"]) {
       const adminUser = new User(
         "admin",
@@ -28,17 +33,19 @@ export default function Login({ togglePage, showLogin }) {
         true
       ); // Hash the admin password
       const updatedUsers = { ...storedUsers, admin: adminUser };
-      localStorage.setItem("users", JSON.stringify(updatedUsers));
-      setStoredUsers(updatedUsers);
+      localStorage.setItem("users", JSON.stringify(updatedUsers)); // Save updated users to localStorage
+      setStoredUsers(updatedUsers); // Update state
     }
-  }, [storedUsers]);
+  }, [storedUsers]); // Dependency array to re-run effect when storedUsers changes
 
+  // Handle login form submission
   const handleLogin = (event) => {
-    event.preventDefault();
+    event.preventDefault(); // Prevent form submission
 
+    // Check if both username and password are provided
     if (!username || !password) {
       alert("Please fill in both username and password.");
-      logAttempt(username, "Empty username or password");
+      logAttempt(username, "Empty username or password"); // Log empty attempt
       return;
     }
 
@@ -50,21 +57,21 @@ export default function Login({ togglePage, showLogin }) {
       (u) => u.username.toLowerCase() === normalizedUsername
     );
 
-    // Log the username input and the outcome
+    // Log the username input and the outcome if user is not found
     if (!user) {
       alert("User not found. Please check your username.");
-      logAttempt(normalizedUsername, "User not found");
+      logAttempt(normalizedUsername, "User not found"); // Log not found attempt
       return;
     }
 
     // Compare the hashed password with the entered password
     if (bcrypt.compareSync(password.trim(), user.password)) {
-      alert("Login successful!");
-      localStorage.setItem("currentUser", JSON.stringify(user));
+      alert("Login successful!"); // Success message
+      localStorage.setItem("currentUser", JSON.stringify(user)); // Store current user in localStorage
       logAttempt(normalizedUsername, "Login successful"); // Log successful login
-      navigate("/home");
+      navigate("/home"); // Redirect to home page
     } else {
-      alert("Invalid username or password.");
+      alert("Invalid username or password."); // Error message
       logAttempt(normalizedUsername, "Invalid password"); // Log invalid password attempt
     }
   };
@@ -73,25 +80,25 @@ export default function Login({ togglePage, showLogin }) {
   const logAttempt = (username, action) => {
     const date = new Date();
     const logEntry = {
-      date: date.toLocaleDateString(),
-      time: date.toLocaleTimeString(),
-      user: username,
-      action: action,
+      date: date.toLocaleDateString(), // Log the current date
+      time: date.toLocaleTimeString(), // Log the current time
+      user: username, // Username attempting login
+      action: action, // Outcome of the attempt
     };
 
-    // Get existing logs from local storage
+    // Get existing logs from localStorage
     const existingLogs = JSON.parse(localStorage.getItem("logs")) || [];
     existingLogs.push(logEntry); // Add the new log entry
-    localStorage.setItem("logs", JSON.stringify(existingLogs)); // Save back to local storage
+    localStorage.setItem("logs", JSON.stringify(existingLogs)); // Save logs back to localStorage
   };
 
-  
-
+  // Function to handle user creation
   const handleCreateUser = (newUser) => {
-    const normalizedUsername = newUser.username.trim().toLowerCase();
+    const normalizedUsername = newUser.username.trim().toLowerCase(); // Normalize username
 
+    // Check if user already exists
     if (storedUsers[normalizedUsername]) {
-      alert("User already exists. Please choose a different username.");
+      alert("User already exists. Please choose a different username."); // Error if username is taken
       return;
     }
 
@@ -102,43 +109,44 @@ export default function Login({ togglePage, showLogin }) {
       [normalizedUsername]: new User(
         normalizedUsername,
         hashedPassword,
-        newUser.isAdmin
+        newUser.isAdmin // Set isAdmin based on newUser's properties
       ),
     };
-    localStorage.setItem("users", JSON.stringify(updatedUsers));
-    setStoredUsers(updatedUsers);
+    localStorage.setItem("users", JSON.stringify(updatedUsers)); // Save updated users to localStorage
+    setStoredUsers(updatedUsers); // Update state
   };
 
   return (
     <div className="container">
       <section className="header">
-        <h1>Dynasty Defense Security</h1>
+        <h1>Dynasty Defense Security</h1> {/* Header for the login page */}
       </section>
       <div className="login-card">
-        <h2>Login</h2>
+        <h2>Login</h2> {/* Login form title */}
         <form id="login-form" className="sign-in-form" onSubmit={handleLogin}>
           <div className="input-group">
             <input
               type="text"
               value={username}
-              onChange={(e) => setUsername(e.target.value)}
+              onChange={(e) => setUsername(e.target.value)} // Update username state on input change
               required
-              placeholder="Username"
+              placeholder="Username" // Placeholder for username input
             />
           </div>
           <div className="input-group">
             <input
               type="password"
               value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              onChange={(e) => setPassword(e.target.value)} // Update password state on input change
               required
-              placeholder="Password"
+              placeholder="Password" // Placeholder for password input
             />
           </div>
-          <button type="submit">Login</button>
+          <button type="submit">Login</button> {/* Submit button for login */}
         </form>
         <button className="toggle-button" onClick={togglePage}>
-          {showLogin ? "Go to Register" : "Register?"}
+          {showLogin ? "Go to Register" : "Register?"}{" "}
+          {/* Toggle to registration page */}
         </button>
       </div>
     </div>

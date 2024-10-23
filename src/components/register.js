@@ -1,23 +1,40 @@
+// register.js
+
+// Import necessary dependencies
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import bcrypt from "bcryptjs"; // Import bcrypt for hashing
+import bcrypt from "bcryptjs"; // For password hashing
 import "./styles/register.css";
 
-// User class definition for creating new users
+/**
+ * User class
+ *
+ * Represents a user in the application, with properties for username, hashed password,
+ * and a flag indicating if the user is an admin.
+ *
+ * @param {string} username - The user's username
+ * @param {string} password - The user's hashed password
+ * @param {boolean} isAdmin - Indicates if the user has admin privileges (default: false)
+ */
 class User {
   constructor(username, password, isAdmin = false) {
     this.username = username;
-    this.password = password; // This will be the hashed password
-    this.isAdmin = isAdmin; // Set to false for regular users
+    this.password = password; // This stores the hashed password
+    this.isAdmin = isAdmin; // Admin flag (false for regular users)
   }
 }
 
-// Function to log the registration event
+/**
+ * Logs a registration event to the admin log
+ *
+ * @param {string} username - The username of the registered user
+ * @param {string} action - Description of the action being logged
+ */
 const logRegistration = (username, action) => {
   const logEntry = {
     action: action,
     user: username,
-    timestamp: new Date().toISOString(), // Get current time in ISO format
+    timestamp: new Date().toISOString(), // Get the current time in ISO format
   };
 
   // Retrieve the existing admin log from localStorage
@@ -41,11 +58,21 @@ const logRegistration = (username, action) => {
   logEntries.push(logEntry);
   localStorage.setItem("adminLog", JSON.stringify(logEntries));
 
-  // Debugging: Log the entries to console
+  // Debugging: Output the updated admin log entries to the console
   console.log("Updated Admin Log Entries:", logEntries);
 };
 
-// The Register component definition
+/**
+ * Register Component
+ *
+ * This component allows users to register an account with username and password.
+ * It performs validations, hashes the password, and logs the registration.
+ *
+ * @param {Object} props - Component properties
+ * @param {Function} props.togglePage - Function to toggle between login and register views
+ * @param {boolean} props.showLogin - Indicates whether to show the login page
+ * @returns {JSX.Element} The Register component
+ */
 export default function Register({ togglePage, showLogin }) {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
@@ -53,7 +80,12 @@ export default function Register({ togglePage, showLogin }) {
   const [errorMessages, setErrorMessages] = useState([]);
   const navigate = useNavigate();
 
-  // Function to validate password requirements
+  /**
+   * Validates password requirements
+   *
+   * @param {string} password - The password to validate
+   * @returns {Object} An object indicating which requirements are met
+   */
   const validatePassword = (password) => ({
     length: password.length >= 16,
     uppercase: /[A-Z]/.test(password),
@@ -62,12 +94,18 @@ export default function Register({ togglePage, showLogin }) {
     specialChar: /[!@#$%^&*]/.test(password),
   });
 
-  // Function to handle form submission
+  /**
+   * Handles form submission for registration
+   *
+   * Validates user input, hashes the password, creates a new user, and navigates to the homepage.
+   *
+   * @param {Event} event - The form submission event
+   */
   const handleSubmit = async (event) => {
     event.preventDefault();
     const newErrorMessages = [];
 
-    // Validating the username length
+    // Validate username length
     if (username.length < 5) {
       newErrorMessages.push("Username must be at least 5 characters long.");
     }
@@ -87,27 +125,23 @@ export default function Register({ togglePage, showLogin }) {
       storedUsers = []; // Reset to an empty array if there's an error
     }
 
-    // Count regular users (excluding admins)
+    // Count regular users and check the maximum limit
     const regularUsersCount = storedUsers.filter(
       (user) => !user.isAdmin
     ).length;
-
-    // Alert if max number of regular users is reached
     if (regularUsersCount >= 10) {
-      alert("Maximum number of regular users (4) has been reached.");
-      return; // Prevent further registration
+      alert("Maximum number of regular users (10) has been reached.");
+      return;
     }
 
-    // Checking if the username already exists
+    // Check for existing username
     const userExists = storedUsers.some((user) => user.username === username);
     if (userExists) {
       newErrorMessages.push("Username already exists. Please choose another.");
     }
 
-    // Password validation
+    // Validate password
     const passwordRequirements = validatePassword(password);
-
-    // Adding error messages for unmet password requirements
     if (!passwordRequirements.length) {
       newErrorMessages.push("Password must be at least 16 characters long.");
     }
@@ -130,12 +164,12 @@ export default function Register({ togglePage, showLogin }) {
       );
     }
 
-    // Validate that passwords match
+    // Check if passwords match
     if (password !== confirmPassword) {
       newErrorMessages.push("Passwords do not match.");
     }
 
-    // Set error messages if there are any validation issues
+    // If there are validation errors, update the state and exit
     if (newErrorMessages.length > 0) {
       setErrorMessages(newErrorMessages);
       return;
@@ -143,14 +177,14 @@ export default function Register({ togglePage, showLogin }) {
 
     // Hash the password and create a new user
     const hashedPassword = await bcrypt.hash(password, 10);
-    const newUser = new User(username, hashedPassword); // Store the hashed password
-    storedUsers.push(newUser); // Add the new user to the array
-    localStorage.setItem("users", JSON.stringify(storedUsers)); // Save updated users array
+    const newUser = new User(username, hashedPassword);
+    storedUsers.push(newUser);
+    localStorage.setItem("users", JSON.stringify(storedUsers));
 
-    // Log the registration event
+    // Log the registration
     logRegistration(username, "User Registration");
 
-    // Automatically log in the user
+    // Automatically log in the new user
     localStorage.setItem("currentUser", JSON.stringify(newUser));
 
     // Clear error messages and navigate to the homepage
