@@ -21,8 +21,6 @@ export default function SettingsPage() {
       return storedUserData ? JSON.parse(storedUserData) : null;
     };
 
-  
-
     const loadUsers = () => {
       const storedUsers = localStorage.getItem("users");
       if (storedUsers) {
@@ -66,9 +64,6 @@ export default function SettingsPage() {
   const notifyNonAdmin = () => {
     alert("Only admins can change settings.");
   };
-
-  
- 
 
 
   const handleEditUser = (username) => {
