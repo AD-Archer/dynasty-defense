@@ -138,35 +138,40 @@ export default function SettingsPage() {
    * Function to save changes made to a user's information
    */
   const handleSaveUserEdit = async () => {
-    if (!editingUser) return; // Return if no user is being edited
+    if (!editingUser) return;
 
-    // If password is changed by an admin, validate it
+    const previousUsername = editingUser.username;
+
+    // Log the change if the username is being edited
+    if (newUserName !== previousUsername) {
+      logEvent(
+        `Username changed from "${previousUsername}" to "${newUserName}".`
+      );
+    }
+
     if (user.isAdmin && newPassword !== editingUser.password) {
       const isValidPassword = validatePassword(newPassword);
       if (!isValidPassword) {
         const confirmChange = window.confirm(
           "The new password does not meet the requirements. Do you want to proceed anyway?"
         );
-        if (!confirmChange) return; // Abort if admin does not confirm
+        if (!confirmChange) return; // If admin cancels, do not proceed
       }
     }
 
-    // Hash the new password
-    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    const hashedPassword = await bcrypt.hash(newPassword, 10); // Hash the new password
 
-    // Update users state with edited user data
     setUsers((prevUsers) => {
       const updatedUsers = prevUsers.map((user) => {
         if (user.username === editingUser.username) {
-          return { ...user, username: newUserName, password: hashedPassword };
+          return { ...user, username: newUserName, password: hashedPassword }; // Use hashed password
         }
         return user;
       });
-      localStorage.setItem("users", JSON.stringify(updatedUsers)); // Save to localStorage
+      localStorage.setItem("users", JSON.stringify(updatedUsers));
       return updatedUsers;
     });
 
-    // Update the current user in localStorage if they were edited
     const updatedCurrentUser = {
       ...editingUser,
       username: newUserName,
@@ -174,7 +179,7 @@ export default function SettingsPage() {
     };
     localStorage.setItem("currentUser", JSON.stringify(updatedCurrentUser));
 
-    setEditingUser(null); // Reset editing state
+    setEditingUser(null);
     setNewUserName("");
     setNewPassword("");
   };
@@ -184,24 +189,28 @@ export default function SettingsPage() {
    * @param {string} username - The username of the user to delete
    */
   const handleDeleteUser = (username) => {
-    // Ensure only admins can delete users
     if (!user || !user.isAdmin) {
       notifyNonAdmin();
       return;
     }
 
-    // Prevent deleting the default "admin" or current user
-    if (username === "admin" || username === user.username) {
-      alert("You cannot delete the default admin or your own account.");
+    if (username === "admin") {
+      alert("You cannot delete the default admin account.");
       return;
     }
 
-    // Update users list excluding the deleted user
+    if (username === user.username) {
+      alert("You cannot delete your own account.");
+      return;
+    }
+
+    logEvent(`Deleted user: "${username}".`); // Log the deletion
+
     setUsers((prevUsers) => {
       const updatedUsers = prevUsers.filter(
         (user) => user.username !== username
       );
-      localStorage.setItem("users", JSON.stringify(updatedUsers)); // Save to localStorage
+      localStorage.setItem("users", JSON.stringify(updatedUsers));
       return updatedUsers;
     });
   };
@@ -216,23 +225,32 @@ export default function SettingsPage() {
       return;
     }
 
-    // Prevent changing admin status of "admin" or current user
-    if (username.toLowerCase() === "admin" || username === user.username) {
+    if (username.toLowerCase() === "admin") {
       alert(
-        "You cannot change the admin privileges of the default admin or your own account."
+        "You cannot remove admin privileges from the default admin account."
       );
       return;
     }
 
-    // Update the admin status of the selected user
+    if (username === user.username) {
+      alert("You cannot remove your own admin privileges.");
+      return;
+    }
+
     setUsers((prevUsers) => {
       const updatedUsers = prevUsers.map((user) => {
         if (user.username.toLowerCase() === username.toLowerCase()) {
-          return { ...user, isAdmin: !user.isAdmin }; // Toggle isAdmin flag
+          const newIsAdminStatus = !user.isAdmin;
+          logEvent(
+            newIsAdminStatus
+              ? `Made "${username}" an admin.`
+              : `Removed "${username}" from admin.`
+          ); // Log the admin status change
+          return { ...user, isAdmin: newIsAdminStatus }; // Toggle admin status
         }
         return user;
       });
-      localStorage.setItem("users", JSON.stringify(updatedUsers)); // Save to localStorage
+      localStorage.setItem("users", JSON.stringify(updatedUsers));
       return updatedUsers;
     });
   };
@@ -245,6 +263,22 @@ export default function SettingsPage() {
     navigate("/"); // Redirect to login page
   };
 
+  // Log user actions for auditing purposes
+  const logEvent = (action) => {
+    const currentDateTime = new Date();
+    const logEntry = {
+      date: currentDateTime.toLocaleDateString(), // Get the date
+      time: currentDateTime.toLocaleTimeString(), // Get the time
+      user: user ? user.username : "Unknown User", // Get current user
+      action: action, // The action taken
+    };
+
+    // Append the log entry to local storage
+    const logs = JSON.parse(localStorage.getItem("logs")) || [];
+    logs.push(logEntry);
+    localStorage.setItem("logs", JSON.stringify(logs));
+  };
+
   return (
     <div className="home-container">
       <Sidebar
@@ -255,13 +289,11 @@ export default function SettingsPage() {
 
       <main className="main-content">
         <h1 className="header-title">Settings</h1> {/* Page title */}
-
         <section className="users-section">
           <h2>Manage Users</h2> {/* Section title */}
-
           <div className="users-list">
             {users.length === 0 ? (
-              <p>No users available.</p> 
+              <p>No users available.</p>
             ) : (
               users.map((user) => (
                 <li className="user-item" key={user.username}>

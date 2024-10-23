@@ -1,5 +1,3 @@
-// register.js
-
 // Import necessary dependencies
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -30,11 +28,13 @@ class User {
  * @param {string} username - The username of the registered user
  * @param {string} action - Description of the action being logged
  */
-const logRegistration = (username, action) => {
+const logRegistration = (action) => {
+  const currentDateTime = new Date(); // Get the current date and time
   const logEntry = {
-    action: action,
-    user: username,
-    timestamp: new Date().toISOString(), // Get the current time in ISO format
+    date: currentDateTime.toLocaleDateString(), // Get the date
+    time: currentDateTime.toLocaleTimeString(), // Get the time
+    user: "no-user", // Use "no-user" as the username
+    action: action, // The action taken
   };
 
   // Retrieve the existing admin log from localStorage
@@ -181,8 +181,8 @@ export default function Register({ togglePage, showLogin }) {
     storedUsers.push(newUser);
     localStorage.setItem("users", JSON.stringify(storedUsers));
 
-    // Log the registration
-    logRegistration(username, "User Registration");
+    // Log the registration in a consistent format
+    logRegistration(username, `Registered a new user`);
 
     // Automatically log in the new user
     localStorage.setItem("currentUser", JSON.stringify(newUser));
