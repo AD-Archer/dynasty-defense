@@ -86,14 +86,22 @@ export default function LogsPage({ currentUser }) {
             </thead>
             <tbody>
               {logs.length > 0 ? (
-                logs.map((log, index) => (
-                  <tr key={index}>
-                    <td>{log.date}</td>
-                    <td>{log.time}</td>
-                    <td>{log.user}</td>
-                    <td>{log.action}</td>
-                  </tr>
-                ))
+                logs
+                  .slice()
+                  .reverse()
+                  .map(
+                    (
+                      log,
+                      index // Reverse the array
+                    ) => (
+                      <tr key={index}>
+                        <td>{log.date}</td>
+                        <td>{log.time}</td>
+                        <td>{log.user}</td>
+                        <td>{log.action}</td>
+                      </tr>
+                    )
+                  )
               ) : (
                 <tr>
                   <td colSpan="4">No logs available</td>
