@@ -137,52 +137,61 @@ export default function SettingsPage() {
   /**
    * Function to save changes made to a user's information
    */
-  const handleSaveUserEdit = async () => {
-    if (!editingUser) return;
+const handleSaveUserEdit = async () => {
+  if (!editingUser) return;
 
-    const previousUsername = editingUser.username;
+  const previousUsername = editingUser.username;
 
-    // Log the change if the username is being edited
-    if (newUserName !== previousUsername) {
-      logEvent(
-        `Username changed from "${previousUsername}" to "${newUserName}".`
+  // Log the change if the username is being edited
+  if (newUserName !== previousUsername) {
+    logEvent(
+      `Username changed from "${previousUsername}" to "${newUserName}".`
+    );
+  }
+
+  let passwordChanged = false; // Track if password is changed
+
+  if (user.isAdmin && newPassword !== editingUser.password) {
+    const isValidPassword = validatePassword(newPassword);
+    if (!isValidPassword) {
+      const confirmChange = window.confirm(
+        "The new password does not meet the requirements. Do you want to proceed anyway?"
       );
+      if (!confirmChange) return; // If admin cancels, do not proceed
     }
 
-    if (user.isAdmin && newPassword !== editingUser.password) {
-      const isValidPassword = validatePassword(newPassword);
-      if (!isValidPassword) {
-        const confirmChange = window.confirm(
-          "The new password does not meet the requirements. Do you want to proceed anyway?"
-        );
-        if (!confirmChange) return; // If admin cancels, do not proceed
+    passwordChanged = true; // Set flag indicating the password is being changed
+  }
+
+  const hashedPassword = await bcrypt.hash(newPassword, 10); // Hash the new password
+
+  setUsers((prevUsers) => {
+    const updatedUsers = prevUsers.map((user) => {
+      if (user.username === editingUser.username) {
+        return { ...user, username: newUserName, password: hashedPassword }; // Use hashed password
       }
-    }
-
-    const hashedPassword = await bcrypt.hash(newPassword, 10); // Hash the new password
-
-    setUsers((prevUsers) => {
-      const updatedUsers = prevUsers.map((user) => {
-        if (user.username === editingUser.username) {
-          return { ...user, username: newUserName, password: hashedPassword }; // Use hashed password
-        }
-        return user;
-      });
-      localStorage.setItem("users", JSON.stringify(updatedUsers));
-      return updatedUsers;
+      return user;
     });
+    localStorage.setItem("users", JSON.stringify(updatedUsers));
+    return updatedUsers;
+  });
 
-    const updatedCurrentUser = {
-      ...editingUser,
-      username: newUserName,
-      password: hashedPassword,
-    };
-    localStorage.setItem("currentUser", JSON.stringify(updatedCurrentUser));
-
-    setEditingUser(null);
-    setNewUserName("");
-    setNewPassword("");
+  const updatedCurrentUser = {
+    ...editingUser,
+    username: newUserName,
+    password: hashedPassword,
   };
+  localStorage.setItem("currentUser", JSON.stringify(updatedCurrentUser));
+
+  // Log the password change
+  if (passwordChanged) {
+    logEvent(`Password changed for user: "${previousUsername}".`);
+  }
+
+  setEditingUser(null);
+  setNewUserName("");
+  setNewPassword("");
+};
 
   /**
    * Function to delete a user

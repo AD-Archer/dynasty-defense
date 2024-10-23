@@ -68,11 +68,11 @@ export default function Login({ togglePage, showLogin }) {
     if (bcrypt.compareSync(password.trim(), user.password)) {
       alert("Login successful!"); // Success message
       localStorage.setItem("currentUser", JSON.stringify(user)); // Store current user in localStorage
-      logAttempt(normalizedUsername, "Login successful"); // Log successful login
+      logAttempt(normalizedUsername, "Sign in: Login successful"); // Log successful login
       navigate("/home"); // Redirect to home page
     } else {
       alert("Invalid username or password."); // Error message
-      logAttempt(normalizedUsername, "Invalid password"); // Log invalid password attempt
+      logAttempt(normalizedUsername, "Sign in: Invalid password"); // Log invalid password attempt
     }
   };
 
