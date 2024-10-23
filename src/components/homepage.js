@@ -4,6 +4,7 @@ import "./styles/homepage.css";
 import flameIcon from "../assets/images/Flame icon.svg";
 import securitySafeIcon from "../assets/images/Security Safe Icon.svg";
 import smokeIcon from "../assets/images/Smoke icon.svg";
+import Sidebar from "./SideBar";
 
 export default function HomePage({ currentUser }) {
   const navigate = useNavigate(); // Initialize navigate for navigation
@@ -254,26 +255,11 @@ export default function HomePage({ currentUser }) {
 
   return (
     <div className="home-container">
-      <aside className={`sidebar ${isSidebarCollapsed ? "collapsed" : ""}`}>
-        <div className="active-user">
-          {user ? <p>Welcome, {user.username}</p> : <p>Loading user...</p>}
-        </div>
-        <button className="sign-out-button" onClick={handleSignOut}>
-          Sign Out
-        </button>
-        <Link to="/home">
-          <button className="sidebar-button">Home</button>
-        </Link>
-        <Link to="/settings">
-          <button className="sidebar-button">Sensors</button>
-        </Link>
-        <Link to="/AdminLog">
-          <button className="sidebar-button">Logs</button>
-        </Link>
-        <Link to="/settings">
-          <button className="sidebar-button">Settings</button>
-        </Link>
-      </aside>
+      <Sidebar
+        user={user}
+        handleSignOut={handleSignOut}
+        isCollapsed={isSidebarCollapsed}
+      />
 
       <main className="main-content">
         <h1 className="header-title">Defense Panel</h1>

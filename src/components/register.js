@@ -93,7 +93,7 @@ export default function Register({ togglePage, showLogin }) {
     ).length;
 
     // Alert if max number of regular users is reached
-    if (regularUsersCount >= 4) {
+    if (regularUsersCount >= 10) {
       alert("Maximum number of regular users (4) has been reached.");
       return; // Prevent further registration
     }

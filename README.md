@@ -1,7 +1,7 @@
 # Dynasty Defense System
 
 ## Description
-The **Dynasty Defense System** is a real-time alarm monitoring solution for enclosed spaces. It allows administrators to configure fire, smoke, and heat sensors, monitor real-time events, and receive instant notifications via a user-friendly interface. The system ensures swift responses to potential emergencies through secure access and easy sensor management.
+The **Dynasty Defense System** is a real-time alarm monitoring solution for enclosed spaces. It allows administrators to configure fire, smoke, and security sensors, monitor real-time events, and receive instant notifications via a user-friendly interface. The system ensures swift responses to potential emergencies through secure access and easy sensor management.
 
 ## Features
 - **User Authentication**: Secure access with password protection.
@@ -9,7 +9,7 @@ The **Dynasty Defense System** is a real-time alarm monitoring solution for encl
 - **Real-Time Monitoring**: Track sensor status and events in real-time.
 - **Alarm Notifications**: Receive instant alerts when a sensor is triggered.
 - **Reset & Deactivation**: Easily reset or deactivate sensors to handle false alarms.
-- **Custom Sensors**: Create and configure additional custom sensors.
+- **Admin Log**: All actions made on site is logged to a list for admins to read.
 - **Multi-Admin Support**: The default admin can create more admin accounts.
 
 ## Installation
@@ -34,9 +34,8 @@ The **Dynasty Defense System** is a real-time alarm monitoring solution for encl
 1. **Register and Sign In**:
    - New users can register an account via the registration form. Once registered, sign in using the created credentials.
    - An admin account is created by default with the following credentials:
-     - **Username**: `admin`
+     - **Username**: `admin` (all lowercase)
      - **Password**: `password` (all lowercase)
-   - For security purposes, it is recommended to change the default admin password after the first login.
 
 2. **Admin Dashboard**:
    - Upon signing in, the dashboard allows users to configure and monitor sensors, as well as manage system alarms.
@@ -44,11 +43,13 @@ The **Dynasty Defense System** is a real-time alarm monitoring solution for encl
 
 3. **Sensor Activation**:
    - Users can activate a sensor to enable real-time monitoring. When a sensor detects an event (fire, smoke, or heat), it triggers an alarm.
-   - Users can also create their own custom sensors to listen for specific alarm conditions.
 
 4. **Handling Alarms**:
    - When an alarm is triggered, notifications appear on the dashboard, and appropriate actions can be taken to resolve the situation.
    - Admins have the capability to silence or reset alarms to manage false positives or handle emergency scenarios.
+
+5. **Error Handling**:
+ - When an error is encountered you should reset your local stroage settings and it should clear up any problems encountered
 
 ## Contributing
 Feel free to submit issues or pull requests to help improve the system. All contributions are welcome!
