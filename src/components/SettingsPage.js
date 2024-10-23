@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import bcrypt from "bcryptjs"; // Import bcrypt
 import "./styles/homepage.css";
 import "./styles/settingspage.css";
+import Sidebar from "./SideBar";
 
 export default function SettingsPage() {
   const navigate = useNavigate();
@@ -201,31 +202,14 @@ export default function SettingsPage() {
 
   return (
     <div className="home-container">
-      <aside className={`sidebar ${isSidebarCollapsed ? "collapsed" : ""}`}>
-        <div className="active-user">
-          {user ? <p>Welcome, {user.username}</p> : <p>Loading user...</p>}
-        </div>
-        <button className="sign-out-button" onClick={handleSignOut}>
-          Sign Out
-        </button>
-        <Link to="/home">
-          <button className="sidebar-button">Home</button>
-        </Link>
-        <Link to="/settings">
-          <button className="sidebar-button">Sensors</button>
-        </Link>
-        <Link to="/AdminLog">
-          <button className="sidebar-button">Logs</button>
-        </Link>
-        <Link to="/settings">
-          <button className="sidebar-button">Settings</button>
-        </Link>
-      </aside>
+      <Sidebar
+        user={user}
+        handleSignOut={handleSignOut}
+        isCollapsed={isSidebarCollapsed}
+      />
 
       <main className="main-content">
         <h1 className="header-title">Settings</h1>
-
-        
 
         <section className="users-section">
           <h2>Manage Users</h2>
