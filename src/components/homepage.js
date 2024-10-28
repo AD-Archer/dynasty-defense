@@ -84,6 +84,18 @@ export default function HomePage({ currentUser }) {
       user: user?.username || "Unknown User",
       action,
     };
+
+    // Check if the last log is the same as the new log
+    const lastLog = logs[logs.length - 1];
+    if (
+      lastLog &&
+      lastLog.action === newLog.action &&
+      lastLog.date === newLog.date &&
+      lastLog.time === newLog.time
+    ) {
+      return; // Skip adding the log if it's a duplicate
+    }
+
     logs.push(newLog);
     localStorage.setItem("logs", JSON.stringify(logs));
   };
@@ -97,36 +109,66 @@ export default function HomePage({ currentUser }) {
     navigate("/");
   };
 
-  useEffect(() => {
-    // Component initialization tasks
-    checkUserLogin(); // Validate user login status
-    setLastTriggeredTimes(
-      loadStoredState("lastTriggeredTimes", lastTriggeredTimes)
-    );
-    setActivatedSensors((prev) => {
-      const storedSensors = loadStoredState("activatedSensors", prev);
-      Object.keys(storedSensors).forEach((sensor) => {
-        if (storedSensors[sensor]) {
-          randomTriggerAlarm(sensor); // Trigger alarms for active sensors
-        }
-      });
-      return storedSensors;
+useEffect(() => {
+  // Component initialization tasks
+  checkUserLogin(); // Validate user login status
+
+  // Load last triggered times and activated sensors from local storage
+  setLastTriggeredTimes(
+    loadStoredState("lastTriggeredTimes", lastTriggeredTimes)
+  );
+  const storedActivatedSensors = loadStoredState(
+    "activatedSensors",
+    activatedSensors
+  );
+  setActivatedSensors(storedActivatedSensors);
+
+  // Trigger alarms for active sensors initially
+  Object.keys(storedActivatedSensors).forEach((sensor) => {
+    if (storedActivatedSensors[sensor]) {
+      triggerAlarmForSensor(sensor); // Trigger the alarm if the sensor is active
+    }
+  });
+
+  // Function to get a random delay between min and max (in milliseconds)
+  const getRandomDelay = (min, max) => {
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+  };
+
+  // Set up an interval to check sensor statuses periodically
+  let intervalId;
+  const checkSensors = () => {
+    // Use the latest state for activatedSensors
+    Object.keys(activatedSensors).forEach((sensor) => {
+      // Re-check activated sensors status
+      if (activatedSensors[sensor]) {
+        triggerAlarmForSensor(sensor); // Trigger the alarm if the sensor is active
+      }
     });
-  }, []);
 
-  /**
-   * Toggles the sidebar collapse state.
-   */
-  const toggleSidebar = () => setIsSidebarCollapsed((prev) => !prev);
+    // Set the next check with a random delay
+    const delay = getRandomDelay(2000, 10000); // Random delay between 2 and 10 seconds
+    intervalId = setTimeout(checkSensors, delay);
+  };
 
+  // Start the first check
+  checkSensors();
+
+  // Cleanup function
+  return () => {
+    // Clear the interval when the component unmounts
+    clearTimeout(intervalId);
+  };
+}, []);
   /**
-   * Randomly triggers an alarm for a specified sensor with interval handling.
+   * Triggers an alarm for a specified sensor if the sensor is active.
    * @param {string} sensor - The sensor name.
    */
-  const randomTriggerAlarm = (sensor) => {
+  const triggerAlarmForSensor = (sensor) => {
     const alarmKey = `${sensor.replace("Sensor", "Alarm")}`;
 
-    const triggerAlarm = () => {
+    // Only trigger the alarm if the sensor is active
+    if (activatedSensors[sensor]) {
       const currentTime = new Date().toLocaleTimeString();
       if (!activeAlarms[alarmKey]) {
         setLastTriggeredTimes((prev) => {
@@ -145,22 +187,26 @@ export default function HomePage({ currentUser }) {
           return newAlarms;
         });
       }
-    };
-
-    if (!activeAlarms[alarmKey]) {
-      const intervalId = setInterval(() => {
-        if (Math.random() < 0.5) {
-          triggerAlarm();
-          clearInterval(intervalId);
-        }
-      }, Math.floor(Math.random() * (10000 - 3000 + 1)) + 3000);
-
-      setSensorIntervals((prev) => ({ ...prev, [sensor]: intervalId }));
     }
   };
 
   /**
-   * Toggles the activation state of a sensor and handles alarm triggering.
+   * Silences the alarm for a specified sensor, regardless of whether the sensor is active.
+   * @param {string} sensor - The sensor name.
+   */
+  const silenceAlarmForSensor = (sensor) => {
+    const alarmKey = `${sensor.replace("Sensor", "Alarm")}`;
+
+    setActiveAlarms((prev) => {
+      const newAlarms = { ...prev, [alarmKey]: false };
+      localStorage.setItem("activeAlarms", JSON.stringify(newAlarms));
+      logEvent(`Silenced ${alarmKey}.`);
+      return newAlarms;
+    });
+  };
+
+  /**
+   * Updates the sensor activation state and handles related alarm behavior.
    * @param {string} sensor - The sensor name.
    */
   const toggleSensor = (sensor) => {
@@ -174,6 +220,9 @@ export default function HomePage({ currentUser }) {
         if (newState[sensor]) {
           updatedTimes[sensor] = currentTime;
           logEvent(`${sensor} activated at ${currentTime}`);
+          triggerAlarmForSensor(sensor); // Check to trigger alarm if activating sensor
+        } else {
+          silenceAlarmForSensor(sensor); // Silence alarm if deactivating sensor
         }
         localStorage.setItem(
           "lastTriggeredTimes",
@@ -183,13 +232,6 @@ export default function HomePage({ currentUser }) {
       });
 
       localStorage.setItem("activatedSensors", JSON.stringify(newState));
-
-      if (newState[sensor]) {
-        randomTriggerAlarm(sensor);
-      } else {
-        silenceAlarmForSensor(sensor);
-      }
-
       return newState;
     });
   };
@@ -203,29 +245,6 @@ export default function HomePage({ currentUser }) {
     }
   };
 
-  /**
-   * Silences an alarm for a given sensor.
-   * @param {string} sensor - The sensor associated with the alarm.
-   */
-  const silenceAlarmForSensor = (sensor) => {
-    const alarmKey = `${sensor.replace("Sensor", "Alarm")}`;
-    setActiveAlarms((prev) => {
-      const newAlarms = { ...prev, [alarmKey]: false };
-      localStorage.setItem("activeAlarms", JSON.stringify(newAlarms));
-      logEvent(`Silenced ${alarmKey}.`);
-      return newAlarms;
-    });
-
-    const intervalId = sensorIntervals[sensor];
-    if (intervalId) {
-      clearInterval(intervalId);
-      setSensorIntervals((prev) => {
-        const newIntervals = { ...prev };
-        delete newIntervals[sensor];
-        return newIntervals;
-      });
-    }
-  };
 
   /**
    * Silences an alarm if the user has admin privileges.
