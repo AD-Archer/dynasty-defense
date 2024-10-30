@@ -1,18 +1,18 @@
 {
   "files": {
     "main.css": "/dynasty-defense/static/css/main.a239c989.css",
-    "main.js": "/dynasty-defense/static/js/main.ac18531d.js",
+    "main.js": "/dynasty-defense/static/js/main.671965ac.js",
     "static/js/453.8716ae1b.chunk.js": "/dynasty-defense/static/js/453.8716ae1b.chunk.js",
     "static/media/Smoke icon.svg": "/dynasty-defense/static/media/Smoke icon.6bc81430dc418bf3a71b2e0fb6e8b673.svg",
     "static/media/Flame icon.svg": "/dynasty-defense/static/media/Flame icon.53f7892b42012855b9f92c84ad0a17ea.svg",
     "static/media/Security Safe Icon.svg": "/dynasty-defense/static/media/Security Safe Icon.4cd1c34c56387095123f158fc255bc57.svg",
     "index.html": "/dynasty-defense/index.html",
     "main.a239c989.css.map": "/dynasty-defense/static/css/main.a239c989.css.map",
-    "main.ac18531d.js.map": "/dynasty-defense/static/js/main.ac18531d.js.map",
+    "main.671965ac.js.map": "/dynasty-defense/static/js/main.671965ac.js.map",
     "453.8716ae1b.chunk.js.map": "/dynasty-defense/static/js/453.8716ae1b.chunk.js.map"
   },
   "entrypoints": [
     "static/css/main.a239c989.css",
-    "static/js/main.ac18531d.js"
+    "static/js/main.671965ac.js"
   ]
 }
