@@ -1,5 +1,5 @@
 # Dynasty Defense System
-
+[![Netlify Status](https://api.netlify.com/api/v1/badges/f552b9c8-ebd7-4a39-90dd-03a631d2253e/deploy-status)](https://app.netlify.com/sites/dynastydefense/deploys)
 ## Description
 The **Dynasty Defense System** is a real-time alarm monitoring solution for enclosed spaces. It allows administrators to configure fire, smoke, and security sensors, monitor real-time events, and receive instant notifications via a user-friendly interface. The system ensures swift responses to potential emergencies through secure access and easy sensor management.
 
