@@ -6,11 +6,11 @@
 }
 
 .main-content {
-  flex: 1;
-  min-height: 100vh;
+  margin-left: 0;
+  margin-top: var(--nav-height);
   padding: var(--spacing-sm);
-  margin-left: var(--sidebar-width);
-  transition: margin-left var(--transition-speed) var(--transition-function);
+  min-height: calc(100vh - var(--nav-height));
+  width: 100%;
 }
 
 .card {
