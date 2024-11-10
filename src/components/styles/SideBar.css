@@ -1,0 +1,93 @@
+/* General Sidebar Styles */
+.sidebar {
+  background-color: var(--card-bg-color);
+  flex: 0 0 auto;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  transition: width 0.3s;
+  overflow: hidden;
+  height: 100%; /* Ensure it takes full height */
+}
+
+/* Collapsed Sidebar Styles */
+.sidebar.collapsed {
+  width: 60px; /* Smaller width when collapsed */
+  overflow: auto;
+}
+
+/* Sidebar Button Styles */
+.sidebar-button {
+  background-color: var(--primary-color);
+  color: white;
+  border: none;
+  padding: 12px;
+  border-radius: 6px;
+  font-size: 16px;
+  cursor: pointer;
+  margin-bottom: 1.5rem;
+  height: 50px;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  transition: background-color 0.3s, opacity 0.3s;
+}
+
+/* Active and Hover States for Buttons */
+.sidebar-button.active {
+  background-color: #357abd;
+  opacity: 0.8;
+}
+
+.sidebar-button:hover {
+  background-color: #357abd;
+}
+
+/* Mobile Specific Styles (media query) */
+@media (max-width: 768px) {
+  .sidebar {
+    width: 250px; /* Ensure sidebar is not too wide */
+    position: fixed; /* Fix sidebar position */
+    top: 0;
+    left: 0;
+    bottom: 0;
+    z-index: 100; /* Ensure it's above other content */
+    transition: all 0.3s ease-in-out;
+  }
+
+  .sidebar.collapsed {
+    width: 60px; /* Collapsed sidebar is very narrow */
+  }
+
+  .sidebar-button {
+    font-size: 14px; /* Adjust font size for smaller screens */
+    padding: 10px; /* Adjust padding for smaller screens */
+  }
+
+  .active-user {
+    display: none; /* Hide active user info on small screens */
+  }
+
+  .sign-out-button {
+    font-size: 14px; /* Adjust size of sign-out button */
+  }
+
+  /* Make the sidebar toggle more user-friendly */
+  .sidebar.collapsed .sidebar-button {
+    justify-content: center; /* Center icons when collapsed */
+  }
+}
+
+/* For wider screens (desktops and large tablets), ensure the sidebar is still usable */
+@media (min-width: 769px) {
+  .sidebar {
+    width: 250px; /* Set a larger width for wider screens */
+  }
+
+  .sidebar.collapsed {
+    width: 60px;
+  }
+}
