@@ -177,3 +177,32 @@
 .loading-indicator {
   animation: rotate 1s infinite linear;
 }
+
+/* Add to your existing homepage.css */
+
+.empty-state-message {
+  text-align: center;
+  padding: 2rem;
+  background-color: var(--card-bg-color);
+  border-radius: 8px;
+  margin: 1rem 0;
+}
+
+.empty-state-message p {
+  margin-bottom: 1rem;
+  color: var(--text-color);
+}
+
+.primary-button {
+  display: inline-block;
+  padding: 10px 20px;
+  background-color: var(--primary-color);
+  color: white;
+  text-decoration: none;
+  border-radius: 4px;
+  transition: background-color 0.3s ease;
+}
+
+.primary-button:hover {
+  background-color: var(--primary-hover);
+}

@@ -35,7 +35,8 @@ export default function SettingsPage() {
   const [newUser, setNewUser] = useState({
     username: '',
     password: '',
-    isAdmin: false
+    isAdmin: false,
+    profileImage: null
   });
 
   /**
@@ -322,6 +323,18 @@ const handleSaveUserEdit = async () => {
     // Create sensor ID from name
     const sensorId = newSensor.name.toLowerCase().replace(/\s+/g, '_');
     
+    // Check for duplicate sensors (comparing all three fields)
+    const isDuplicate = customSensors.some(sensor => 
+      sensor.name.toLowerCase() === newSensor.name.toLowerCase() &&
+      sensor.icon === (newSensor.icon || '🔔') &&
+      sensor.description === newSensor.description
+    );
+
+    if (isDuplicate) {
+      alert("A sensor with identical name, icon, and description already exists.");
+      return;
+    }
+    
     const newCustomSensor = {
       id: sensorId,
       name: newSensor.name,
@@ -476,6 +489,25 @@ const handleSaveUserEdit = async () => {
     logEvent("Exported logs to CSV");
   };
 
+  const handleImageUpload = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      if (file.size > 2 * 1024 * 1024) { // 2MB limit
+        alert("Image size should be less than 2MB");
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setNewUser(prev => ({
+          ...prev,
+          profileImage: reader.result
+        }));
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   const handleCreateUser = async (e) => {
     e.preventDefault();
     
@@ -527,7 +559,8 @@ const handleSaveUserEdit = async () => {
     const createdUser = {
       username: newUser.username,
       password: hashedPassword,
-      isAdmin: newUser.isAdmin
+      isAdmin: newUser.isAdmin,
+      profileImage: newUser.profileImage
     };
 
     // Add user to storage
@@ -548,11 +581,12 @@ const handleSaveUserEdit = async () => {
     // Log to admin logs
     logEvent(`Created new user "${newUser.username}"${newUser.isAdmin ? ' with admin privileges' : ''}`);
 
-    // Reset form
+    // Reset form including image
     setNewUser({
       username: '',
       password: '',
-      isAdmin: false
+      isAdmin: false,
+      profileImage: null
     });
 
     alert("User created successfully!");
@@ -615,25 +649,32 @@ const handleSaveUserEdit = async () => {
 
         <section className="existing-sensors-section">
           <h2>Existing Custom Sensors</h2>
-          <div className="sensors-grid">
-            {customSensors.map((sensor, index) => (
-              <div key={`settings-sensor-${sensor.id}-${index}`} className="sensor-item">
-                <div className="sensor-icon">{sensor.icon}</div>
-                <div className="sensor-info">
-                  <h3>{sensor.name}</h3>
-                  <p>{sensor.description}</p>
-                </div>
-                {user?.isAdmin && (
-                  <button 
-                    onClick={() => deleteSensor(sensor.id)}
-                    className="delete-sensor-btn"
-                  >
-                    Delete
-                  </button>
-                )}
+          {!user?.isAdmin ? (
+            <p className="admin-only-message">Only administrators can manage sensors.</p>
+          ) : (
+            customSensors.length === 0 ? (
+              <p className="no-sensors-message">No custom sensors have been created yet.</p>
+            ) : (
+              <div className="sensors-grid">
+                {customSensors.map((sensor, index) => (
+                  <div key={`settings-sensor-${sensor.id}-${index}`} className="sensor-item">
+                    <div className="sensor-icon">{sensor.icon}</div>
+                    <div className="sensor-info">
+                      <h3>{sensor.name}</h3>
+                      <p>{sensor.description || 'No description provided'}</p>
+                    </div>
+                    <button 
+                      onClick={() => deleteSensor(sensor.id)}
+                      className="delete-sensor-btn"
+                      title="Delete sensor"
+                    >
+                      Delete
+                    </button>
+                  </div>
+                ))}
               </div>
-            ))}
-          </div>
+            )
+          )}
         </section>
 
         <section className="create-user-section">
@@ -642,97 +683,130 @@ const handleSaveUserEdit = async () => {
             <p className="admin-only-message">Only administrators can create users.</p>
           ) : (
             <form onSubmit={handleCreateUser} className="create-user-form">
-              <div className="form-group">
-                <label>Username:</label>
+              <div className="profile-image-upload">
+                <div className="image-preview">
+                  {newUser.profileImage ? (
+                    <img 
+                      src={newUser.profileImage} 
+                      alt="Profile preview" 
+                      className="profile-preview"
+                    />
+                  ) : (
+                    <div className="image-placeholder">
+                      <span>👤</span>
+                      <p>Upload Profile Image</p>
+                    </div>
+                  )}
+                </div>
                 <input
-                  type="text"
-                  value={newUser.username}
-                  onChange={(e) => setNewUser({...newUser, username: e.target.value})}
-                  placeholder="Enter username"
-                  required
+                  type="file"
+                  accept="image/*"
+                  onChange={handleImageUpload}
+                  id="profile-image"
+                  className="image-input"
                 />
-              </div>
-              
-              <div className="form-group">
-                <label>Password:</label>
-                <input
-                  type="password"
-                  value={newUser.password}
-                  onChange={(e) => setNewUser({...newUser, password: e.target.value})}
-                  placeholder="Enter password"
-                  required
-                />
-              </div>
-
-              <div className="form-group checkbox-group">
-                <label>
-                  <input
-                    type="checkbox"
-                    checked={newUser.isAdmin}
-                    onChange={(e) => setNewUser({...newUser, isAdmin: e.target.checked})}
-                  />
-                  Create as Administrator
+                <label htmlFor="profile-image" className="upload-button">
+                  Choose Image
                 </label>
               </div>
 
-              <button type="submit" className="create-user-btn">
-                Create User
-              </button>
+              <div className="user-form-fields">
+                <div className="form-group">
+                  <label>Username:</label>
+                  <input
+                    type="text"
+                    value={newUser.username}
+                    onChange={(e) => setNewUser({...newUser, username: e.target.value})}
+                    placeholder="Enter username"
+                    required
+                  />
+                </div>
+                
+                <div className="form-group">
+                  <label>Password:</label>
+                  <input
+                    type="password"
+                    value={newUser.password}
+                    onChange={(e) => setNewUser({...newUser, password: e.target.value})}
+                    placeholder="Enter password"
+                    required
+                  />
+                </div>
+
+                <div className="form-group checkbox-group">
+                  <label>
+                    <input
+                      type="checkbox"
+                      checked={newUser.isAdmin}
+                      onChange={(e) => setNewUser({...newUser, isAdmin: e.target.checked})}
+                    />
+                    Create as Administrator
+                  </label>
+                </div>
+
+                <button type="submit" className="create-user-btn">
+                  Create User
+                </button>
+              </div>
             </form>
           )}
         </section>
 
         {/* Existing Users Section */}
         <section className="users-section">
-          <h2>Manage Users</h2> {/* Section title */}
-          <div className="users-list">
-            {users.length === 0 ? (
-              <p>No users available.</p>
-            ) : (
-              users.map((user) => (
-                <li className="user-item" key={user.username}>
-                  <span>
-                    {user.username} {user.isAdmin ? "(Admin)" : ""}
-                  </span>
-                  <div className="button-container">
-                    <button
-                      className="edit-user-button"
-                      onClick={() => handleEditUser(user.username)}
-                    >
-                      Edit
-                    </button>
-                    <button
-                      className="delete-user-button"
-                      onClick={() => handleDeleteUser(user.username)}
-                    >
-                      Delete
-                    </button>
-                    <button
-                      className="toggle-admin-button"
-                      onClick={() => handleToggleAdmin(user.username)}
-                    >
-                      {user.isAdmin ? "Remove Admin" : "Make Admin"}
-                    </button>
-                  </div>
-                  {editingUser?.username === user.username && (
-                    <div className="edit-user-inputs">
-                      <input
-                        type="text"
-                        value={newUserName}
-                        onChange={(e) => setNewUserName(e.target.value)}
-                      />
-                      <input
-                        type="password"
-                        value={newPassword}
-                        onChange={(e) => setNewPassword(e.target.value)}
-                      />
-                      <button onClick={handleSaveUserEdit}>Save</button>
+          <h2>Manage Users</h2>
+          {!user?.isAdmin ? (
+            <p className="admin-only-message">Only administrators can manage users.</p>
+          ) : (
+            <div className="users-list">
+              {users.length === 0 ? (
+                <p>No users available.</p>
+              ) : (
+                users.map((user) => (
+                  <li className="user-item" key={user.username}>
+                    <span>
+                      {user.username} {user.isAdmin ? "(Admin)" : ""}
+                    </span>
+                    <div className="button-container">
+                      <button
+                        className="edit-user-button"
+                        onClick={() => handleEditUser(user.username)}
+                      >
+                        Edit
+                      </button>
+                      <button
+                        className="delete-user-button"
+                        onClick={() => handleDeleteUser(user.username)}
+                      >
+                        Delete
+                      </button>
+                      <button
+                        className="toggle-admin-button"
+                        onClick={() => handleToggleAdmin(user.username)}
+                      >
+                        {user.isAdmin ? "Remove Admin" : "Make Admin"}
+                      </button>
                     </div>
-                  )}
-                </li>
-              ))
-            )}
-          </div>
+                    {editingUser?.username === user.username && (
+                      <div className="edit-user-inputs">
+                        <input
+                          type="text"
+                          value={newUserName}
+                          onChange={(e) => setNewUserName(e.target.value)}
+                        />
+                        <input
+                          type="password"
+                          value={newPassword}
+                          onChange={(e) => setNewPassword(e.target.value)}
+                        />
+                        <button onClick={handleSaveUserEdit}>Save</button>
+                      </div>
+                    )}
+                  </li>
+                ))
+              )}
+            </div>
+          )}
         </section>
 
         <section className="log-settings-section">

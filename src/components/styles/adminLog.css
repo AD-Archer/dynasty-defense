@@ -219,3 +219,92 @@
 .admin-log-entry.new {
   animation: pulse 1s var(--transition-function);
 }
+
+/* Add or update button styles */
+.logs-actions {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.clear-logs-button,
+.export-logs-button {
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.clear-logs-button {
+  background-color: var(--error-color, #dc3545);
+  color: white;
+}
+
+.export-logs-button {
+  background-color: var(--primary-color, #007bff);
+  color: white;
+}
+
+.clear-logs-button:hover,
+.export-logs-button:hover {
+  opacity: 0.9;
+  transform: translateY(-1px);
+}
+
+.clear-logs-button:active,
+.export-logs-button:active {
+  transform: translateY(0);
+}
+
+/* Add icons to buttons */
+.clear-logs-button::before {
+  content: "🗑️";
+  font-size: 0.9rem;
+}
+
+.export-logs-button::before {
+  content: "📥";
+  font-size: 0.9rem;
+}
+
+/* Update table styles */
+.logs-table-container {
+  margin-top: 1rem;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.logs-table {
+  width: 100%;
+  border-collapse: collapse;
+  background-color: var(--card-bg-color);
+}
+
+.logs-table th {
+  background-color: var(--primary-color);
+  color: white;
+  font-weight: 500;
+  text-align: left;
+  padding: 0.75rem 1rem;
+}
+
+.logs-table td {
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.logs-table tr:last-child td {
+  border-bottom: none;
+}
+
+.no-logs-message {
+  text-align: center;
+  color: var(--text-secondary-color);
+  padding: 2rem;
+}

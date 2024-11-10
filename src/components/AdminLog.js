@@ -55,20 +55,73 @@ export default function LogsPage({ currentUser }) {
    */
   const toggleSidebar = () => setIsSidebarCollapsed((prev) => !prev);
 
-  // Loads logs from local storage when the component mounts
+  // Load and deduplicate logs on mount
   useEffect(() => {
-    const storedLogs = localStorage.getItem("logs");
-    if (storedLogs) {
-      setLogs(JSON.parse(storedLogs));
-    }
+    const loadAndDedupeLogs = () => {
+      const storedLogs = JSON.parse(localStorage.getItem("logs") || "[]");
+      
+      // Create a map to track unique logs
+      const uniqueLogsMap = new Map();
+      
+      // Process logs in reverse to keep the most recent entries
+      storedLogs.reverse().forEach(log => {
+        // Create a unique key combining relevant properties
+        const key = `${log.date}-${log.time}-${log.user}-${log.action}`;
+        
+        // Only keep the first occurrence (which is the most recent due to reverse)
+        if (!uniqueLogsMap.has(key)) {
+          uniqueLogsMap.set(key, log);
+        }
+      });
+      
+      // Convert back to array and reverse to restore original order
+      const deduplicatedLogs = Array.from(uniqueLogsMap.values()).reverse();
+      
+      // Update localStorage with deduplicated logs
+      localStorage.setItem("logs", JSON.stringify(deduplicatedLogs));
+      setLogs(deduplicatedLogs);
+    };
+
+    loadAndDedupeLogs();
   }, []);
 
   /**
    * Clears all logs from both the state and local storage.
    */
   const clearLogs = () => {
-    localStorage.removeItem("logs"); // Remove logs from local storage
-    setLogs([]); // Clear logs from the state
+    if (window.confirm("Are you sure you want to clear all logs? This action cannot be undone.")) {
+      localStorage.setItem("logs", JSON.stringify([]));
+      setLogs([]);
+      
+      // Log the clearing action itself
+      const clearLog = {
+        date: new Date().toLocaleDateString(),
+        time: new Date().toLocaleTimeString(),
+        user: user?.username || "Unknown User",
+        action: "Cleared all logs"
+      };
+      
+      localStorage.setItem("logs", JSON.stringify([clearLog]));
+      setLogs([clearLog]);
+    }
+  };
+
+  // Function to export logs as CSV
+  const exportLogs = () => {
+    const csvContent = [
+      ['Date', 'Time', 'User', 'Action'],
+      ...logs.map(log => [log.date, log.time, log.user, log.action])
+    ].map(row => row.join(',')).join('\n');
+
+    const blob = new Blob([csvContent], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `system_logs_${new Date().toISOString().split('T')[0]}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    window.URL.revokeObjectURL(url);
   };
 
   return (
@@ -80,14 +133,25 @@ export default function LogsPage({ currentUser }) {
       />
 
       <main className="main-content">
-        <h1 className="header-title">Logs Page</h1>
+        <h1 className="header-title">System Logs</h1>
 
-        {/* Button to clear all logs */}
-        <button className="clear-logs-button" onClick={clearLogs}>
-          Clear Logs
-        </button>
+        <div className="logs-actions">
+          <button 
+            className="clear-logs-button" 
+            onClick={clearLogs}
+            title="Clear all logs"
+          >
+            Clear
+          </button>
+          <button 
+            className="export-logs-button" 
+            onClick={exportLogs}
+            title="Export logs to CSV"
+          >
+            Export
+          </button>
+        </div>
 
-        {/* Logs table displaying the list of log entries */}
         <div className="logs-table-container">
           <table className="logs-table">
             <thead>
@@ -100,21 +164,19 @@ export default function LogsPage({ currentUser }) {
             </thead>
             <tbody>
               {logs.length > 0 ? (
-                logs
-                  .slice()
-                  .reverse() // Display the logs in reverse order (most recent first)
-                  .map((log, index) => (
-                    <tr key={index}>
-                      <td>{log.date}</td>
-                      <td>{log.time}</td>
-                      <td>{log.user}</td>
-                      <td>{log.action}</td>
-                    </tr>
-                  ))
+                logs.map((log, index) => (
+                  <tr key={`${log.date}-${log.time}-${log.user}-${log.action}-${index}`}>
+                    <td>{log.date}</td>
+                    <td>{log.time}</td>
+                    <td>{log.user}</td>
+                    <td>{log.action}</td>
+                  </tr>
+                ))
               ) : (
                 <tr>
-                  <td colSpan="4">No logs available</td>{" "}
-                  {/* Placeholder if no logs */}
+                  <td colSpan="4" className="no-logs-message">
+                    No logs available
+                  </td>
                 </tr>
               )}
             </tbody>

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, Suspense } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import "./styles/homepage.css";
 import flameIcon from "../assets/images/Flame icon.svg";
@@ -38,8 +38,13 @@ export default function HomePage({ currentUser }) {
    * @returns {any} The loaded or default value.
    */
   const loadInitialState = (key, defaultValue) => {
-    const storedValue = localStorage.getItem(key);
-    return storedValue ? JSON.parse(storedValue) : defaultValue;
+    try {
+      const storedValue = localStorage.getItem(key);
+      return storedValue ? JSON.parse(storedValue) : defaultValue;
+    } catch (error) {
+      console.error(`Error loading ${key} from localStorage:`, error);
+      return defaultValue;
+    }
   };
 
   const [activeAlarms, setActiveAlarms] = useState(
@@ -68,8 +73,13 @@ export default function HomePage({ currentUser }) {
    * @returns {any} The stored or default value.
    */
   const loadStoredState = (key, defaultValue) => {
-    const storedData = localStorage.getItem(key);
-    return storedData ? JSON.parse(storedData) : defaultValue;
+    try {
+      const storedData = localStorage.getItem(key);
+      return storedData ? JSON.parse(storedData) : defaultValue;
+    } catch (error) {
+      console.error(`Error loading ${key} from localStorage:`, error);
+      return defaultValue;
+    }
   };
 
   /**
@@ -341,81 +351,156 @@ export default function HomePage({ currentUser }) {
   };
 
   return (
-    <div className="home-container">
-      <Sidebar
-        user={user}
-        handleSignOut={handleSignOut}
-        isCollapsed={isSidebarCollapsed}
-      />
-      <main className="main-content">
-        <h1 className="header-title">Defense Panel</h1>
+    <ErrorBoundary>
+      <Suspense fallback={<div>Loading...</div>}>
+        <div className="home-container">
+          <Sidebar
+            user={user}
+            handleSignOut={handleSignOut}
+            isCollapsed={isSidebarCollapsed}
+          />
+          <main className="main-content">
+            <h1 className="header-title">Defense Panel</h1>
 
-        {/* Sensors Section */}
-        <section className="sensors-section">
-          <h2>Sensors</h2>
-          <div className="sensor-cards-container">
-            {/* Custom sensors */}
-            {customSensors.map((sensor, index) => (
-              <div className="sensor-card" key={`sensor-${sensor.id}-${index}`}>
-                <div className="sensor-icon custom-icon">{sensor.icon}</div>
-                <h3>{sensor.name}</h3>
-                <button
-                  className="alarm-button"
-                  style={{
-                    backgroundColor: activatedSensors[sensor.sensorKey]
-                      ? "green"
-                      : "blue",
-                  }}
-                  onClick={() => toggleSensor(sensor.sensorKey)}
-                >
-                  {activatedSensors[sensor.sensorKey]
-                    ? "Deactivate"
-                    : "Activate"}
-                </button>
-                <p className="last-triggered-text">
-                  Last Activated:{" "}
-                  {lastTriggeredTimes[sensor.sensorKey] || "Never"}
-                </p>
-              </div>
-            ))}
-          </div>
-        </section>
+            {/* Sensors Section */}
+            <section className="sensors-section">
+              <h2>Sensors</h2>
+              {customSensors.length === 0 ? (
+                <div className="empty-state-message">
+                  {user?.isAdmin ? (
+                    <div>
+                      <p>No sensors have been created yet.</p>
+                      <Link to="/settings" className="primary-button">
+                        Go to Settings to Create Sensors
+                      </Link>
+                    </div>
+                  ) : (
+                    <p>No sensors available. Please contact your system administrator to set up sensors.</p>
+                  )}
+                </div>
+              ) : (
+                <div className="sensor-cards-container">
+                  {/* Custom sensors */}
+                  {customSensors.map((sensor, index) => (
+                    <div className="sensor-card" key={`sensor-${sensor.id}-${index}`}>
+                      <div className="sensor-icon custom-icon">{sensor.icon}</div>
+                      <h3>{sensor.name}</h3>
+                      <button
+                        className="alarm-button"
+                        style={{
+                          backgroundColor: activatedSensors[sensor.sensorKey]
+                            ? "green"
+                            : "blue",
+                        }}
+                        onClick={() => toggleSensor(sensor.sensorKey)}
+                      >
+                        {activatedSensors[sensor.sensorKey]
+                          ? "Deactivate"
+                          : "Activate"}
+                      </button>
+                      <p className="last-triggered-text">
+                        Last Activated:{" "}
+                        {lastTriggeredTimes[sensor.sensorKey] || "Never"}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </section>
 
-        {/* Alarms Section */}
-        <section className="alarms-section">
-          <h2>Alarms</h2>
-          <div className="alarm-cards-container">
-            {/* Custom alarms */}
-            {customSensors.map((sensor, index) => (
-              <div className="alarm-card" key={`alarm-${sensor.id}-${index}`}>
-                <div className="alarm-icon custom-icon">{sensor.icon}</div>
-                <h3>{sensor.name} Alarm</h3>
-                <p className="last-triggered-text">
-                  Active Since:{" "}
-                  {activeAlarms[sensor.alarmKey]
-                    ? lastTriggeredTimes[sensor.alarmKey]
-                    : "Not active"}
-                </p>
-                <button
-                  className="alarm-button"
-                  style={{
-                    backgroundColor: activeAlarms[sensor.alarmKey]
-                      ? "red"
-                      : "blue",
-                  }}
-                  onClick={() => silenceAlarm(sensor.alarmKey)}
-                >
-                  Silence Alarm
-                </button>
-                <p className="last-triggered-text">
-                  Last Triggered:{" "}
-                  {lastTriggeredTimes[sensor.alarmKey] || "Never"}
-                </p>
-              </div>
-            ))}
-          </div>
-        </section>
-      </main>
-    </div>
+            {/* Alarms Section */}
+            <section className="alarms-section">
+              <h2>Alarms</h2>
+              {customSensors.length === 0 ? (
+                <div className="empty-state-message">
+                  {user?.isAdmin ? (
+                    <div>
+                      <p>No alarms available. Alarms are created automatically when you create sensors.</p>
+                      <Link to="/settings" className="primary-button">
+                        Go to Settings to Create Sensors
+                      </Link>
+                    </div>
+                  ) : (
+                    <p>No alarms available. Please contact your system administrator to set up sensors and alarms.</p>
+                  )}
+                </div>
+              ) : (
+                <div className="alarm-cards-container">
+                  {/* Custom alarms */}
+                  {customSensors.map((sensor, index) => (
+                    <div className="alarm-card" key={`alarm-${sensor.id}-${index}`}>
+                      <div className="alarm-icon custom-icon">{sensor.icon}</div>
+                      <h3>{sensor.name} Alarm</h3>
+                      <p className="last-triggered-text">
+                        Active Since:{" "}
+                        {activeAlarms[sensor.alarmKey]
+                          ? lastTriggeredTimes[sensor.alarmKey]
+                          : "Not active"}
+                      </p>
+                      <button
+                        className="alarm-button"
+                        style={{
+                          backgroundColor: activeAlarms[sensor.alarmKey]
+                            ? "red"
+                            : "blue",
+                        }}
+                        onClick={() => silenceAlarm(sensor.alarmKey)}
+                      >
+                        Silence Alarm
+                      </button>
+                      <p className="last-triggered-text">
+                        Last Triggered:{" "}
+                        {lastTriggeredTimes[sensor.alarmKey] || "Never"}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </section>
+          </main>
+        </div>
+      </Suspense>
+    </ErrorBoundary>
   );
 }
+
+// Add error boundary component
+class ErrorBoundary extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = { hasError: false };
+  }
+
+  static getDerivedStateFromError(error) {
+    return { hasError: true };
+  }
+
+  componentDidCatch(error, errorInfo) {
+    // Log the error to your error reporting service
+    console.error('Error:', error, errorInfo);
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div className="error-container">
+          <h1>Something went wrong.</h1>
+          <button onClick={() => window.location.reload()}>
+            Refresh Page
+          </button>
+        </div>
+      );
+    }
+
+    return this.props.children;
+  }
+}
+
+// Add error handling to localStorage setItem operations
+const safeSetItem = (key, value) => {
+  try {
+    localStorage.setItem(key, JSON.stringify(value));
+  } catch (error) {
+    console.error(`Error saving ${key} to localStorage:`, error);
+  }
+};
