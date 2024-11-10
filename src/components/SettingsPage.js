@@ -21,6 +21,22 @@ export default function SettingsPage() {
   const [editingUser, setEditingUser] = useState(null); // State for user being edited
   const [newUserName, setNewUserName] = useState(""); // State for editing user's name
   const [newPassword, setNewPassword] = useState(""); // State for editing user's password
+  const [newSensor, setNewSensor] = useState({
+    name: '',
+    icon: '',
+    description: ''
+  });
+  const [customSensors, setCustomSensors] = useState([]);
+  const [logSettings, setLogSettings] = useState({
+    maxEntries: parseInt(localStorage.getItem('logMaxEntries')) || 1000,
+    retentionDays: parseInt(localStorage.getItem('logRetentionDays')) || 30,
+    autoDelete: localStorage.getItem('logAutoDelete') === 'true'
+  });
+  const [newUser, setNewUser] = useState({
+    username: '',
+    password: '',
+    isAdmin: false
+  });
 
   /**
    * useEffect hook runs once on component mount to load user data and users list
@@ -77,6 +93,14 @@ export default function SettingsPage() {
     }
   }, [navigate]); // Dependency array to re-run effect when navigate changes
 
+  // Load custom sensors on component mount
+  useEffect(() => {
+    const stored = localStorage.getItem('customSensors');
+    if (stored) {
+      setCustomSensors(JSON.parse(stored));
+    }
+  }, []);
+
   /**
    * Function to notify users who are not admins
    */
@@ -124,15 +148,13 @@ export default function SettingsPage() {
    * @param {string} password - The password to validate
    * @returns {boolean} - Whether the password is valid
    */
-  const validatePassword = (password) => {
-    return (
-      passwordRequirements.length(password) &&
-      passwordRequirements.uppercase(password) &&
-      passwordRequirements.lowercase(password) &&
-      passwordRequirements.number(password) &&
-      passwordRequirements.specialChar(password)
-    );
-  };
+  const validatePassword = (password) => ({
+    length: password.length >= 16,
+    uppercase: /[A-Z]/.test(password),
+    lowercase: /[a-z]/.test(password),
+    number: /[0-9]/.test(password),
+    specialChar: /[!@#$%^&*]/.test(password),
+  });
 
   /**
    * Function to save changes made to a user's information
@@ -288,6 +310,254 @@ const handleSaveUserEdit = async () => {
     localStorage.setItem("logs", JSON.stringify(logs));
   };
 
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    
+    // Check if user is admin
+    if (!user?.isAdmin) {
+      alert("Only administrators can create sensors.");
+      return;
+    }
+    
+    // Create sensor ID from name
+    const sensorId = newSensor.name.toLowerCase().replace(/\s+/g, '_');
+    
+    const newCustomSensor = {
+      id: sensorId,
+      name: newSensor.name,
+      icon: newSensor.icon || '🔔',
+      description: newSensor.description,
+      sensorKey: `${sensorId}Sensor`,
+      alarmKey: `${sensorId}Alarm`
+    };
+
+    const updatedSensors = [...customSensors, newCustomSensor];
+    setCustomSensors(updatedSensors);
+    localStorage.setItem('customSensors', JSON.stringify(updatedSensors));
+
+    // Initialize sensor and alarm states in localStorage
+    const storedActivatedSensors = JSON.parse(localStorage.getItem('activatedSensors') || '{}');
+    const storedActiveAlarms = JSON.parse(localStorage.getItem('activeAlarms') || '{}');
+    const storedLastTriggeredTimes = JSON.parse(localStorage.getItem('lastTriggeredTimes') || '{}');
+
+    storedActivatedSensors[newCustomSensor.sensorKey] = false;
+    storedActiveAlarms[newCustomSensor.alarmKey] = false;
+    storedLastTriggeredTimes[newCustomSensor.sensorKey] = 'Never';
+    storedLastTriggeredTimes[newCustomSensor.alarmKey] = 'Never';
+
+    localStorage.setItem('activatedSensors', JSON.stringify(storedActivatedSensors));
+    localStorage.setItem('activeAlarms', JSON.stringify(storedActiveAlarms));
+    localStorage.setItem('lastTriggeredTimes', JSON.stringify(storedLastTriggeredTimes));
+
+    // Log the sensor creation
+    logEvent(`Created new sensor: "${newSensor.name}"`);
+
+    // Reset form
+    setNewSensor({ name: '', icon: '', description: '' });
+  };
+
+  const deleteSensor = (sensorId) => {
+    // Check if user is admin
+    if (!user?.isAdmin) {
+      alert("Only administrators can delete sensors.");
+      return;
+    }
+
+    // Find the sensor to log its name
+    const sensorToDelete = customSensors.find(sensor => sensor.id === sensorId);
+    
+    const updatedSensors = customSensors.filter(sensor => sensor.id !== sensorId);
+    setCustomSensors(updatedSensors);
+    localStorage.setItem('customSensors', JSON.stringify(updatedSensors));
+
+    // Clean up related states in localStorage
+    const storedActivatedSensors = JSON.parse(localStorage.getItem('activatedSensors') || '{}');
+    const storedActiveAlarms = JSON.parse(localStorage.getItem('activeAlarms') || '{}');
+    const storedLastTriggeredTimes = JSON.parse(localStorage.getItem('lastTriggeredTimes') || '{}');
+
+    delete storedActivatedSensors[`${sensorId}Sensor`];
+    delete storedActiveAlarms[`${sensorId}Alarm`];
+    delete storedLastTriggeredTimes[`${sensorId}Sensor`];
+    delete storedLastTriggeredTimes[`${sensorId}Alarm`];
+
+    localStorage.setItem('activatedSensors', JSON.stringify(storedActivatedSensors));
+    localStorage.setItem('activeAlarms', JSON.stringify(storedActiveAlarms));
+    localStorage.setItem('lastTriggeredTimes', JSON.stringify(storedLastTriggeredTimes));
+
+    // Log the sensor deletion
+    logEvent(`Deleted sensor: "${sensorToDelete.name}"`);
+  };
+
+  const handleLogSettingsChange = (setting, value) => {
+    if (!user?.isAdmin) {
+      alert("Only administrators can modify log settings.");
+      return;
+    }
+
+    setLogSettings(prev => {
+      const newSettings = { ...prev, [setting]: value };
+      
+      // Save to localStorage
+      if (setting === 'maxEntries') {
+        localStorage.setItem('logMaxEntries', value);
+      } else if (setting === 'retentionDays') {
+        localStorage.setItem('logRetentionDays', value);
+      } else if (setting === 'autoDelete') {
+        localStorage.setItem('logAutoDelete', value);
+      }
+
+      // Log the change
+      logEvent(`Modified log setting: ${setting} set to ${value}`);
+      
+      // Apply the settings
+      applyLogSettings(newSettings);
+      
+      return newSettings;
+    });
+  };
+
+  const applyLogSettings = (settings) => {
+    const logs = JSON.parse(localStorage.getItem('logs') || '[]');
+    let updatedLogs = [...logs];
+
+    // Apply max entries limit
+    if (settings.maxEntries > 0) {
+      updatedLogs = updatedLogs.slice(-settings.maxEntries);
+    }
+
+    // Apply retention period if auto-delete is enabled
+    if (settings.autoDelete) {
+      const cutoffDate = new Date();
+      cutoffDate.setDate(cutoffDate.getDate() - settings.retentionDays);
+      
+      updatedLogs = updatedLogs.filter(log => {
+        const logDate = new Date(log.date);
+        return logDate > cutoffDate;
+      });
+    }
+
+    localStorage.setItem('logs', JSON.stringify(updatedLogs));
+  };
+
+  const clearLogs = () => {
+    if (!user?.isAdmin) {
+      alert("Only administrators can clear logs.");
+      return;
+    }
+
+    if (window.confirm("Are you sure you want to clear all logs? This action cannot be undone.")) {
+      localStorage.setItem('logs', JSON.stringify([]));
+      logEvent("Cleared all logs");
+    }
+  };
+
+  const exportLogs = () => {
+    if (!user?.isAdmin) {
+      alert("Only administrators can export logs.");
+      return;
+    }
+
+    const logs = JSON.parse(localStorage.getItem('logs') || '[]');
+    const csvContent = [
+      ['Date', 'Time', 'User', 'Action'],
+      ...logs.map(log => [log.date, log.time, log.user, log.action])
+    ].map(row => row.join(',')).join('\n');
+
+    const blob = new Blob([csvContent], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `system_logs_${new Date().toISOString().split('T')[0]}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    window.URL.revokeObjectURL(url);
+
+    logEvent("Exported logs to CSV");
+  };
+
+  const handleCreateUser = async (e) => {
+    e.preventDefault();
+    
+    if (!user?.isAdmin) {
+      alert("Only administrators can create users.");
+      return;
+    }
+
+    // Check for empty fields
+    if (!newUser.username || !newUser.password) {
+      alert("Username and password are required.");
+      return;
+    }
+
+    // Check username length
+    if (newUser.username.length < 5) {
+      if (!window.confirm("Username is shorter than 5 characters. Create anyway?")) {
+        return;
+      }
+    }
+
+    // Check if username exists
+    const storedUsers = JSON.parse(localStorage.getItem('users') || '[]');
+    if (storedUsers.some(u => u.username === newUser.username)) {
+      alert("Username already exists.");
+      return;
+    }
+
+    // Validate password and warn if weak
+    const passwordRequirements = validatePassword(newUser.password);
+    const isWeakPassword = !Object.values(passwordRequirements).every(Boolean);
+    
+    if (isWeakPassword) {
+      const weaknesses = [];
+      if (!passwordRequirements.length) weaknesses.push("- Less than 16 characters");
+      if (!passwordRequirements.uppercase) weaknesses.push("- Missing uppercase letter");
+      if (!passwordRequirements.lowercase) weaknesses.push("- Missing lowercase letter");
+      if (!passwordRequirements.number) weaknesses.push("- Missing number");
+      if (!passwordRequirements.specialChar) weaknesses.push("- Missing special character");
+
+      const confirmMessage = `Warning: This password is weak:\n${weaknesses.join('\n')}\n\nCreate user anyway?`;
+      if (!window.confirm(confirmMessage)) {
+        return;
+      }
+    }
+
+    // Hash password and create user
+    const hashedPassword = await bcrypt.hash(newUser.password, 10);
+    const createdUser = {
+      username: newUser.username,
+      password: hashedPassword,
+      isAdmin: newUser.isAdmin
+    };
+
+    // Add user to storage
+    const updatedUsers = [...storedUsers, createdUser];
+    localStorage.setItem('users', JSON.stringify(updatedUsers));
+    setUsers(updatedUsers);
+
+    // Log the creation with details
+    console.log('Created new user:', {
+      username: newUser.username,
+      isAdmin: newUser.isAdmin,
+      passwordStrength: isWeakPassword ? 'Weak' : 'Strong',
+      weaknesses: isWeakPassword ? Object.entries(passwordRequirements)
+        .filter(([_, valid]) => !valid)
+        .map(([requirement]) => requirement) : []
+    });
+
+    // Log to admin logs
+    logEvent(`Created new user "${newUser.username}"${newUser.isAdmin ? ' with admin privileges' : ''}`);
+
+    // Reset form
+    setNewUser({
+      username: '',
+      password: '',
+      isAdmin: false
+    });
+
+    alert("User created successfully!");
+  };
+
   return (
     <div className="home-container">
       <Sidebar
@@ -297,7 +567,122 @@ const handleSaveUserEdit = async () => {
       />
 
       <main className="main-content">
-        <h1 className="header-title">Settings</h1> {/* Page title */}
+        <h1 className="header-title">Settings</h1>
+        
+        {/* Add Custom Sensors Section */}
+        <section className="custom-sensors-section">
+          <h2>Create Custom Sensor</h2>
+          {!user?.isAdmin ? (
+            <p className="admin-only-message">Only administrators can create and manage sensors.</p>
+          ) : (
+            <form onSubmit={handleSubmit} className="sensor-form">
+              <div className="form-group">
+                <label>Sensor Name:</label>
+                <input
+                  type="text"
+                  value={newSensor.name}
+                  onChange={(e) => setNewSensor({...newSensor, name: e.target.value})}
+                  required
+                  placeholder="Enter sensor name"
+                />
+              </div>
+              
+              <div className="form-group">
+                <label>Icon (emoji or URL):</label>
+                <input
+                  type="text"
+                  value={newSensor.icon}
+                  onChange={(e) => setNewSensor({...newSensor, icon: e.target.value})}
+                  placeholder="🔔"
+                />
+              </div>
+
+              <div className="form-group">
+                <label>Description:</label>
+                <textarea
+                  value={newSensor.description}
+                  onChange={(e) => setNewSensor({...newSensor, description: e.target.value})}
+                  placeholder="Describe the sensor's purpose"
+                />
+              </div>
+
+              <button type="submit" className="create-sensor-btn">
+                Create Sensor
+              </button>
+            </form>
+          )}
+        </section>
+
+        <section className="existing-sensors-section">
+          <h2>Existing Custom Sensors</h2>
+          <div className="sensors-grid">
+            {customSensors.map((sensor, index) => (
+              <div key={`settings-sensor-${sensor.id}-${index}`} className="sensor-item">
+                <div className="sensor-icon">{sensor.icon}</div>
+                <div className="sensor-info">
+                  <h3>{sensor.name}</h3>
+                  <p>{sensor.description}</p>
+                </div>
+                {user?.isAdmin && (
+                  <button 
+                    onClick={() => deleteSensor(sensor.id)}
+                    className="delete-sensor-btn"
+                  >
+                    Delete
+                  </button>
+                )}
+              </div>
+            ))}
+          </div>
+        </section>
+
+        <section className="create-user-section">
+          <h2>Create New User</h2>
+          {!user?.isAdmin ? (
+            <p className="admin-only-message">Only administrators can create users.</p>
+          ) : (
+            <form onSubmit={handleCreateUser} className="create-user-form">
+              <div className="form-group">
+                <label>Username:</label>
+                <input
+                  type="text"
+                  value={newUser.username}
+                  onChange={(e) => setNewUser({...newUser, username: e.target.value})}
+                  placeholder="Enter username"
+                  required
+                />
+              </div>
+              
+              <div className="form-group">
+                <label>Password:</label>
+                <input
+                  type="password"
+                  value={newUser.password}
+                  onChange={(e) => setNewUser({...newUser, password: e.target.value})}
+                  placeholder="Enter password"
+                  required
+                />
+              </div>
+
+              <div className="form-group checkbox-group">
+                <label>
+                  <input
+                    type="checkbox"
+                    checked={newUser.isAdmin}
+                    onChange={(e) => setNewUser({...newUser, isAdmin: e.target.checked})}
+                  />
+                  Create as Administrator
+                </label>
+              </div>
+
+              <button type="submit" className="create-user-btn">
+                Create User
+              </button>
+            </form>
+          )}
+        </section>
+
+        {/* Existing Users Section */}
         <section className="users-section">
           <h2>Manage Users</h2> {/* Section title */}
           <div className="users-list">
@@ -348,6 +733,73 @@ const handleSaveUserEdit = async () => {
               ))
             )}
           </div>
+        </section>
+
+        <section className="log-settings-section">
+          <h2>Log Management</h2>
+          {!user?.isAdmin ? (
+            <p className="admin-only-message">Only administrators can manage logs.</p>
+          ) : (
+            <>
+              <div className="log-settings-grid">
+                <div className="log-setting-item">
+                  <label>Maximum Log Entries:</label>
+                  <input
+                    type="number"
+                    min="0"
+                    value={logSettings.maxEntries}
+                    onChange={(e) => handleLogSettingsChange('maxEntries', parseInt(e.target.value))}
+                    className="log-setting-input"
+                  />
+                  <p className="setting-description">
+                    Set to 0 for unlimited entries
+                  </p>
+                </div>
+
+                <div className="log-setting-item">
+                  <label>Auto-Delete Logs:</label>
+                  <div className="toggle-container">
+                    <input
+                      type="checkbox"
+                      checked={logSettings.autoDelete}
+                      onChange={(e) => handleLogSettingsChange('autoDelete', e.target.checked)}
+                      className="toggle-input"
+                    />
+                    <span className="toggle-label">
+                      {logSettings.autoDelete ? 'Enabled' : 'Disabled'}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="log-setting-item">
+                  <label>Retention Period (days):</label>
+                  <input
+                    type="number"
+                    min="1"
+                    value={logSettings.retentionDays}
+                    onChange={(e) => handleLogSettingsChange('retentionDays', parseInt(e.target.value))}
+                    className="log-setting-input"
+                    disabled={!logSettings.autoDelete}
+                  />
+                </div>
+              </div>
+
+              <div className="log-actions">
+                <button 
+                  onClick={clearLogs}
+                  className="clear-logs-btn"
+                >
+                  Clear All Logs
+                </button>
+                <button 
+                  onClick={exportLogs}
+                  className="export-logs-btn"
+                >
+                  Export Logs to CSV
+                </button>
+              </div>
+            </>
+          )}
         </section>
       </main>
     </div>

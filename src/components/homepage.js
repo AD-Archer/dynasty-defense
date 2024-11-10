@@ -109,176 +109,83 @@ export default function HomePage({ currentUser }) {
     navigate("/");
   };
 
-useEffect(() => {
-  // Component initialization tasks
-  checkUserLogin(); // Validate user login status
+  const [customSensors, setCustomSensors] = useState([]);
 
-  // Load last triggered times and activated sensors from local storage
-  setLastTriggeredTimes(
-    loadStoredState("lastTriggeredTimes", lastTriggeredTimes)
-  );
-  const storedActivatedSensors = loadStoredState(
-    "activatedSensors",
-    activatedSensors
-  );
-  setActivatedSensors(storedActivatedSensors);
+  useEffect(() => {
+    // Component initialization tasks
+    checkUserLogin();
 
-  // Trigger alarms for active sensors initially
-  Object.keys(storedActivatedSensors).forEach((sensor) => {
-    if (storedActivatedSensors[sensor]) {
-      triggerAlarmForSensor(sensor); // Trigger the alarm if the sensor is active
-    }
-  });
+    // Load custom sensors and states only once on mount
+    const storedCustomSensors = JSON.parse(localStorage.getItem("customSensors") || "[]");
+    setCustomSensors(storedCustomSensors);
+    setLastTriggeredTimes(loadStoredState("lastTriggeredTimes", {}));
+    setActivatedSensors(loadStoredState("activatedSensors", {}));
+    setActiveAlarms(loadStoredState("activeAlarms", {}));
 
-  // Function to get a random delay between min and max (in milliseconds)
-  const getRandomDelay = (min, max) => {
-    return Math.floor(Math.random() * (max - min + 1)) + min;
-  };
+    // Function to get a random delay between min and max (in milliseconds)
+    const getRandomDelay = (min, max) => {
+      return Math.floor(Math.random() * (max - min + 1)) + min;
+    };
 
-  // Set up an interval to check sensor statuses periodically
-  let intervalId;
-  const checkSensors = () => {
-    setActiveAlarms((prevAlarms) => {
-      const newAlarms = { ...prevAlarms };
-      
+    // Set up an interval to check sensor statuses periodically
+    let intervalId;
+    const checkSensors = () => {
+      const currentActivatedSensors = loadStoredState("activatedSensors", {});
+      const currentAlarms = loadStoredState("activeAlarms", {});
+      let alarmsUpdated = false;
+      const newAlarms = { ...currentAlarms };
+
       // Check each sensor and update corresponding alarm
-      Object.keys(activatedSensors).forEach((sensor) => {
+      Object.keys(currentActivatedSensors).forEach((sensor) => {
         const alarmKey = `${sensor.replace("Sensor", "Alarm")}`;
-        if (!activatedSensors[sensor] && newAlarms[alarmKey]) {
-          // If sensor is inactive but alarm is on, silence it
-          newAlarms[alarmKey] = false;
-        } else if (activatedSensors[sensor]) {
-          // Only trigger alarm if sensor is active
-          triggerAlarmForSensor(sensor);
+        if (!currentActivatedSensors[sensor]) {
+          // If sensor is inactive, silence its alarm
+          if (newAlarms[alarmKey]) {
+            newAlarms[alarmKey] = false;
+            alarmsUpdated = true;
+          }
+        } else if (currentActivatedSensors[sensor] && Math.random() < 0.2) {
+          // 20% chance to trigger alarm if not already triggered
+          if (!newAlarms[alarmKey]) {
+            newAlarms[alarmKey] = true;
+            alarmsUpdated = true;
+            const currentTime = new Date().toLocaleTimeString();
+            const updatedTimes = {
+              ...loadStoredState("lastTriggeredTimes", {}),
+              [alarmKey]: currentTime
+            };
+            localStorage.setItem("lastTriggeredTimes", JSON.stringify(updatedTimes));
+            setLastTriggeredTimes(updatedTimes);
+            logEvent(`${alarmKey} triggered at ${currentTime}`);
+          }
         }
       });
 
-      localStorage.setItem("activeAlarms", JSON.stringify(newAlarms));
-      return newAlarms;
-    });
-
-    // Set the next check with a random delay
-    const delay = getRandomDelay(2000, 10000);
-    intervalId = setTimeout(checkSensors, delay);
-  };
-
-  // Start the first check
-  checkSensors();
-
-  // Cleanup function
-  return () => {
-    // Clear the interval when the component unmounts
-    clearTimeout(intervalId);
-  };
-}, []);
-  /**
-   * Triggers an alarm for a specified sensor if the sensor is active.
-   * @param {string} sensor - The sensor name.
-   */
-  const triggerAlarmForSensor = (sensor) => {
-    const alarmKey = `${sensor.replace("Sensor", "Alarm")}`;
-
-    // Only trigger the alarm if the sensor is active
-    if (activatedSensors[sensor]) {
-      const currentTime = new Date().toLocaleTimeString();
-      if (!activeAlarms[alarmKey]) {
-        setLastTriggeredTimes((prev) => {
-          const updatedTimes = { ...prev, [alarmKey]: currentTime };
-          localStorage.setItem(
-            "lastTriggeredTimes",
-            JSON.stringify(updatedTimes)
-          );
-          return updatedTimes;
-        });
-
-        setActiveAlarms((prev) => {
-          const newAlarms = { ...prev, [alarmKey]: true };
-          localStorage.setItem("activeAlarms", JSON.stringify(newAlarms));
-          logEvent(`${alarmKey} triggered at ${currentTime}`);
-          return newAlarms;
-        });
+      // Only update state if changes were made
+      if (alarmsUpdated) {
+        localStorage.setItem("activeAlarms", JSON.stringify(newAlarms));
+        setActiveAlarms(newAlarms);
       }
-    } else {
-      // If sensor is not active, ensure the corresponding alarm is silenced
-      silenceAlarmForSensor(sensor);
-    }
-  };
 
-  /**
-   * Silences the alarm for a specified sensor, regardless of whether the sensor is active.
-   * @param {string} sensor - The sensor name.
-   */
-  const silenceAlarmForSensor = (sensor) => {
-    const alarmKey = `${sensor.replace("Sensor", "Alarm")}`;
+      // Set the next check with a random delay
+      intervalId = setTimeout(checkSensors, getRandomDelay(2000, 10000));
+    };
 
-    setActiveAlarms((prev) => {
-      const newAlarms = { ...prev, [alarmKey]: false };
-      localStorage.setItem("activeAlarms", JSON.stringify(newAlarms));
-      logEvent(`Silenced ${alarmKey}.`);
-      return newAlarms;
-    });
-  };
+    // Start the first check
+    checkSensors();
 
-  /**
-   * Updates the sensor activation state and handles related alarm behavior.
-   * @param {string} sensor - The sensor name.
-   */
-  const toggleSensor = (sensor) => {
-    const currentTime = new Date().toLocaleTimeString();
-
-    setActivatedSensors((prev) => {
-      const newState = { ...prev, [sensor]: !prev[sensor] };
-
-      setLastTriggeredTimes((prev) => {
-        const updatedTimes = { ...prev };
-        if (newState[sensor]) {
-          updatedTimes[sensor] = currentTime;
-          logEvent(`${sensor} activated at ${currentTime}`);
-          triggerAlarmForSensor(sensor); // Check to trigger alarm if activating sensor
-        } else {
-          silenceAlarmForSensor(sensor); // Silence alarm if deactivating sensor
-        }
-        localStorage.setItem(
-          "lastTriggeredTimes",
-          JSON.stringify(updatedTimes)
-        );
-        return updatedTimes;
-      });
-
-      localStorage.setItem("activatedSensors", JSON.stringify(newState));
-      return newState;
-    });
-  };
-
-  /**
-   * Checks if a user is logged in and redirects if not.
-   */
-  const checkUserLogin = () => {
-    if (!loadStoredState("currentUser", null)) {
-      navigate("/");
-    }
-  };
-
-
-  /**
-   * Silences an alarm if the user has admin privileges.
-   * @param {string} alarm - The alarm to be silenced.
-   */
-  const silenceAlarm = (alarm) => {
-    if (user?.isAdmin) {
-      // Only log and update if the alarm is currently active
-      if (activeAlarms[alarm]) {
-        setActiveAlarms((prev) => {
-          const newAlarms = { ...prev, [alarm]: false };
-          localStorage.setItem("activeAlarms", JSON.stringify(newAlarms));
-          logEvent(`Silenced ${alarm} alarm.`); // Only logs when there was an active alarm
-          return newAlarms;
-        });
+    // Cleanup function
+    return () => {
+      if (intervalId) {
+        clearTimeout(intervalId);
       }
-    } else {
-      alert("Only the admin can perform this action.");
-    }
-  };
+    };
+  }, []); // Empty dependency array since we're loading from localStorage
+
+  // Add a separate useEffect for handling activatedSensors changes
+  useEffect(() => {
+    localStorage.setItem("activatedSensors", JSON.stringify(activatedSensors));
+  }, [activatedSensors]);
 
   /**
    * Renders a sensor card.
@@ -330,6 +237,109 @@ useEffect(() => {
     </div>
   );
 
+  // Update the silenceAlarm function
+  const silenceAlarm = (alarmKey) => {
+    if (!user?.isAdmin) {
+      alert("Only the admin can silence alarms.");
+      return;
+    }
+
+    setActiveAlarms((prev) => {
+      const newAlarms = { ...prev, [alarmKey]: false };
+      localStorage.setItem("activeAlarms", JSON.stringify(newAlarms));
+      logEvent(`Silenced ${alarmKey} alarm.`);
+      return newAlarms;
+    });
+  };
+
+  /**
+   * Updates the sensor activation state and handles related alarm behavior.
+   * @param {string} sensor - The sensor name.
+   */
+  const toggleSensor = (sensor) => {
+    const currentTime = new Date().toLocaleTimeString();
+
+    setActivatedSensors((prev) => {
+      const newState = { ...prev, [sensor]: !prev[sensor] };
+
+      setLastTriggeredTimes((prev) => {
+        const updatedTimes = { ...prev };
+        if (newState[sensor]) {
+          updatedTimes[sensor] = currentTime;
+          logEvent(`${sensor} activated at ${currentTime}`);
+          triggerAlarmForSensor(sensor); // Check to trigger alarm if activating sensor
+        } else {
+          silenceAlarmForSensor(sensor); // Silence alarm if deactivating sensor
+        }
+        localStorage.setItem(
+          "lastTriggeredTimes",
+          JSON.stringify(updatedTimes)
+        );
+        return updatedTimes;
+      });
+
+      localStorage.setItem("activatedSensors", JSON.stringify(newState));
+      return newState;
+    });
+  };
+
+  /**
+   * Checks if a user is logged in and redirects if not.
+   */
+  const checkUserLogin = () => {
+    if (!loadStoredState("currentUser", null)) {
+      navigate("/");
+    }
+  };
+
+  /**
+   * Silences the alarm for a specified sensor, regardless of whether the sensor is active.
+   * @param {string} sensor - The sensor name.
+   */
+  const silenceAlarmForSensor = (sensor) => {
+    const alarmKey = `${sensor.replace("Sensor", "Alarm")}`;
+
+    setActiveAlarms((prev) => {
+      const newAlarms = { ...prev, [alarmKey]: false };
+      localStorage.setItem("activeAlarms", JSON.stringify(newAlarms));
+      logEvent(`Silenced ${alarmKey}.`);
+      return newAlarms;
+    });
+  };
+
+  /**
+   * Triggers an alarm for a specified sensor if the sensor is active.
+   * @param {string} sensor - The sensor name.
+   */
+  const triggerAlarmForSensor = (sensor) => {
+    const alarmKey = `${sensor.replace("Sensor", "Alarm")}`;
+
+    // Only trigger the alarm if the sensor is active
+    if (activatedSensors[sensor]) {
+      const currentTime = new Date().toLocaleTimeString();
+      if (!activeAlarms[alarmKey]) {
+        setLastTriggeredTimes((prev) => {
+          const updatedTimes = { ...prev, [alarmKey]: currentTime };
+          localStorage.setItem(
+            "lastTriggeredTimes",
+            JSON.stringify(updatedTimes)
+          );
+          return updatedTimes;
+        });
+
+        setActiveAlarms((prev) => {
+          const newAlarms = { ...prev, [alarmKey]: true };
+          localStorage.setItem("activeAlarms", JSON.stringify(newAlarms));
+          logEvent(`${alarmKey} triggered at ${currentTime}`);
+          return newAlarms;
+        });
+      }
+    } else {
+      // If sensor is not active, ensure the corresponding alarm is silenced
+      silenceAlarmForSensor(sensor);
+    }
+  };
+
   return (
     <div className="home-container">
       <Sidebar
@@ -339,20 +349,70 @@ useEffect(() => {
       />
       <main className="main-content">
         <h1 className="header-title">Defense Panel</h1>
+
+        {/* Sensors Section */}
         <section className="sensors-section">
-          <h2>Main Sensors</h2>
+          <h2>Sensors</h2>
           <div className="sensor-cards-container">
-            {renderSensorCard("fireSensor", flameIcon)}
-            {renderSensorCard("smokeSensor", smokeIcon)}
-            {renderSensorCard("securitySensor", securitySafeIcon)}
+            {/* Custom sensors */}
+            {customSensors.map((sensor, index) => (
+              <div className="sensor-card" key={`sensor-${sensor.id}-${index}`}>
+                <div className="sensor-icon custom-icon">{sensor.icon}</div>
+                <h3>{sensor.name}</h3>
+                <button
+                  className="alarm-button"
+                  style={{
+                    backgroundColor: activatedSensors[sensor.sensorKey]
+                      ? "green"
+                      : "blue",
+                  }}
+                  onClick={() => toggleSensor(sensor.sensorKey)}
+                >
+                  {activatedSensors[sensor.sensorKey]
+                    ? "Deactivate"
+                    : "Activate"}
+                </button>
+                <p className="last-triggered-text">
+                  Last Activated:{" "}
+                  {lastTriggeredTimes[sensor.sensorKey] || "Never"}
+                </p>
+              </div>
+            ))}
           </div>
         </section>
+
+        {/* Alarms Section */}
         <section className="alarms-section">
-          <h2>Main Alarms</h2>
+          <h2>Alarms</h2>
           <div className="alarm-cards-container">
-            {renderAlarmCard("fireAlarm", flameIcon)}
-            {renderAlarmCard("smokeAlarm", smokeIcon)}
-            {renderAlarmCard("securityAlarm", securitySafeIcon)}
+            {/* Custom alarms */}
+            {customSensors.map((sensor, index) => (
+              <div className="alarm-card" key={`alarm-${sensor.id}-${index}`}>
+                <div className="alarm-icon custom-icon">{sensor.icon}</div>
+                <h3>{sensor.name} Alarm</h3>
+                <p className="last-triggered-text">
+                  Active Since:{" "}
+                  {activeAlarms[sensor.alarmKey]
+                    ? lastTriggeredTimes[sensor.alarmKey]
+                    : "Not active"}
+                </p>
+                <button
+                  className="alarm-button"
+                  style={{
+                    backgroundColor: activeAlarms[sensor.alarmKey]
+                      ? "red"
+                      : "blue",
+                  }}
+                  onClick={() => silenceAlarm(sensor.alarmKey)}
+                >
+                  Silence Alarm
+                </button>
+                <p className="last-triggered-text">
+                  Last Triggered:{" "}
+                  {lastTriggeredTimes[sensor.alarmKey] || "Never"}
+                </p>
+              </div>
+            ))}
           </div>
         </section>
       </main>
