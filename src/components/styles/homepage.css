@@ -101,6 +101,14 @@
   align-items: center; /* Center items horizontally */
   border-radius: 10px; /* Rounded corners */
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2); /* Subtle shadow */
+  animation: scaleIn 0.3s var(--transition-function);
+  transition: transform 0.3s var(--transition-function);
+}
+
+.sensor-card:hover,
+.alarm-card:hover {
+  transform: translateY(-5px) scale(1.02);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
 }
 
 /* Icon styles */
@@ -109,6 +117,12 @@
   width: 50px; /* Consistent icon size */
   height: auto; /* Maintain aspect ratio */
   margin-bottom: 10px; /* Space below icons */
+  transition: transform 0.3s var(--transition-function);
+}
+
+.sensor-card:hover .sensor-icon,
+.alarm-card:hover .alarm-icon {
+  transform: scale(1.1);
 }
 
 /* Alarm button styles */
@@ -121,10 +135,27 @@
   margin-top: 10px; /* Space above the button */
   cursor: pointer; /* Pointer cursor on hover */
   transition: background-color 0.3s; /* Transition effect */
+  position: relative;
+  overflow: hidden;
 }
 
 .alarm-button:hover {
   background-color: darkblue; /* Darker on hover */
+}
+
+.alarm-button::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+  transform: translateX(-100%);
+}
+
+.alarm-button:hover::after {
+  animation: shimmer 1s var(--transition-function);
 }
 
 /* Last triggered text styles */
@@ -133,4 +164,19 @@
   color: #bbb; /* Light gray color */
   font-size: 12px; /* Smaller font */
   text-align: center; /* Center align text */
+}
+
+/* Update homepage.css with animations */
+.home__section {
+  animation: slideInBottom 0.5s var(--transition-function);
+  animation-fill-mode: both;
+}
+
+.home__section:nth-child(1) { animation-delay: 0.1s; }
+.home__section:nth-child(2) { animation-delay: 0.2s; }
+.home__section:nth-child(3) { animation-delay: 0.3s; }
+
+/* Add loading animation */
+.loading-indicator {
+  animation: rotate 1s infinite linear;
 }

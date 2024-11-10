@@ -179,3 +179,43 @@
   text-align: center;
   font-weight: bold;
 }
+
+/* Update adminLog.css with animations */
+.admin-log__title {
+  animation: slideInTop 0.5s var(--transition-function);
+}
+
+.admin-log-entry {
+  animation: slideInBottom 0.3s var(--transition-function);
+  animation-fill-mode: both;
+}
+
+.admin-log-entry:nth-child(1) { animation-delay: 0.1s; }
+.admin-log-entry:nth-child(2) { animation-delay: 0.2s; }
+.admin-log-entry:nth-child(3) { animation-delay: 0.3s; }
+/* Continue for more entries */
+
+.admin-log-clear-button {
+  position: relative;
+  overflow: hidden;
+}
+
+.admin-log-clear-button::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+  transform: translateX(-100%);
+}
+
+.admin-log-clear-button:hover::after {
+  animation: shimmer 1s var(--transition-function);
+}
+
+/* Add animation for new log entries */
+.admin-log-entry.new {
+  animation: pulse 1s var(--transition-function);
+}
