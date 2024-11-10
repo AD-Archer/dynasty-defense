@@ -152,3 +152,12 @@ button:hover {
   background-size: 1000px 100%;
   animation: shimmer 2s infinite linear;
 }
+
+.toggle-button{
+  margin-top: 1px;
+  background-color: transparent;
+}
+.toggle-button:hover {
+  color: #357abd;
+  background-color: transparent;
+}
