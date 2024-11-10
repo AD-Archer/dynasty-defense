@@ -138,16 +138,27 @@ useEffect(() => {
   // Set up an interval to check sensor statuses periodically
   let intervalId;
   const checkSensors = () => {
-    // Use the latest state for activatedSensors
-    Object.keys(activatedSensors).forEach((sensor) => {
-      // Re-check activated sensors status
-      if (activatedSensors[sensor]) {
-        triggerAlarmForSensor(sensor); // Trigger the alarm if the sensor is active
-      }
+    setActiveAlarms((prevAlarms) => {
+      const newAlarms = { ...prevAlarms };
+      
+      // Check each sensor and update corresponding alarm
+      Object.keys(activatedSensors).forEach((sensor) => {
+        const alarmKey = `${sensor.replace("Sensor", "Alarm")}`;
+        if (!activatedSensors[sensor] && newAlarms[alarmKey]) {
+          // If sensor is inactive but alarm is on, silence it
+          newAlarms[alarmKey] = false;
+        } else if (activatedSensors[sensor]) {
+          // Only trigger alarm if sensor is active
+          triggerAlarmForSensor(sensor);
+        }
+      });
+
+      localStorage.setItem("activeAlarms", JSON.stringify(newAlarms));
+      return newAlarms;
     });
 
     // Set the next check with a random delay
-    const delay = getRandomDelay(2000, 10000); // Random delay between 2 and 10 seconds
+    const delay = getRandomDelay(2000, 10000);
     intervalId = setTimeout(checkSensors, delay);
   };
 
@@ -187,6 +198,9 @@ useEffect(() => {
           return newAlarms;
         });
       }
+    } else {
+      // If sensor is not active, ensure the corresponding alarm is silenced
+      silenceAlarmForSensor(sensor);
     }
   };
 
@@ -252,12 +266,15 @@ useEffect(() => {
    */
   const silenceAlarm = (alarm) => {
     if (user?.isAdmin) {
-      setActiveAlarms((prev) => {
-        const newAlarms = { ...prev, [alarm]: false };
-        localStorage.setItem("activeAlarms", JSON.stringify(newAlarms));
-        logEvent(`Silenced ${alarm} alarm.`);
-        return newAlarms;
-      });
+      // Only log and update if the alarm is currently active
+      if (activeAlarms[alarm]) {
+        setActiveAlarms((prev) => {
+          const newAlarms = { ...prev, [alarm]: false };
+          localStorage.setItem("activeAlarms", JSON.stringify(newAlarms));
+          logEvent(`Silenced ${alarm} alarm.`); // Only logs when there was an active alarm
+          return newAlarms;
+        });
+      }
     } else {
       alert("Only the admin can perform this action.");
     }
