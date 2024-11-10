@@ -1,6 +1,6 @@
 // Import necessary dependencies
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import bcrypt from "bcryptjs"; // For password hashing
 import "./styles/register.css";
 
@@ -73,7 +73,7 @@ const logRegistration = (action) => {
  * @param {boolean} props.showLogin - Indicates whether to show the login page
  * @returns {JSX.Element} The Register component
  */
-export default function Register({ togglePage, showLogin }) {
+export default function Register() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -247,9 +247,9 @@ export default function Register({ togglePage, showLogin }) {
             ))}
           </div>
         )}
-        <button className="toggle-button" onClick={togglePage}>
-          {showLogin ? "Go to Register" : "Login?"}
-        </button>
+        <p className="link-to-sign-in">
+          Already have an account? <Link to="/login">Login here</Link>
+        </p>
       </div>
     </div>
   );

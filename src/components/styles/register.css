@@ -13,3 +13,21 @@
   font-weight: bold;
 }
 
+.link-to-sign-in {
+  margin-top: 1rem;
+  text-align: center;
+  color: var(--text-color);
+}
+
+.link-to-sign-in a {
+  color: var(--primary-color);
+  text-decoration: none;
+  margin-left: 0.5rem;
+  transition: color 0.3s ease;
+}
+
+.link-to-sign-in a:hover {
+  color: var(--primary-hover);
+  text-decoration: underline;
+}
+

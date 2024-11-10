@@ -1,7 +1,7 @@
 // login.js
 
 import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import bcrypt from "bcryptjs"; // Import bcryptjs for password hashing
 import "./styles/global.css"; // Import global CSS styles
 
@@ -14,7 +14,7 @@ class User {
   }
 }
 
-export default function Login({ togglePage, showLogin }) {
+export default function Login() {
   const navigate = useNavigate(); // Hook to navigate programmatically
   const [username, setUsername] = useState(""); // State for storing the entered username
   const [password, setPassword] = useState(""); // State for storing the entered password
@@ -144,10 +144,9 @@ export default function Login({ togglePage, showLogin }) {
           </div>
           <button type="submit">Login</button> {/* Submit button for login */}
         </form>
-        <button className="toggle-button" onClick={togglePage}>
-          {showLogin ? "Go to Register" : "Register?"}{" "}
-          {/* Toggle to registration page */}
-        </button>
+        <p className="link-to-sign-in">
+          Don't have an account? <Link to="/register">Register here</Link>
+        </p>
       </div>
     </div>
   );

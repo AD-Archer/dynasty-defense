@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 import "./App.css";
 import Register from "./components/register";
@@ -10,20 +10,14 @@ import LandingPage from './components/LandingPage';
 import LearnMore from './components/LearnMore';
 
 function App() {
-  const [showLogin, setShowLogin] = useState(false);
-
-  const togglePage = () => {
-    setShowLogin((prev) => !prev);
-  };
-
   return (
     <Router>
       <div className="App">
         <Routes>
           <Route path="/" element={<LandingPage />} />
           <Route path="/learn-more" element={<LearnMore />} />
-          <Route path="/login" element={<Login togglePage={togglePage} />} />
-          <Route path="/register" element={<Register togglePage={togglePage} />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
           <Route path="/home" element={<HomePage />} />
           <Route path="/settings" element={<SettingsPage />} />
           <Route path="/AdminLog" element={<AdminLog />} />
