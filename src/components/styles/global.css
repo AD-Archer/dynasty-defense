@@ -1,0 +1,163 @@
+/* Global CSS Variables and Base Styles */
+:root {
+  /* Colors */
+  --bg-gradient-start: #1e1e1e;
+  --bg-gradient-end: #3b3b3b;
+  --card-bg-color: #2f2d2d;
+  --input-bg-color: #383838;
+  --text-color: #ffffff;
+  --input-text-color: #e0e0e0;
+  --icon-color: #888;
+  --border-color: #555;
+  --error-color: #e74c3c;
+  --success-color: #27ae60;
+  --primary-color: #007bff;
+  --primary-hover: #0056b3;
+
+  /* Spacing */
+  --spacing-xs: 0.5rem;
+  --spacing-sm: 1rem;
+  --spacing-md: 1.5rem;
+  --spacing-lg: 2rem;
+
+  /* Animations */
+  --transition-speed: 0.3s;
+  --transition-function: ease;
+}
+
+/* Animation Keyframes */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideInRight {
+  from { transform: translateX(100%); }
+  to { transform: translateX(0); }
+}
+
+@keyframes slideInLeft {
+  from { transform: translateX(-100%); }
+  to { transform: translateX(0); }
+}
+
+@keyframes scaleIn {
+  from { transform: scale(0.95); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+@keyframes slideInTop {
+  from { transform: translateY(-100%); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes slideInBottom {
+  from { transform: translateY(20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+  100% { transform: scale(1); }
+}
+
+@keyframes rotate {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes shimmer {
+  0% { background-position: -1000px 0; }
+  100% { background-position: 1000px 0; }
+}
+
+/* Global Resets */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Roboto', sans-serif;
+  color: var(--text-color);
+  background: linear-gradient(to right, var(--bg-gradient-start), var(--bg-gradient-end));
+  min-height: 100vh;
+}
+
+/* Global Form Elements */
+input, textarea {
+  width: 100%;
+  padding: var(--spacing-sm);
+  background-color: var(--input-bg-color);
+  border: 1px solid var(--border-color);
+  color: var(--input-text-color);
+  border-radius: 6px;
+  transition: border-color var(--transition-speed) var(--transition-function);
+}
+
+input:focus, textarea:focus {
+  outline: none;
+  border-color: var(--primary-color);
+}
+
+/* Global Button Styles */
+button {
+  background-color: var(--primary-color);
+  color: var(--text-color);
+  border: none;
+  padding: var(--spacing-sm);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all var(--transition-speed) var(--transition-function);
+}
+
+button:hover {
+  background-color: var(--primary-hover);
+  transform: translateY(-2px);
+}
+
+/* Utility Classes */
+.text-center { text-align: center; }
+.mt-1 { margin-top: var(--spacing-sm); }
+.mt-2 { margin-top: var(--spacing-md); }
+.mb-1 { margin-bottom: var(--spacing-sm); }
+.mb-2 { margin-bottom: var(--spacing-md); }
+.fade-in { animation: fadeIn var(--transition-speed) var(--transition-function); }
+.scale-in { animation: scaleIn var(--transition-speed) var(--transition-function); }
+
+/* Animation utility classes */
+.animate-slide-in-top {
+  animation: slideInTop 0.5s var(--transition-function);
+}
+
+.animate-slide-in-bottom {
+  animation: slideInBottom 0.5s var(--transition-function);
+}
+
+.animate-pulse {
+  animation: pulse 2s infinite var(--transition-function);
+}
+
+.animate-rotate {
+  animation: rotate 1s infinite linear;
+}
+
+.animate-shimmer {
+  background: linear-gradient(90deg, 
+    var(--card-bg-color) 0%, 
+    rgba(255,255,255,0.1) 50%, 
+    var(--card-bg-color) 100%);
+  background-size: 1000px 100%;
+  animation: shimmer 2s infinite linear;
+}
+
+.toggle-button{
+  margin-top: 1px;
+  background-color: transparent;
+}
+.toggle-button:hover {
+  color: #357abd;
+  background-color: transparent;
+}

@@ -1,0 +1,182 @@
+/* homepage.css */
+
+/* Main container for the homepage layout */
+.home-container {
+  display: flex; /* Flexbox layout for responsiveness */
+  height: 100vh; /* Full viewport height */
+}
+
+/* Sidebar styles */
+.sidebar {
+  background-color: var(--card-bg-color);
+  flex: 0 0 auto; /* Prevent sidebar from growing */
+  padding: 1rem;
+  display: flex;
+  flex-direction: column; /* Stack buttons vertically */
+  justify-content: space-between; /* Evenly space buttons */
+  transition: width 0.3s; /* Smooth width transition */
+  overflow: hidden; /* Prevent overflow */
+}
+
+.sidebar.collapsed {
+  width: 60px; /* Width when collapsed */
+  overflow: auto; /* Allow scrolling when collapsed */
+}
+
+/* Button styles */
+.sidebar-button {
+  background-color: var(--primary-color);
+  color: white;
+  border: none;
+  padding: 12px; /* Consistent padding */
+  border-radius: 6px;
+  font-size: 16px;
+  cursor: pointer;
+  margin-bottom: 1.5rem; /* Space between buttons */
+  height: 50px; /* Fixed height for uniformity */
+  width: 100%; /* Full width */
+  display: flex; /* Flexbox for centering content */
+  align-items: center; /* Center items vertically */
+  justify-content: center; /* Center items horizontally */
+  text-align: center; /* Center text */
+  transition: background-color 0.3s, opacity 0.3s; /* Smooth transition */
+}
+
+.sidebar-button.active {
+  background-color: #357abd;
+  opacity: 0.8; /* Increased opacity for active buttons */
+}
+
+.sidebar-button:hover {
+  background-color: #357abd; /* Hover effect */
+}
+
+/* Settings button */
+.settings-button {
+  margin-top: auto; /* Push to the bottom */
+  height: 50px; /* Match height with other buttons */
+  width: 100%; /* Full width */
+  padding: 12px; /* Consistent padding */
+}
+
+/* Main content area */
+.main-content {
+  flex-grow: 1; /* Fill the remaining space */
+  padding: 1rem;
+  background-color: var(--bg-gradient-end);
+  display: flex;
+  flex-direction: column; /* Stack content vertically */
+}
+
+/* Section styles */
+.sensors-section,
+.alarms-section,
+.custom-sensors,
+.custom-alarms {
+  margin: 1rem 0;
+  padding: 1rem;
+  background-color: var(--card-bg-color);
+  border-radius: 10px;
+}
+
+/* Card containers */
+.sensor-cards-container,
+.alarm-cards-container,
+.custom-alarms-container,
+.custom-sensors-container {
+  display: flex; /* Enable flex layout */
+  justify-content: center; /* Center cards */
+  flex-wrap: wrap; /* Allow wrapping to next line */
+}
+
+/* Card styles */
+.sensor-card,
+.alarm-card {
+  background-color: #383838; /* Dark background */
+  padding: 20px; /* Increased padding */
+  margin: 10px; /* Space between cards */
+  width: 200px; /* Fixed width for uniformity */
+  display: flex; /* Use flexbox for alignment */
+  flex-direction: column; /* Stack items vertically */
+  align-items: center; /* Center items horizontally */
+  border-radius: 10px; /* Rounded corners */
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2); /* Subtle shadow */
+  animation: scaleIn 0.3s var(--transition-function);
+  transition: transform 0.3s var(--transition-function);
+}
+
+.sensor-card:hover,
+.alarm-card:hover {
+  transform: translateY(-5px) scale(1.02);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+}
+
+/* Icon styles */
+.sensor-icon,
+.alarm-icon {
+  width: 50px; /* Consistent icon size */
+  height: auto; /* Maintain aspect ratio */
+  margin-bottom: 10px; /* Space below icons */
+  transition: transform 0.3s var(--transition-function);
+}
+
+.sensor-card:hover .sensor-icon,
+.alarm-card:hover .alarm-icon {
+  transform: scale(1.1);
+}
+
+/* Alarm button styles */
+.alarm-button {
+  background-color: var(--primary-color);
+  color: white; /* Button text color */
+  border: none;
+  border-radius: 6px; /* Rounded corners */
+  padding: 10px 15px; /* Button padding */
+  margin-top: 10px; /* Space above the button */
+  cursor: pointer; /* Pointer cursor on hover */
+  transition: background-color 0.3s; /* Transition effect */
+  position: relative;
+  overflow: hidden;
+}
+
+.alarm-button:hover {
+  background-color: darkblue; /* Darker on hover */
+}
+
+.alarm-button::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+  transform: translateX(-100%);
+}
+
+.alarm-button:hover::after {
+  animation: shimmer 1s var(--transition-function);
+}
+
+/* Last triggered text styles */
+.last-triggered-text {
+  margin-top: 10px; /* Space above text */
+  color: #bbb; /* Light gray color */
+  font-size: 12px; /* Smaller font */
+  text-align: center; /* Center align text */
+}
+
+/* Update homepage.css with animations */
+.home__section {
+  animation: slideInBottom 0.5s var(--transition-function);
+  animation-fill-mode: both;
+}
+
+.home__section:nth-child(1) { animation-delay: 0.1s; }
+.home__section:nth-child(2) { animation-delay: 0.2s; }
+.home__section:nth-child(3) { animation-delay: 0.3s; }
+
+/* Add loading animation */
+.loading-indicator {
+  animation: rotate 1s infinite linear;
+}
