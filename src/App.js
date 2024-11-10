@@ -6,6 +6,8 @@ import Login from "./components/login";
 import HomePage from "./components/homepage";
 import SettingsPage from "./components/SettingsPage";
 import AdminLog from "./components/AdminLog";
+import LandingPage from './components/LandingPage';
+import LearnMore from './components/LearnMore';
 
 function App() {
   const [showLogin, setShowLogin] = useState(false);
@@ -18,16 +20,10 @@ function App() {
     <Router>
       <div className="App">
         <Routes>
-          <Route
-            path="/"
-            element={
-              showLogin ? (
-                <Login togglePage={togglePage} />
-              ) : (
-                <Register togglePage={togglePage} />
-              )
-            }
-          />
+          <Route path="/" element={<LandingPage />} />
+          <Route path="/learn-more" element={<LearnMore />} />
+          <Route path="/login" element={<Login togglePage={togglePage} />} />
+          <Route path="/register" element={<Register togglePage={togglePage} />} />
           <Route path="/home" element={<HomePage />} />
           <Route path="/settings" element={<SettingsPage />} />
           <Route path="/AdminLog" element={<AdminLog />} />

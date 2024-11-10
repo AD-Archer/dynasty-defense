@@ -6,6 +6,7 @@ import bcrypt from "bcryptjs"; // Import bcrypt for password hashing
 import "./styles/homepage.css"; // Import homepage styles
 import "./styles/settingspage.css"; // Import settings page styles
 import Sidebar from "./SideBar"; // Import Sidebar component
+import Footer from "./Footer"; // Import Footer component
 
 /**
  * SettingsPage component handles user management and settings functionalities
@@ -599,285 +600,287 @@ const handleSaveUserEdit = async () => {
         handleSignOut={handleSignOut}
         isCollapsed={isSidebarCollapsed}
       />
-
-      <main className="main-content">
-        <h1 className="header-title">Settings</h1>
-        
-        {/* Add Custom Sensors Section */}
-        <section className="custom-sensors-section">
-          <h2>Create Custom Sensor</h2>
-          {!user?.isAdmin ? (
-            <p className="admin-only-message">Only administrators can create and manage sensors.</p>
-          ) : (
-            <form onSubmit={handleSubmit} className="sensor-form">
-              <div className="form-group">
-                <label>Sensor Name:</label>
-                <input
-                  type="text"
-                  value={newSensor.name}
-                  onChange={(e) => setNewSensor({...newSensor, name: e.target.value})}
-                  required
-                  placeholder="Enter sensor name"
-                />
-              </div>
-              
-              <div className="form-group">
-                <label>Icon (emoji or URL):</label>
-                <input
-                  type="text"
-                  value={newSensor.icon}
-                  onChange={(e) => setNewSensor({...newSensor, icon: e.target.value})}
-                  placeholder="🔔"
-                />
-              </div>
-
-              <div className="form-group">
-                <label>Description:</label>
-                <textarea
-                  value={newSensor.description}
-                  onChange={(e) => setNewSensor({...newSensor, description: e.target.value})}
-                  placeholder="Describe the sensor's purpose"
-                />
-              </div>
-
-              <button type="submit" className="create-sensor-btn">
-                Create Sensor
-              </button>
-            </form>
-          )}
-        </section>
-
-        <section className="existing-sensors-section">
-          <h2>Existing Custom Sensors</h2>
-          {!user?.isAdmin ? (
-            <p className="admin-only-message">Only administrators can manage sensors.</p>
-          ) : (
-            customSensors.length === 0 ? (
-              <p className="no-sensors-message">No custom sensors have been created yet.</p>
+      <div className="content-wrapper">
+        <main className="main-content">
+          <h1 className="header-title">Settings</h1>
+          
+          {/* Add Custom Sensors Section */}
+          <section className="custom-sensors-section">
+            <h2>Create Custom Sensor</h2>
+            {!user?.isAdmin ? (
+              <p className="admin-only-message">Only administrators can create and manage sensors.</p>
             ) : (
-              <div className="sensors-grid">
-                {customSensors.map((sensor, index) => (
-                  <div key={`settings-sensor-${sensor.id}-${index}`} className="sensor-item">
-                    <div className="sensor-icon">{sensor.icon}</div>
-                    <div className="sensor-info">
-                      <h3>{sensor.name}</h3>
-                      <p className="sensor-description">
-                        {sensor.description || 'No description provided'}
-                      </p>
-                    </div>
-                    <button 
-                      onClick={() => deleteSensor(sensor.id)}
-                      className="delete-sensor-btn"
-                      title="Delete sensor"
-                    >
-                      Delete
-                    </button>
-                  </div>
-                ))}
-              </div>
-            )
-          )}
-        </section>
-
-        <section className="create-user-section">
-          <h2>Create New User</h2>
-          {!user?.isAdmin ? (
-            <p className="admin-only-message">Only administrators can create users.</p>
-          ) : (
-            <form onSubmit={handleCreateUser} className="create-user-form">
-              <div className="profile-image-upload">
-                <div className="image-preview">
-                  {newUser.profileImage ? (
-                    <img 
-                      src={newUser.profileImage} 
-                      alt="Profile preview" 
-                      className="profile-preview"
-                    />
-                  ) : (
-                    <div className="image-placeholder">
-                      <span>👤</span>
-                      <p>Upload Profile Image</p>
-                    </div>
-                  )}
-                </div>
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={handleImageUpload}
-                  id="profile-image"
-                  className="image-input"
-                />
-                <label htmlFor="profile-image" className="upload-button">
-                  Choose Image
-                </label>
-              </div>
-
-              <div className="user-form-fields">
+              <form onSubmit={handleSubmit} className="sensor-form">
                 <div className="form-group">
-                  <label>Username:</label>
+                  <label>Sensor Name:</label>
                   <input
                     type="text"
-                    value={newUser.username}
-                    onChange={(e) => setNewUser({...newUser, username: e.target.value})}
-                    placeholder="Enter username"
+                    value={newSensor.name}
+                    onChange={(e) => setNewSensor({...newSensor, name: e.target.value})}
                     required
+                    placeholder="Enter sensor name"
                   />
                 </div>
                 
                 <div className="form-group">
-                  <label>Password:</label>
+                  <label>Icon (emoji or URL):</label>
                   <input
-                    type="password"
-                    value={newUser.password}
-                    onChange={(e) => setNewUser({...newUser, password: e.target.value})}
-                    placeholder="Enter password"
-                    required
+                    type="text"
+                    value={newSensor.icon}
+                    onChange={(e) => setNewSensor({...newSensor, icon: e.target.value})}
+                    placeholder="🔔"
                   />
                 </div>
 
-                <div className="form-group checkbox-group">
-                  <label>
-                    <input
-                      type="checkbox"
-                      checked={newUser.isAdmin}
-                      onChange={(e) => setNewUser({...newUser, isAdmin: e.target.checked})}
-                    />
-                    Create as Administrator
-                  </label>
+                <div className="form-group">
+                  <label>Description:</label>
+                  <textarea
+                    value={newSensor.description}
+                    onChange={(e) => setNewSensor({...newSensor, description: e.target.value})}
+                    placeholder="Describe the sensor's purpose"
+                  />
                 </div>
 
-                <button type="submit" className="create-user-btn">
-                  Create User
+                <button type="submit" className="create-sensor-btn">
+                  Create Sensor
                 </button>
-              </div>
-            </form>
-          )}
-        </section>
+              </form>
+            )}
+          </section>
 
-        {/* Existing Users Section */}
-        <section className="users-section">
-          <h2>Manage Users</h2>
-          {!user?.isAdmin ? (
-            <p className="admin-only-message">Only administrators can manage users.</p>
-          ) : (
-            <div className="users-list">
-              {users.length === 0 ? (
-                <p>No users available.</p>
+          <section className="existing-sensors-section">
+            <h2>Existing Custom Sensors</h2>
+            {!user?.isAdmin ? (
+              <p className="admin-only-message">Only administrators can manage sensors.</p>
+            ) : (
+              customSensors.length === 0 ? (
+                <p className="no-sensors-message">No custom sensors have been created yet.</p>
               ) : (
-                users.map((user) => (
-                  <li className="user-item" key={user.username}>
-                    <span>
-                      {user.username} {user.isAdmin ? "(Admin)" : ""}
-                    </span>
-                    <div className="button-container">
-                      <button
-                        className="edit-user-button"
-                        onClick={() => handleEditUser(user.username)}
-                      >
-                        Edit
-                      </button>
-                      <button
-                        className="delete-user-button"
-                        onClick={() => handleDeleteUser(user.username)}
+                <div className="sensors-grid">
+                  {customSensors.map((sensor, index) => (
+                    <div key={`settings-sensor-${sensor.id}-${index}`} className="sensor-item">
+                      <div className="sensor-icon">{sensor.icon}</div>
+                      <div className="sensor-info">
+                        <h3>{sensor.name}</h3>
+                        <p className="sensor-description">
+                          {sensor.description || 'No description provided'}
+                        </p>
+                      </div>
+                      <button 
+                        onClick={() => deleteSensor(sensor.id)}
+                        className="delete-sensor-btn"
+                        title="Delete sensor"
                       >
                         Delete
                       </button>
-                      <button
-                        className="toggle-admin-button"
-                        onClick={() => handleToggleAdmin(user.username)}
-                      >
-                        {user.isAdmin ? "Remove Admin" : "Make Admin"}
-                      </button>
                     </div>
-                    {editingUser?.username === user.username && (
-                      <div className="edit-user-inputs">
-                        <input
-                          type="text"
-                          value={newUserName}
-                          onChange={(e) => setNewUserName(e.target.value)}
-                        />
-                        <input
-                          type="password"
-                          value={newPassword}
-                          onChange={(e) => setNewPassword(e.target.value)}
-                        />
-                        <button onClick={handleSaveUserEdit}>Save</button>
+                  ))}
+                </div>
+              )
+            )}
+          </section>
+
+          <section className="create-user-section">
+            <h2>Create New User</h2>
+            {!user?.isAdmin ? (
+              <p className="admin-only-message">Only administrators can create users.</p>
+            ) : (
+              <form onSubmit={handleCreateUser} className="create-user-form">
+                <div className="profile-image-upload">
+                  <div className="image-preview">
+                    {newUser.profileImage ? (
+                      <img 
+                        src={newUser.profileImage} 
+                        alt="Profile preview" 
+                        className="profile-preview"
+                      />
+                    ) : (
+                      <div className="image-placeholder">
+                        <span>👤</span>
+                        <p>Upload Profile Image</p>
                       </div>
                     )}
-                  </li>
-                ))
-              )}
-            </div>
-          )}
-        </section>
-
-        <section className="log-settings-section">
-          <h2>Log Management</h2>
-          {!user?.isAdmin ? (
-            <p className="admin-only-message">Only administrators can manage logs.</p>
-          ) : (
-            <>
-              <div className="log-settings-grid">
-                <div className="log-setting-item">
-                  <label>Maximum Log Entries:</label>
+                  </div>
                   <input
-                    type="number"
-                    min="0"
-                    value={logSettings.maxEntries}
-                    onChange={(e) => handleLogSettingsChange('maxEntries', parseInt(e.target.value))}
-                    className="log-setting-input"
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageUpload}
+                    id="profile-image"
+                    className="image-input"
                   />
-                  <p className="setting-description">
-                    Set to 0 for unlimited entries
-                  </p>
+                  <label htmlFor="profile-image" className="upload-button">
+                    Choose Image
+                  </label>
                 </div>
 
-                <div className="log-setting-item">
-                  <label>Auto-Delete Logs:</label>
-                  <div className="toggle-container">
+                <div className="user-form-fields">
+                  <div className="form-group">
+                    <label>Username:</label>
                     <input
-                      type="checkbox"
-                      checked={logSettings.autoDelete}
-                      onChange={(e) => handleLogSettingsChange('autoDelete', e.target.checked)}
-                      className="toggle-input"
+                      type="text"
+                      value={newUser.username}
+                      onChange={(e) => setNewUser({...newUser, username: e.target.value})}
+                      placeholder="Enter username"
+                      required
                     />
-                    <span className="toggle-label">
-                      {logSettings.autoDelete ? 'Enabled' : 'Disabled'}
-                    </span>
+                  </div>
+                  
+                  <div className="form-group">
+                    <label>Password:</label>
+                    <input
+                      type="password"
+                      value={newUser.password}
+                      onChange={(e) => setNewUser({...newUser, password: e.target.value})}
+                      placeholder="Enter password"
+                      required
+                    />
+                  </div>
+
+                  <div className="form-group checkbox-group">
+                    <label>
+                      <input
+                        type="checkbox"
+                        checked={newUser.isAdmin}
+                        onChange={(e) => setNewUser({...newUser, isAdmin: e.target.checked})}
+                      />
+                      Create as Administrator
+                    </label>
+                  </div>
+
+                  <button type="submit" className="create-user-btn">
+                    Create User
+                  </button>
+                </div>
+              </form>
+            )}
+          </section>
+
+          {/* Existing Users Section */}
+          <section className="users-section">
+            <h2>Manage Users</h2>
+            {!user?.isAdmin ? (
+              <p className="admin-only-message">Only administrators can manage users.</p>
+            ) : (
+              <div className="users-list">
+                {users.length === 0 ? (
+                  <p>No users available.</p>
+                ) : (
+                  users.map((user) => (
+                    <li className="user-item" key={user.username}>
+                      <span>
+                        {user.username} {user.isAdmin ? "(Admin)" : ""}
+                      </span>
+                      <div className="button-container">
+                        <button
+                          className="edit-user-button"
+                          onClick={() => handleEditUser(user.username)}
+                        >
+                          Edit
+                        </button>
+                        <button
+                          className="delete-user-button"
+                          onClick={() => handleDeleteUser(user.username)}
+                        >
+                          Delete
+                        </button>
+                        <button
+                          className="toggle-admin-button"
+                          onClick={() => handleToggleAdmin(user.username)}
+                        >
+                          {user.isAdmin ? "Remove Admin" : "Make Admin"}
+                        </button>
+                      </div>
+                      {editingUser?.username === user.username && (
+                        <div className="edit-user-inputs">
+                          <input
+                            type="text"
+                            value={newUserName}
+                            onChange={(e) => setNewUserName(e.target.value)}
+                          />
+                          <input
+                            type="password"
+                            value={newPassword}
+                            onChange={(e) => setNewPassword(e.target.value)}
+                          />
+                          <button onClick={handleSaveUserEdit}>Save</button>
+                        </div>
+                      )}
+                    </li>
+                  ))
+                )}
+              </div>
+            )}
+          </section>
+
+          <section className="log-settings-section">
+            <h2>Log Management</h2>
+            {!user?.isAdmin ? (
+              <p className="admin-only-message">Only administrators can manage logs.</p>
+            ) : (
+              <>
+                <div className="log-settings-grid">
+                  <div className="log-setting-item">
+                    <label>Maximum Log Entries:</label>
+                    <input
+                      type="number"
+                      min="0"
+                      value={logSettings.maxEntries}
+                      onChange={(e) => handleLogSettingsChange('maxEntries', parseInt(e.target.value))}
+                      className="log-setting-input"
+                    />
+                    <p className="setting-description">
+                      Set to 0 for unlimited entries
+                    </p>
+                  </div>
+
+                  <div className="log-setting-item">
+                    <label>Auto-Delete Logs:</label>
+                    <div className="toggle-container">
+                      <input
+                        type="checkbox"
+                        checked={logSettings.autoDelete}
+                        onChange={(e) => handleLogSettingsChange('autoDelete', e.target.checked)}
+                        className="toggle-input"
+                      />
+                      <span className="toggle-label">
+                        {logSettings.autoDelete ? 'Enabled' : 'Disabled'}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="log-setting-item">
+                    <label>Retention Period (days):</label>
+                    <input
+                      type="number"
+                      min="1"
+                      value={logSettings.retentionDays}
+                      onChange={(e) => handleLogSettingsChange('retentionDays', parseInt(e.target.value))}
+                      className="log-setting-input"
+                      disabled={!logSettings.autoDelete}
+                    />
                   </div>
                 </div>
 
-                <div className="log-setting-item">
-                  <label>Retention Period (days):</label>
-                  <input
-                    type="number"
-                    min="1"
-                    value={logSettings.retentionDays}
-                    onChange={(e) => handleLogSettingsChange('retentionDays', parseInt(e.target.value))}
-                    className="log-setting-input"
-                    disabled={!logSettings.autoDelete}
-                  />
+                <div className="log-actions">
+                  <button 
+                    onClick={clearLogs}
+                    className="clear-logs-btn"
+                  >
+                    Clear All Logs
+                  </button>
+                  <button 
+                    onClick={exportLogs}
+                    className="export-logs-btn"
+                  >
+                    Export Logs to CSV
+                  </button>
                 </div>
-              </div>
-
-              <div className="log-actions">
-                <button 
-                  onClick={clearLogs}
-                  className="clear-logs-btn"
-                >
-                  Clear All Logs
-                </button>
-                <button 
-                  onClick={exportLogs}
-                  className="export-logs-btn"
-                >
-                  Export Logs to CSV
-                </button>
-              </div>
-            </>
-          )}
-        </section>
-      </main>
+              </>
+            )}
+          </section>
+        </main>
+        <Footer />
+      </div>
     </div>
   );
 }

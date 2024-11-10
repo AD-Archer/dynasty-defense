@@ -5,6 +5,43 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ---
 
+## [2.2.0] - 2024-11-16
+### Added
+- New Landing Page:
+  - Modern hero section with clear call-to-action
+  - Feature showcase section
+  - About section highlighting key benefits
+  - Improved user onboarding flow
+
+- Learn More Page:
+  - Detailed feature explanations
+  - Pricing plans and comparison
+  - How it works section
+  - Contact information
+  - Clear call-to-action buttons
+
+- Enhanced Footer Component:
+  - Consistent footer across all pages
+  - Quick links section
+  - Contact information
+  - Streamlined design
+  - Responsive layout
+
+### Changed
+- Restructured navigation flow
+- Improved component organization
+- Enhanced responsive design for mobile devices
+- Updated contact information and links
+- Refined user interface consistency
+
+### Fixed
+- Footer alignment and spacing issues
+- Navigation inconsistencies between pages
+- Mobile responsiveness in landing page
+- Contact section text alignment
+
+---
+
 ## [2.1.0] - 2024-11-15
 ### Added
 - Enhanced Accessibility Features:

@@ -2,8 +2,9 @@
 
 /* Main container for the homepage layout */
 .home-container {
-  display: flex; /* Flexbox layout for responsiveness */
-  height: 100vh; /* Full viewport height */
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
 }
 
 /* Sidebar styles */
@@ -61,11 +62,19 @@
 
 /* Main content area */
 .main-content {
-  flex-grow: 1; /* Fill the remaining space */
-  padding: 1rem;
-  background-color: var(--bg-gradient-end);
+  flex: 1;
+  padding: var(--spacing-lg);
+  margin-left: 0;
+  width: 100%;
   display: flex;
-  flex-direction: column; /* Stack content vertically */
+  flex-direction: column;
+}
+
+/* Add this to ensure content fills space properly */
+.content-wrapper {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
 }
 
 /* Section styles */

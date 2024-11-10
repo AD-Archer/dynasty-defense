@@ -5,6 +5,7 @@ import flameIcon from "../assets/images/Flame icon.svg";
 import securitySafeIcon from "../assets/images/Security Safe Icon.svg";
 import smokeIcon from "../assets/images/Smoke icon.svg";
 import Sidebar from "./SideBar";
+import Footer from './Footer';
 
 /**
  * The main component for the HomePage.
@@ -373,124 +374,127 @@ export default function HomePage({ currentUser }) {
             handleSignOut={handleSignOut}
             isCollapsed={isSidebarCollapsed}
           />
-          <main className="main-content">
-            <h1 className="header-title">Defense Panel</h1>
+          <div className="content-wrapper">
+            <main className="main-content">
+              <h1 className="header-title">Defense Panel</h1>
 
-            {/* Sensors Section */}
-            <section className="sensors-section">
-              <h2>Sensors</h2>
-              {customSensors.length === 0 ? (
-                <div className="empty-state-message">
-                  {user?.isAdmin ? (
-                    <div>
-                      <p>No sensors have been created yet.</p>
-                      <Link to="/settings" className="primary-button">
-                        Go to Settings to Create Sensors
-                      </Link>
-                    </div>
-                  ) : (
-                    <p>
-                      No sensors available. Please contact your system
-                      administrator to set up sensors.
-                    </p>
-                  )}
-                </div>
-              ) : (
-                <div className="sensor-cards-container">
-                  {/* Custom sensors */}
-                  {customSensors.map((sensor, index) => (
-                    <div
-                      className="sensor-card"
-                      key={`sensor-${sensor.id}-${index}`}
-                    >
-                      <div className="sensor-icon custom-icon">
-                        <span>{sensor.icon}</span>
+              {/* Sensors Section */}
+              <section className="sensors-section">
+                <h2>Sensors</h2>
+                {customSensors.length === 0 ? (
+                  <div className="empty-state-message">
+                    {user?.isAdmin ? (
+                      <div>
+                        <p>No sensors have been created yet.</p>
+                        <Link to="/settings" className="primary-button">
+                          Go to Settings to Create Sensors
+                        </Link>
                       </div>
-                      <h3>{sensor.name}</h3>
-                      <button
-                        className="alarm-button"
-                        style={{
-                          backgroundColor: activatedSensors[sensor.sensorKey]
-                            ? "green"
-                            : "blue",
-                        }}
-                        onClick={() => toggleSensor(sensor.sensorKey)}
-                      >
-                        {activatedSensors[sensor.sensorKey]
-                          ? "Deactivate"
-                          : "Activate"}
-                      </button>
-                      <p className="last-triggered-text">
-                        Last Activated:{" "}
-                        {lastTriggeredTimes[sensor.sensorKey] || "Never"}
-                      </p>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </section>
-
-            {/* Alarms Section */}
-            <section className="alarms-section">
-              <h2>Alarms</h2>
-              {customSensors.length === 0 ? (
-                <div className="empty-state-message">
-                  {user?.isAdmin ? (
-                    <div>
+                    ) : (
                       <p>
-                        No alarms available. Alarms are created automatically
-                        when you create sensors.
+                        No sensors available. Please contact your system
+                        administrator to set up sensors.
                       </p>
-                      <Link to="/settings" className="primary-button">
-                        Go to Settings to Create Sensors
-                      </Link>
-                    </div>
-                  ) : (
-                    <p>
-                      No alarms available. Please contact your system
-                      administrator to set up sensors and alarms.
-                    </p>
-                  )}
-                </div>
-              ) : (
-                <div className="alarm-cards-container">
-                  {/* Custom alarms */}
-                  {customSensors.map((sensor, index) => (
-                    <div
-                      className="alarm-card"
-                      key={`alarm-${sensor.id}-${index}`}
-                    >
-                      <div className="alarm-icon custom-icon">
-                        <span>{sensor.icon}</span>
-                      </div>
-                      <h3>{sensor.name} Alarm</h3>
-                      <p className="last-triggered-text">
-                        Active Since:{" "}
-                        {activeAlarms[sensor.alarmKey]
-                          ? lastTriggeredTimes[sensor.alarmKey]
-                          : "Not active"}
-                      </p>
-                      <button
-                        className="alarm-button"
-                        style={{
-                          backgroundColor: activeAlarms[sensor.alarmKey]
-                            ? "red"
-                            : "blue",
-                        }}
-                        onClick={() => silenceAlarm(sensor.alarmKey)}
+                    )}
+                  </div>
+                ) : (
+                  <div className="sensor-cards-container">
+                    {/* Custom sensors */}
+                    {customSensors.map((sensor, index) => (
+                      <div
+                        className="sensor-card"
+                        key={`sensor-${sensor.id}-${index}`}
                       >
-                        Silence Alarm
-                      </button>
-                      <p className="last-triggered-text">
-                        Last Triggered:{" "}
-                        {lastTriggeredTimes[sensor.alarmKey] || "Never"}
+                        <div className="sensor-icon custom-icon">
+                          <span>{sensor.icon}</span>
+                        </div>
+                        <h3>{sensor.name}</h3>
+                        <button
+                          className="alarm-button"
+                          style={{
+                            backgroundColor: activatedSensors[sensor.sensorKey]
+                              ? "green"
+                              : "blue",
+                          }}
+                          onClick={() => toggleSensor(sensor.sensorKey)}
+                        >
+                          {activatedSensors[sensor.sensorKey]
+                            ? "Deactivate"
+                            : "Activate"}
+                        </button>
+                        <p className="last-triggered-text">
+                          Last Activated:{" "}
+                          {lastTriggeredTimes[sensor.sensorKey] || "Never"}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </section>
+
+              {/* Alarms Section */}
+              <section className="alarms-section">
+                <h2>Alarms</h2>
+                {customSensors.length === 0 ? (
+                  <div className="empty-state-message">
+                    {user?.isAdmin ? (
+                      <div>
+                        <p>
+                          No alarms available. Alarms are created automatically
+                          when you create sensors.
+                        </p>
+                        <Link to="/settings" className="primary-button">
+                          Go to Settings to Create Sensors
+                        </Link>
+                      </div>
+                    ) : (
+                      <p>
+                        No alarms available. Please contact your system
+                        administrator to set up sensors and alarms.
                       </p>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </section>
-          </main>
+                    )}
+                  </div>
+                ) : (
+                  <div className="alarm-cards-container">
+                    {/* Custom alarms */}
+                    {customSensors.map((sensor, index) => (
+                      <div
+                        className="alarm-card"
+                        key={`alarm-${sensor.id}-${index}`}
+                      >
+                        <div className="alarm-icon custom-icon">
+                          <span>{sensor.icon}</span>
+                        </div>
+                        <h3>{sensor.name} Alarm</h3>
+                        <p className="last-triggered-text">
+                          Active Since:{" "}
+                          {activeAlarms[sensor.alarmKey]
+                            ? lastTriggeredTimes[sensor.alarmKey]
+                            : "Not active"}
+                        </p>
+                        <button
+                          className="alarm-button"
+                          style={{
+                            backgroundColor: activeAlarms[sensor.alarmKey]
+                              ? "red"
+                              : "blue",
+                          }}
+                          onClick={() => silenceAlarm(sensor.alarmKey)}
+                        >
+                          Silence Alarm
+                        </button>
+                        <p className="last-triggered-text">
+                          Last Triggered:{" "}
+                          {lastTriggeredTimes[sensor.alarmKey] || "Never"}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </section>
+            </main>
+            <Footer />
+          </div>
         </div>
       </Suspense>
     </ErrorBoundary>
