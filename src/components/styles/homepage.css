@@ -93,20 +93,18 @@
 /* Card styles */
 .sensor-card,
 .alarm-card {
-  background: var(--card-bg-color);
-  padding: 1.5rem;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-align: center;
+  padding: 20px;
+  margin: 10px;
+  border-radius: 12px;
+  min-width: 280px;
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.3);
+  transition: all 0.3s ease;
 }
 
 .sensor-card:hover,
 .alarm-card:hover {
-  transform: translateY(-5px) scale(1.02);
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+  transform: translateY(-5px);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.5);
 }
 
 /* Icon styles */
@@ -119,12 +117,34 @@
 }
 
 .custom-icon {
-  font-size: 2rem; /* Size for emoji icons */
-  width: auto;    /* Override width for emoji icons */
-  height: auto;   /* Override height for emoji icons */
+  font-size: 2rem;
+  width: 48px;
+  height: 48px;
   display: flex;
   align-items: center;
   justify-content: center;
+  margin-bottom: 1rem;
+  background-color: rgba(255, 255, 255, 0.1);
+  border-radius: 50%;
+  padding: 8px;
+  text-align: center;
+  overflow: hidden;
+}
+
+.custom-icon img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.custom-icon span {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  font-size: 24px;
+  line-height: 1;
 }
 
 .sensor-card:hover .sensor-icon,
@@ -205,4 +225,214 @@
 
 .primary-button:hover {
   background-color: var(--primary-hover);
+}
+
+/* Card Base Styles */
+.sensor-card,
+.alarm-card {
+  padding: 20px;
+  margin: 10px;
+  border-radius: 12px;
+  min-width: 280px;
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.3);
+  transition: all 0.3s ease;
+}
+
+/* Sensor Card Specific */
+.sensor-card {
+  background-color: #1a1f2b;
+  border-left: 5px solid #2196F3;
+}
+
+.sensor-card h3 {
+  color: #2196F3;
+  border-bottom: 2px solid #2196F3;
+  padding-bottom: 8px;
+}
+
+.sensor-card .alarm-button {
+  background-color: #2196F3;
+  color: white;
+}
+
+.sensor-card .alarm-button:hover {
+  background-color: #1976D2;
+}
+
+/* Alarm Card Specific */
+.alarm-card {
+  background-color: #1f1a1a;
+  border-left: 5px solid #ff4444;
+}
+
+.alarm-card h3 {
+  color: #ff4444;
+  border-bottom: 2px solid #ff4444;
+  padding-bottom: 8px;
+}
+
+.alarm-card .alarm-button {
+  background-color: #ff4444;
+  color: white;
+}
+
+.alarm-card .alarm-button:hover {
+  background-color: #cc0000;
+}
+
+/* Card Containers */
+.sensor-cards-container,
+.alarm-cards-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  padding: 20px;
+}
+
+/* Section Headers */
+.sensors-section h2,
+.alarms-section h2 {
+  font-size: 24px;
+  padding: 15px;
+  margin-bottom: 20px;
+  text-align: center;
+  border-bottom: 3px solid #2a2a2a;
+}
+
+.sensors-section h2 {
+  color: #2196F3;
+}
+
+.alarms-section h2 {
+  color: #ff4444;
+}
+
+/* Button Styles */
+.alarm-button {
+  width: 100%;
+  padding: 10px;
+  border: none;
+  border-radius: 6px;
+  font-weight: bold;
+  cursor: pointer;
+  margin: 10px 0;
+  transition: background-color 0.3s ease;
+}
+
+/* Status Text */
+.last-triggered-text {
+  margin-top: 10px;
+  font-size: 0.9rem;
+  color: #a0a0a0;
+}
+
+/* Icons */
+.sensor-icon,
+.alarm-icon,
+.custom-icon {
+  width: 40px;
+  height: 40px;
+  margin-bottom: 10px;
+}
+
+/* Active Alarm Styling */
+.alarm-card[data-active="true"] {
+  animation: pulse 2s infinite;
+  background-color: #2a1f1f;
+}
+
+@keyframes pulse {
+  0% { box-shadow: 0 0 0 0 rgba(255, 68, 68, 0.6); }
+  70% { box-shadow: 0 0 0 10px rgba(255, 68, 68, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(255, 68, 68, 0); }
+}
+
+/* Adjust card header layout */
+.sensor-card h3,
+.alarm-card h3 {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  min-height: 48px;
+  margin: 0.5rem 0;
+  padding: 0.5rem;
+  word-break: break-word;
+}
+
+/* Add these styles for the settings page sensor items */
+.sensors-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 20px;
+  padding: 20px;
+}
+
+.sensor-item {
+  background-color: #1a1f2b;
+  border-left: 5px solid #2196F3;
+  border-radius: 12px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.3);
+}
+
+.sensor-item .sensor-icon {
+  font-size: 24px;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: rgba(255, 255, 255, 0.1);
+  border-radius: 50%;
+  margin-bottom: 10px;
+}
+
+.sensor-item .sensor-info {
+  flex-grow: 1;
+}
+
+.sensor-item h3 {
+  color: #2196F3;
+  margin-bottom: 8px;
+  border-bottom: 2px solid #2196F3;
+  padding-bottom: 8px;
+}
+
+.sensor-item p {
+  color: #a0a0a0;
+  margin: 0;
+  line-height: 1.4;
+  /* Allow text to wrap */
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  /* Show ellipsis after 3 lines */
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* Add hover state to show full description */
+.sensor-item:hover p {
+  -webkit-line-clamp: unset;
+  max-height: none;
+}
+
+.delete-sensor-btn {
+  background-color: #ff4444;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  padding: 8px 16px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  margin-top: 10px;
+}
+
+.delete-sensor-btn:hover {
+  background-color: #cc0000;
 }

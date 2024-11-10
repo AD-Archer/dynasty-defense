@@ -5,6 +5,46 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 ---
 
+## [2.1.0] - 2024-11-15
+### Added
+- Enhanced Accessibility Features:
+  - Improved color contrast ratios across all interfaces
+  - Added ARIA labels for interactive elements
+  - Implemented keyboard navigation improvements
+  - Added screen reader support for critical notifications
+
+- Visual Distinction Improvements:
+  - New color coding system for different sensor types
+  - Custom icons library for better sensor identification
+  - Visual indicators for alarm states and priorities
+  - Enhanced visual hierarchy in settings panels
+
+- User Experience Enhancements:
+  - Interactive first-time user onboarding guide
+  - Contextual help tooltips throughout interface
+  - Quick-start tutorial for new administrators
+  - Improved feedback for user actions
+
+- Image Upload System:
+  - Support for custom sensor and alarm icons
+  - Image optimization for faster loading
+  - Default icon library for quick selection
+  - Preview functionality for uploaded images
+
+### Changed
+- Updated meta tags for improved SEO and social sharing
+- Refined color palette for better accessibility compliance
+- Restructured navigation for intuitive user flow
+- Enhanced mobile responsive design patterns
+
+### Fixed
+- Color contrast issues for better WCAG compliance
+- Navigation inconsistencies on mobile devices
+- Image loading performance on slower connections
+- Form field accessibility issues
+
+---
+
 ## [2.0.0] - 2024-11-10
 ### Added
 - Custom Sensor System:

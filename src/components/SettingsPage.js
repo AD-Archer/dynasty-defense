@@ -661,7 +661,9 @@ const handleSaveUserEdit = async () => {
                     <div className="sensor-icon">{sensor.icon}</div>
                     <div className="sensor-info">
                       <h3>{sensor.name}</h3>
-                      <p>{sensor.description || 'No description provided'}</p>
+                      <p className="sensor-description">
+                        {sensor.description || 'No description provided'}
+                      </p>
                     </div>
                     <button 
                       onClick={() => deleteSensor(sensor.id)}

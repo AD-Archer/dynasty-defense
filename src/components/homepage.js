@@ -126,7 +126,9 @@ export default function HomePage({ currentUser }) {
     checkUserLogin();
 
     // Load custom sensors and states only once on mount
-    const storedCustomSensors = JSON.parse(localStorage.getItem("customSensors") || "[]");
+    const storedCustomSensors = JSON.parse(
+      localStorage.getItem("customSensors") || "[]"
+    );
     setCustomSensors(storedCustomSensors);
     setLastTriggeredTimes(loadStoredState("lastTriggeredTimes", {}));
     setActivatedSensors(loadStoredState("activatedSensors", {}));
@@ -162,9 +164,12 @@ export default function HomePage({ currentUser }) {
             const currentTime = new Date().toLocaleTimeString();
             const updatedTimes = {
               ...loadStoredState("lastTriggeredTimes", {}),
-              [alarmKey]: currentTime
+              [alarmKey]: currentTime,
             };
-            localStorage.setItem("lastTriggeredTimes", JSON.stringify(updatedTimes));
+            localStorage.setItem(
+              "lastTriggeredTimes",
+              JSON.stringify(updatedTimes)
+            );
             setLastTriggeredTimes(updatedTimes);
             logEvent(`${alarmKey} triggered at ${currentTime}`);
           }
@@ -203,19 +208,20 @@ export default function HomePage({ currentUser }) {
    * @param {string} icon - The sensor icon.
    * @returns {JSX.Element} The sensor card element.
    */
-  const renderSensorCard = (sensor, icon) => (
-    <div className="sensor-card" key={sensor}>
-      <img src={icon} alt={`${sensor} Icon`} className="sensor-icon" />
-      <h3>{sensor.replace("Sensor", "")}</h3>
+  const renderSensorCard = (sensorData, index) => (
+    <div className="sensor-card" key={`sensor-${sensorData.id}-${index}`}>
+      <div className="sensor-icon custom-icon">
+        <span>{sensorData.icon}</span>
+      </div>
+      <h3>📡 {sensorData.name} Sensor</h3>
       <button
         className="alarm-button"
-        style={{ backgroundColor: activatedSensors[sensor] ? "green" : "blue" }}
-        onClick={() => toggleSensor(sensor)}
+        onClick={() => toggleSensor(sensorData.sensorKey)}
       >
-        {activatedSensors[sensor] ? "Deactivate" : "Activate"}
+        {activatedSensors[sensorData.sensorKey] ? "● Active" : "○ Inactive"}
       </button>
       <p className="last-triggered-text">
-        Last Activated: {lastTriggeredTimes[sensor]}
+        Last Activated: {lastTriggeredTimes[sensorData.sensorKey] || "Never"}
       </p>
     </div>
   );
@@ -226,23 +232,31 @@ export default function HomePage({ currentUser }) {
    * @param {string} icon - The alarm icon.
    * @returns {JSX.Element} The alarm card element.
    */
-  const renderAlarmCard = (alarm, icon) => (
-    <div className="alarm-card" key={alarm}>
-      <img src={icon} alt={`${alarm} Icon`} className="alarm-icon" />
-      <h3>{alarm.replace("Alarm", "")}</h3>
+  const renderAlarmCard = (sensorData, index) => (
+    <div 
+      className="alarm-card" 
+      key={`alarm-${sensorData.id}-${index}`}
+      data-active={activeAlarms[sensorData.alarmKey]}
+    >
+      <div className="alarm-icon custom-icon">
+        <span>{sensorData.icon}</span>
+      </div>
+      <h3>🚨 {sensorData.name} Alarm</h3>
       <p className="last-triggered-text">
-        Active Since:{" "}
-        {activeAlarms[alarm] ? lastTriggeredTimes[alarm] : "Not active"}
+        Status: {activeAlarms[sensorData.alarmKey] ? 
+          <strong style={{color: '#ff4444'}}>⚠️ ACTIVE</strong> : 
+          <span style={{color: '#4CAF50'}}>✓ Silent</span>
+        }
       </p>
       <button
         className="alarm-button"
-        style={{ backgroundColor: activeAlarms[alarm] ? "red" : "blue" }}
-        onClick={() => silenceAlarm(alarm)}
+        onClick={() => silenceAlarm(sensorData.alarmKey)}
+        disabled={!activeAlarms[sensorData.alarmKey]}
       >
-        Silence Alarm
+        {activeAlarms[sensorData.alarmKey] ? "🔕 Silence Alarm" : "Alarm Silent"}
       </button>
       <p className="last-triggered-text">
-        Last Triggered: {lastTriggeredTimes[alarm]}
+        Last Triggered: {lastTriggeredTimes[sensorData.alarmKey] || "Never"}
       </p>
     </div>
   );
@@ -375,15 +389,23 @@ export default function HomePage({ currentUser }) {
                       </Link>
                     </div>
                   ) : (
-                    <p>No sensors available. Please contact your system administrator to set up sensors.</p>
+                    <p>
+                      No sensors available. Please contact your system
+                      administrator to set up sensors.
+                    </p>
                   )}
                 </div>
               ) : (
                 <div className="sensor-cards-container">
                   {/* Custom sensors */}
                   {customSensors.map((sensor, index) => (
-                    <div className="sensor-card" key={`sensor-${sensor.id}-${index}`}>
-                      <div className="sensor-icon custom-icon">{sensor.icon}</div>
+                    <div
+                      className="sensor-card"
+                      key={`sensor-${sensor.id}-${index}`}
+                    >
+                      <div className="sensor-icon custom-icon">
+                        <span>{sensor.icon}</span>
+                      </div>
                       <h3>{sensor.name}</h3>
                       <button
                         className="alarm-button"
@@ -415,21 +437,32 @@ export default function HomePage({ currentUser }) {
                 <div className="empty-state-message">
                   {user?.isAdmin ? (
                     <div>
-                      <p>No alarms available. Alarms are created automatically when you create sensors.</p>
+                      <p>
+                        No alarms available. Alarms are created automatically
+                        when you create sensors.
+                      </p>
                       <Link to="/settings" className="primary-button">
                         Go to Settings to Create Sensors
                       </Link>
                     </div>
                   ) : (
-                    <p>No alarms available. Please contact your system administrator to set up sensors and alarms.</p>
+                    <p>
+                      No alarms available. Please contact your system
+                      administrator to set up sensors and alarms.
+                    </p>
                   )}
                 </div>
               ) : (
                 <div className="alarm-cards-container">
                   {/* Custom alarms */}
                   {customSensors.map((sensor, index) => (
-                    <div className="alarm-card" key={`alarm-${sensor.id}-${index}`}>
-                      <div className="alarm-icon custom-icon">{sensor.icon}</div>
+                    <div
+                      className="alarm-card"
+                      key={`alarm-${sensor.id}-${index}`}
+                    >
+                      <div className="alarm-icon custom-icon">
+                        <span>{sensor.icon}</span>
+                      </div>
                       <h3>{sensor.name} Alarm</h3>
                       <p className="last-triggered-text">
                         Active Since:{" "}
@@ -477,7 +510,7 @@ class ErrorBoundary extends React.Component {
 
   componentDidCatch(error, errorInfo) {
     // Log the error to your error reporting service
-    console.error('Error:', error, errorInfo);
+    console.error("Error:", error, errorInfo);
   }
 
   render() {
@@ -485,9 +518,7 @@ class ErrorBoundary extends React.Component {
       return (
         <div className="error-container">
           <h1>Something went wrong.</h1>
-          <button onClick={() => window.location.reload()}>
-            Refresh Page
-          </button>
+          <button onClick={() => window.location.reload()}>Refresh Page</button>
         </div>
       );
     }
