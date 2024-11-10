@@ -1,5 +1,4 @@
 {
-  "homepage": "https://AD-Archer.github.io/dynasty-defense",
   "name": "dynasty-defense",
   "version": "0.1.0",
   "private": true,
@@ -15,11 +14,10 @@
     "web-vitals": "^2.1.4"
   },
   "scripts": {
-    "start": "react-scripts start",
-    "build": "react-scripts build",
+    "start": "GENERATE_SOURCEMAP=false react-scripts start",
+    "build": "GENERATE_SOURCEMAP=false react-scripts build",
     "test": "react-scripts test",
-    "predeploy": "npm run build",
-    "deploy": "gh-pages -d build"
+    "eject": "react-scripts eject"
   },
   "eslintConfig": {
     "extends": [
@@ -45,6 +43,6 @@
     "eslint-config-react-app": "^7.0.1",
     "eslint-plugin-jest": "^27.9.0",
     "eslint-plugin-react": "^7.33.2",
-    "gh-pages": "^6.1.1"
+    "html-webpack-plugin": "^5.6.0"
   }
 }
