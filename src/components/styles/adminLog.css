@@ -5,150 +5,36 @@
   display: flex; /* Ensure the sidebar and main content are side by side */
   flex-direction: row; /* Align children in a row */
   height: 100vh; /* Full height to fit the page */
-  background-color: rgba(0, 0, 0, 0.8); /* Background for the page */
+  background-color: var(--bg-color); /* Use a variable for consistent background */
 }
 
 /* Sidebar styling */
 .sidebar {
   width: 250px; /* Set width for sidebar */
-  background-color: #333; /* Sidebar background color */
-  color: white; /* Text color for sidebar */
+  background-color: var(--sidebar-bg-color); /* Use a variable for sidebar background */
+  color: var(--text-color); /* Text color for sidebar */
   padding: 1rem; /* Add some padding */
   display: flex; /* Use flexbox for alignment */
   flex-direction: column; /* Stack items vertically */
-  position: relative; /* Position for toggle functionality */
-}
-
-/* Collapsed sidebar styling */
-.sidebar.collapsed {
-  width: 80px; /* Change width when collapsed */
-}
-
-
-
-/* Title styling */
-.admin-log-title {
-  color: var(--text-color);
-  font-size: 2rem;
-  margin-bottom: 1rem;
-}
-
-/* Content area for logs */
-.admin-log-content {
-  width: 100%;
-  max-height: 60vh; /* Limit height for overflow */
-  overflow-y: auto; /* Enable scrolling */
-  padding: 1rem;
-  border: 1px solid var(--border-color);
-  border-radius: 8px;
-  background-color: var(--card-bg-color);
-  margin-bottom: 1rem;
-}
-
-/* Individual log entry styling */
-.admin-log-entry {
-  color: var(--text-color);
-  padding: 0.5rem 0;
-  border-bottom: 1px solid var(--border-color);
-}
-
-/* Last log entry without border */
-.admin-log-entry:last-child {
-  border-bottom: none;
-}
-
-/* Message when no logs are available */
-.no-logs-message {
-  color: var(--error-color);
-  text-align: center;
-  font-weight: bold;
-}
-
-/* Button styling for clearing logs */
-.admin-log-clear-button {
-  background-color: var(--primary-color);
-  color: white;
-  border: none;
-  padding: 12px 24px;
-  border-radius: 8px;
-  font-size: 16px;
-  cursor: pointer;
-  transition: background-color 0.3s;
-}
-
-/* Button hover effect */
-.admin-log-clear-button:hover {
-  background-color: #357abd;
-}
-
-/* Media Queries for Responsiveness */
-@media (max-width: 600px) {
-  .sidebar {
-    width: 200px; /* Slightly smaller on mobile */
-  }
-
-  .sidebar.collapsed {
-    width: 60px; /* Further reduced width when collapsed */
-  }
-
-  .main-content {
-    padding: 0.5rem; /* Smaller padding on mobile */
-  }
-
-  .admin-log-title {
-    font-size: 1.5rem; /* Smaller title on mobile */
-  }
-
-  .admin-log-clear-button {
-    padding: 10px 20px; /* Smaller button on mobile */
-  }
-}
-
-/* adminLog.css */
-
-/* Main container for the logs page */
-.logs-container {
-  display: flex; /* Ensure the sidebar and main content are side by side */
-  flex-direction: row; /* Align children in a row */
-  height: 100vh; /* Full height to fit the page */
-}
-
-/* Sidebar styling */
-.sidebar {
-  width: 250px; /* Set width for sidebar */
-  color: white; /* Text color for sidebar */
-  padding: 1rem; /* Add some padding */
-  display: flex; /* Use flexbox for alignment */
-  flex-direction: column; /* Stack items vertically */
-  position: relative; /* Position for toggle functionality */
-}
-
-/* Collapsed sidebar styling */
-.sidebar.collapsed {
-  width: 80px; /* Change width when collapsed */
-}
-
-/* Main content area styling */
-.main-content {
-  flex: 1; /* Allow main content to take up remaining space */
-  padding: 1rem; /* Add some padding */
-  overflow-y: hidden; /* Prevent overflow in main content */
 }
 
 /* Title styling */
 .header-title {
-  font-size: 2rem; /* Larger title */
+  color: var(--text-color);
+  font-size: 2rem; /* Consistent font size */
   margin-bottom: 1rem; /* Spacing below the title */
 }
 
-/* Scrollable table for logs */
+/* Content area for logs */
 .logs-table-container {
   width: 100%; /* Full width for table */
   max-height: 60vh; /* Limit height for overflow */
-  overflow-y: auto; /* Enable vertical scrolling */
+  overflow-y: auto; /* Enable scrolling */
   border: 1px solid var(--border-color); /* Border around the table */
   border-radius: 8px; /* Rounded corners */
   margin-top: 1rem; /* Space above the table */
+  background-color: var(--card-bg-color); /* Consistent background color */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
 }
 
 /* Table styling */
@@ -157,24 +43,15 @@
   border-collapse: collapse; /* Remove gaps between table cells */
 }
 
-/* Header styling for table */
 .logs-table th {
-  padding: 0.5rem; /* Add padding */
-  text-align: left; /* Align text to the left */
-  border-bottom: 2px solid var(--border-color); /* Border below header */
   background-color: var(--primary-color); /* Header background color */
   color: white; /* Header text color */
+  padding: 0.75rem 1rem; /* Consistent padding */
 }
 
-/* Cell styling for table */
 .logs-table td {
-  padding: 0.5rem; /* Add padding */
+  padding: 0.75rem 1rem; /* Consistent padding */
   border-bottom: 1px solid var(--border-color); /* Border below each cell */
-}
-
-/* Last log entry without border */
-.logs-table tr:last-child td {
-  border-bottom: none; /* No border for last row */
 }
 
 /* Message when no logs are available */
@@ -182,134 +59,5 @@
   color: var(--error-color);
   text-align: center;
   font-weight: bold;
-}
-
-/* Update adminLog.css with animations */
-.admin-log__title {
-  animation: slideInTop 0.5s var(--transition-function);
-}
-
-.admin-log-entry {
-  animation: slideInBottom 0.3s var(--transition-function);
-  animation-fill-mode: both;
-}
-
-.admin-log-entry:nth-child(1) { animation-delay: 0.1s; }
-.admin-log-entry:nth-child(2) { animation-delay: 0.2s; }
-.admin-log-entry:nth-child(3) { animation-delay: 0.3s; }
-/* Continue for more entries */
-
-.admin-log-clear-button {
-  position: relative;
-  overflow: hidden;
-}
-
-.admin-log-clear-button::after {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
-  transform: translateX(-100%);
-}
-
-.admin-log-clear-button:hover::after {
-  animation: shimmer 1s var(--transition-function);
-}
-
-/* Add animation for new log entries */
-.admin-log-entry.new {
-  animation: pulse 1s var(--transition-function);
-}
-
-/* Add or update button styles */
-.logs-actions {
-  display: flex;
-  gap: 1rem;
-  margin-bottom: 1.5rem;
-}
-
-.clear-logs-button,
-.export-logs-button {
-  padding: 0.5rem 1rem;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 0.9rem;
-  transition: all 0.2s ease;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.clear-logs-button {
-  background-color: var(--error-color, #dc3545);
-  color: white;
-}
-
-.export-logs-button {
-  background-color: var(--primary-color, #007bff);
-  color: white;
-}
-
-.clear-logs-button:hover,
-.export-logs-button:hover {
-  opacity: 0.9;
-  transform: translateY(-1px);
-}
-
-.clear-logs-button:active,
-.export-logs-button:active {
-  transform: translateY(0);
-}
-
-/* Add icons to buttons */
-.clear-logs-button::before {
-  content: "🗑️";
-  font-size: 0.9rem;
-}
-
-.export-logs-button::before {
-  content: "📥";
-  font-size: 0.9rem;
-}
-
-/* Update table styles */
-.logs-table-container {
-  margin-top: 1rem;
-  border-radius: 8px;
-  overflow-y: auto; /* Enable vertical scrolling */
-  max-height: 60vh; /* Limit height for overflow */
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-.logs-table {
-  width: 100%;
-  border-collapse: collapse;
-  background-color: var(--card-bg-color);
-}
-
-.logs-table th {
-  background-color: var(--primary-color);
-  color: white;
-  font-weight: 500;
-  text-align: left;
-  padding: 0.75rem 1rem;
-}
-
-.logs-table td {
-  padding: 0.75rem 1rem;
-  border-bottom: 1px solid var(--border-color);
-}
-
-.logs-table tr:last-child td {
-  border-bottom: none;
-}
-
-.no-logs-message {
-  text-align: center;
-  color: var(--text-secondary-color);
-  padding: 2rem;
+  padding: 2rem; /* Consistent padding */
 }
