@@ -132,7 +132,7 @@
 .main-content {
   flex: 1; /* Allow main content to take up remaining space */
   padding: 1rem; /* Add some padding */
-  overflow-y: auto; /* Enable vertical scrolling */
+  overflow-y: hidden; /* Prevent overflow in main content */
 }
 
 /* Title styling */
@@ -145,8 +145,10 @@
 .logs-table-container {
   width: 100%; /* Full width for table */
   max-height: 60vh; /* Limit height for overflow */
-  overflow-y: auto; /* Enable scrolling */
+  overflow-y: auto; /* Enable vertical scrolling */
   border: 1px solid var(--border-color); /* Border around the table */
+  border-radius: 8px; /* Rounded corners */
+  margin-top: 1rem; /* Space above the table */
 }
 
 /* Table styling */
@@ -160,6 +162,8 @@
   padding: 0.5rem; /* Add padding */
   text-align: left; /* Align text to the left */
   border-bottom: 2px solid var(--border-color); /* Border below header */
+  background-color: var(--primary-color); /* Header background color */
+  color: white; /* Header text color */
 }
 
 /* Cell styling for table */
@@ -276,7 +280,8 @@
 .logs-table-container {
   margin-top: 1rem;
   border-radius: 8px;
-  overflow: hidden;
+  overflow-y: auto; /* Enable vertical scrolling */
+  max-height: 60vh; /* Limit height for overflow */
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 

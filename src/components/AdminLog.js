@@ -63,19 +63,24 @@ export default function LogsPage({ currentUser }) {
       // Create a map to track unique logs
       const uniqueLogsMap = new Map();
       
-      // Process logs in reverse to keep the most recent entries
-      storedLogs.reverse().forEach(log => {
+      // Process logs to keep the most recent entries
+      storedLogs.forEach(log => {
         // Create a unique key combining relevant properties
         const key = `${log.date}-${log.time}-${log.user}-${log.action}`;
         
-        // Only keep the first occurrence (which is the most recent due to reverse)
+        // Only keep the first occurrence
         if (!uniqueLogsMap.has(key)) {
           uniqueLogsMap.set(key, log);
         }
       });
       
-      // Convert back to array and reverse to restore original order
-      const deduplicatedLogs = Array.from(uniqueLogsMap.values()).reverse();
+      // Convert back to array and sort by newest first
+      const deduplicatedLogs = Array.from(uniqueLogsMap.values())
+        .sort((a, b) => {
+          const dateA = new Date(`${a.date} ${a.time}`);
+          const dateB = new Date(`${b.date} ${b.time}`);
+          return dateB - dateA; // Sort in descending order (newest first)
+        });
       
       // Update localStorage with deduplicated logs
       localStorage.setItem("logs", JSON.stringify(deduplicatedLogs));
