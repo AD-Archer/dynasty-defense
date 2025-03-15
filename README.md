@@ -20,11 +20,11 @@ Ensure your use of sensors and user data complies with local, state, and federal
 ## Installation
 1. Clone the repository:
    ```bash
-   git clone https://github.com/ad-archer/defense-system.git
+   git clone https://github.com/ad-archer/dynasty-defense.git
    ```
 2. Navigate to the project directory:
    ```bash
-   cd defense-system-project
+   cd dynasty-defense
    ```
 3. Install dependencies:
    ```bash
